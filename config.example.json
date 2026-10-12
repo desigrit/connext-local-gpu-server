@@ -1,0 +1,8 @@
+{
+  "TaskName": "Connext-Ollama",
+  "OllamaExe": "%LOCALAPPDATA%\\Programs\\Ollama\\ollama.exe",
+  "ModelsDirectory": "%USERPROFILE%\\.ollama\\models",
+  "Port": 11434,
+  "ContextLength": 8192,
+  "DiscoveryTimeoutSeconds": 90
+}
