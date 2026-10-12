@@ -1,7 +1,5 @@
 # connext-local-gpu-server
 
-One GPU at home. Use it from the devices you already have.
-
 Connext is a guide and a small set of Windows scripts for running Ollama on a GPU PC and reaching it privately through Tailscale. Use the same endpoint from a laptop at home, a phone on mobile data, or a computer while traveling.
 
 The PC runs the model. Your other devices send requests and receive results. Applications need an Ollama or compatible API connection setting; this does not turn the PC into a directly attached graphics card for another device.
