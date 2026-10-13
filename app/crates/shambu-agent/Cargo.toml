@@ -1,11 +1,12 @@
 [package]
 name = "shambu-agent"
-version = "0.2.0"
+version = "0.2.1"
 description = "Read-only private host diagnostics for Shambu"
 edition = "2021"
 
 [dependencies]
 axum = { version = "0.8", default-features = false, features = ["http1", "json", "tokio"] }
+dirs = "7"
 getrandom = "0.3"
 readiness = { path = "../readiness" }
 serde = { version = "1", features = ["derive"] }

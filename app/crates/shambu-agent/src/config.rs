@@ -2,7 +2,7 @@ use readiness::{Mode, Settings, PROTOCOL_VERSION};
 use serde::{Deserialize, Serialize};
 use std::{
     fs,
-    io::Write,
+    io::{Read, Write},
     path::{Path, PathBuf},
 };
 
@@ -12,6 +12,61 @@ pub struct Config {
     pub protocol_version: u32,
     pub endpoint: String,
     pub pairing_key: String,
+}
+
+/// The desktop app owns the name. Read only these three fields from its saved connection.
+/// Refreshing it on every sample also works while the app is closed or Windows is signed out.
+pub fn server_name(endpoint: &str) -> Option<String> {
+    let path = dirs::config_dir()?
+        .join("com.desigrit.shambu")
+        .join("connection.json");
+    read_server_name(&path, endpoint)
+}
+
+fn read_server_name(path: &Path, endpoint: &str) -> Option<String> {
+    #[derive(Deserialize)]
+    struct Profile {
+        mode: Mode,
+        endpoint: String,
+        name: String,
+    }
+    let metadata = fs::symlink_metadata(path).ok()?;
+    if !metadata.is_file() || metadata.file_type().is_symlink() || metadata.len() > 16 * 1024 {
+        return None;
+    }
+    let mut bytes = Vec::new();
+    fs::File::open(path)
+        .ok()?
+        .take(16 * 1024 + 1)
+        .read_to_end(&mut bytes)
+        .ok()?;
+    if bytes.len() > 16 * 1024 {
+        return None;
+    }
+    let profile: Profile = serde_json::from_slice(&bytes).ok()?;
+    if profile.mode != Mode::Host {
+        return None;
+    }
+    let settings = Settings {
+        mode: Mode::Host,
+        endpoint: profile.endpoint,
+        name: profile.name,
+        ..Settings::default()
+    };
+    let saved = readiness::validate_settings(&settings).ok()?;
+    let expected = readiness::validate_settings(&Settings {
+        mode: Mode::Host,
+        endpoint: endpoint.into(),
+        ..Settings::default()
+    })
+    .ok()?;
+    // Both URLs have been restricted to loopback. Treat localhost and 127.0.0.1 alike.
+    if saved.scheme() != expected.scheme()
+        || saved.port_or_known_default() != expected.port_or_known_default()
+    {
+        return None;
+    }
+    readiness::normalize_server_name(&settings.name)
 }
 
 impl Config {
@@ -237,6 +292,36 @@ mod tests {
         };
         let _ = fs::remove_file(&path);
         let _ = fs::remove_dir(&directory);
+    }
+
+    #[test]
+    fn name_tracks_saved_host_settings_and_ignores_other_connections() {
+        let path = std::env::temp_dir().join(format!("shambu-name-{}.json", std::process::id()));
+        let mut profile = serde_json::json!({
+            "mode": "host", "endpoint": "http://localhost:11434/", "name": "  Jungle PC  ",
+            "diagnosticsKey": "ignored"
+        });
+        fs::write(&path, profile.to_string()).unwrap();
+        assert_eq!(
+            read_server_name(&path, "http://127.0.0.1:11434").as_deref(),
+            Some("Jungle PC")
+        );
+        profile["name"] = serde_json::json!("Renamed PC");
+        fs::write(&path, profile.to_string()).unwrap();
+        assert_eq!(
+            read_server_name(&path, "http://127.0.0.1:11434").as_deref(),
+            Some("Renamed PC")
+        );
+        assert!(read_server_name(&path, "http://127.0.0.1:12345").is_none());
+        profile["mode"] = serde_json::json!("remote");
+        fs::write(&path, profile.to_string()).unwrap();
+        assert!(read_server_name(&path, "http://127.0.0.1:11434").is_none());
+        fs::write(&path, "invalid").unwrap();
+        assert!(read_server_name(&path, "http://127.0.0.1:11434").is_none());
+        fs::write(&path, vec![b' '; 16 * 1024 + 1]).unwrap();
+        assert!(read_server_name(&path, "http://127.0.0.1:11434").is_none());
+        fs::remove_file(&path).unwrap();
+        assert!(read_server_name(&path, "http://127.0.0.1:11434").is_none());
     }
 
     #[test]

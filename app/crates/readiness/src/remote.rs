@@ -164,6 +164,11 @@ async fn fetch(client: &Client, endpoint: &Url, key: &str) -> RemoteHost {
         .ok()
         .and_then(|json| serde_json::from_value::<HealthEnvelope>(json).ok())
         .map(|mut envelope| {
+            envelope.snapshot.server_name = envelope
+                .snapshot
+                .server_name
+                .as_deref()
+                .and_then(crate::normalize_server_name);
             // Older agents measured all GPU work. Keep their host checks without relabeling it.
             if envelope
                 .snapshot
@@ -281,6 +286,29 @@ mod tests {
             server_probe(503, json!({})).await.status,
             HostDetails::Unreachable
         );
+    }
+
+    #[tokio::test]
+    async fn server_names_are_optional_and_validated_without_losing_host_checks() {
+        assert!(server_probe(200, fixture())
+            .await
+            .snapshot
+            .unwrap()
+            .server_name
+            .is_none());
+        let mut named = fixture();
+        named["snapshot"]["serverName"] = json!("  The Jungle PC  ");
+        let result = server_probe(200, named.clone()).await;
+        assert_eq!(
+            result.snapshot.unwrap().server_name.as_deref(),
+            Some("The Jungle PC")
+        );
+        for invalid in ["".to_string(), "x".repeat(61), "Hidden\nname".to_string()] {
+            named["snapshot"]["serverName"] = json!(invalid);
+            let result = server_probe(200, named.clone()).await;
+            assert_eq!(result.status, HostDetails::Linked);
+            assert!(result.snapshot.unwrap().server_name.is_none());
+        }
     }
 
     #[tokio::test]

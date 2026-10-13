@@ -57,6 +57,23 @@ test('remote settings reject localhost and persist a valid address', async ({ pa
   await expect(page.getByText('Not linked', { exact: true })).toHaveCount(2);
 });
 
+test('paired remote devices use the name saved on the GPU PC', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('shambu-demo-settings', JSON.stringify({
+    mode: 'remote', endpoint: 'http://192.0.2.10:11434', name: 'Local alias', diagnosticsKey: 'a'.repeat(64), diagnosticsUrl: '',
+  })));
+  await page.goto('/?demo=remote');
+  await expect(page.getByRole('heading', { name: 'The Jungle PC', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Local alias', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await expect(page.getByLabel('Server name')).toHaveValue('The Jungle PC');
+  await expect(page.getByLabel('Server name')).toHaveAttribute('readonly', '');
+  await page.getByLabel('Ollama URL').fill('http://192.0.2.11:11434');
+  await expect(page.getByLabel('Server name')).toHaveValue('Local alias');
+  await expect(page.getByLabel('Server name')).toBeEditable();
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'The Jungle PC', exact: true })).toBeVisible();
+});
+
 test('refresh runs every five minutes and stale readings never stay green', async ({ page }) => {
   await page.clock.install();
   await page.goto('/?demo=healthy');

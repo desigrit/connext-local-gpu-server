@@ -97,6 +97,9 @@ export default function App() {
   const headline = !native && !demo ? 'A window into your server.' : !settings?.endpoint ? 'Meet your server.' : !snapshot ? (busy ? 'Taking a little look.' : 'Let’s check in.') : stale ? 'Time for a fresh look.' : disconnected ? 'Something is out of reach.' : (readiness.tone !== 'ok') ? 'A little attention needed.' : 'Your server is within reach.';
   const checkedLabel = busy ? 'Checking' : !snapshot ? 'Not checked' : checkedAge(snapshot.checkedAtMs, now);
   const externalEndpoint = settings?.mode === 'remote' ? settings.endpoint : snapshot?.externalEndpoint;
+  const remoteServerName = settings?.mode === 'remote' && snapshot?.mode === 'remote' && snapshot.endpoint === settings.endpoint
+    ? snapshot.serverName?.trim() : undefined;
+  const useRemoteName = draft.mode === 'remote' && draft.endpoint.trim().replace(/\/$/, '') === settings?.endpoint && draft.diagnosticsUrl === settings?.diagnosticsUrl && Boolean(remoteServerName);
 
 
   function openSettings() { setPairingCode(''); setDraft(settings ?? defaultSettings); setEditing(true); setFormError(null); }
@@ -167,7 +170,7 @@ export default function App() {
           <button type="button" aria-pressed={draft.mode === 'remote'} onClick={() => chooseMode('remote')}><ArrowUpRight size={16} />Remote server</button>
         </fieldset>
         <label htmlFor="server-name">Server name</label>
-        <input aria-invalid={formError?.field === 'name'} aria-describedby={formError?.field === 'name' ? 'connection-error' : undefined} id="server-name" value={draft.name} maxLength={60} autoComplete="off" onChange={event => setDraft({ ...draft, name: event.target.value })} />
+        <input aria-invalid={formError?.field === 'name'} aria-describedby={formError?.field === 'name' ? 'connection-error' : undefined} id="server-name" value={useRemoteName ? remoteServerName : draft.name} readOnly={useRemoteName} maxLength={60} autoComplete="off" onChange={event => setDraft({ ...draft, name: event.target.value })} />
         <label htmlFor="server-url">Ollama URL</label>
         <input ref={endpointInput} id="server-url" type="url" value={draft.endpoint} autoCapitalize="none" autoComplete="off" spellCheck={false} placeholder={draft.mode === 'host' ? 'http://127.0.0.1:11434' : 'http://<your-server-ip>:11434'} onChange={event => setDraft({ ...draft, endpoint: event.target.value, diagnosticsKey: '' })} aria-describedby={formError?.field === 'endpoint' ? 'connection-error connection-hint' : 'connection-hint'} aria-invalid={formError?.field === 'endpoint'} />
         <p id="connection-hint" className="field-hint">{draft.mode === 'host' ? 'Use the local Ollama address on this computer.' : 'Use the GPU PC’s Tailscale IP. Keep Tailscale connected on both devices.'} Settings stay on this device.</p>
@@ -189,7 +192,7 @@ export default function App() {
     </section>}
 
     <section className="server-strip" aria-label="Selected server">
-      <div className="server-identity"><Monitor size={18} strokeWidth={1.6} aria-hidden="true" /><div><h2>{settings?.name || 'My GPU server'}</h2><p className="endpoint">{externalEndpoint || (settings?.mode === 'host' ? 'Tailscale URL unavailable' : 'No address yet')}</p></div></div>
+      <div className="server-identity"><Monitor size={18} strokeWidth={1.6} aria-hidden="true" /><div><h2>{remoteServerName || settings?.name || 'My GPU server'}</h2><p className="endpoint">{externalEndpoint || (settings?.mode === 'host' ? 'Tailscale URL unavailable' : 'No address yet')}</p></div></div>
       <button className="icon-button" disabled={!externalEndpoint} onClick={copyEndpoint} aria-label={copied ? 'URL copied' : 'Copy server URL'} title={copied ? 'Copied' : 'Copy server URL'}>{copied ? <CheckIcon size={17} /> : <Copy size={17} />}</button>
       <span className="sr-only" role="status">{copied ? 'Server URL copied' : ''}</span>
     </section>

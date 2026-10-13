@@ -171,6 +171,8 @@ pub struct Snapshot {
     pub host_details: HostDetails,
     pub endpoint: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub server_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub external_endpoint: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gpu_name: Option<String>,
@@ -186,8 +188,14 @@ pub struct Snapshot {
     pub gpu_history: Option<GpuHistory>,
 }
 
+pub fn normalize_server_name(name: &str) -> Option<String> {
+    let name = name.trim();
+    (!name.is_empty() && name.chars().count() <= 60 && !name.chars().any(char::is_control))
+        .then(|| name.to_owned())
+}
+
 pub fn validate_settings(settings: &Settings) -> Result<Url, String> {
-    if settings.name.trim().is_empty() || settings.name.chars().count() > 60 {
+    if normalize_server_name(&settings.name).is_none() {
         return Err("Give your server a name between 1 and 60 characters.".into());
     }
     let mut url = Url::parse(settings.endpoint.trim())
@@ -460,6 +468,14 @@ pub async fn inspect(settings: Settings) -> Result<Snapshot, String> {
             error.clone(),
         ),
     };
+    let server_name = if settings.mode == Mode::Host {
+        normalize_server_name(&settings.name)
+    } else {
+        remote
+            .as_ref()
+            .and_then(|host| host.snapshot.as_ref())
+            .and_then(|snapshot| snapshot.server_name.clone())
+    };
     let gpu_history = remote
         .as_ref()
         .and_then(|host| host.snapshot.as_ref())
@@ -534,6 +550,7 @@ pub async fn inspect(settings: Settings) -> Result<Snapshot, String> {
             .as_millis() as u64,
         host_details,
         endpoint: base.as_str().trim_end_matches('/').into(),
+        server_name,
         external_endpoint,
         gpu_name,
         mode: settings.mode,

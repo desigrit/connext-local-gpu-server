@@ -189,12 +189,13 @@ async fn sample_readiness(cache: SnapshotCache, settings: Settings) {
         let measured_at = Instant::now();
         // CLI probes and HTTP calls already have short individual timeouts.
         // This outer bound prevents an unexpected stalled cycle retaining old health forever.
-        if let Ok(Ok(snapshot)) = tokio::time::timeout(
+        if let Ok(Ok(mut snapshot)) = tokio::time::timeout(
             Duration::from_secs(15),
             readiness::inspect(settings.clone()),
         )
         .await
         {
+            snapshot.server_name = config::server_name(&settings.endpoint);
             cache.update(measured_at, snapshot).await;
         }
     }
@@ -213,6 +214,7 @@ mod tests {
             checked_at_ms: 1,
             host_details: HostDetails::Local,
             endpoint: "http://127.0.0.1:11434".into(),
+            server_name: Some("Jungle PC".into()),
             external_endpoint: None,
             gpu_name: None,
             mode: Mode::Host,

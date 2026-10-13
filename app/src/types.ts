@@ -7,6 +7,7 @@ export interface InstalledModel { name: string; size: number }
 export interface LoadedModel extends InstalledModel { sizeVram: number | null }
 export interface GpuHistory { source: 'ollama-gpu-estimate'; sampledAtMs: number; bursts: number[]; activeHours: number[] }
 export interface Snapshot {
+  serverName?: string | null;
   gpuHistory?: GpuHistory | null;
   externalEndpoint?: string | null; gpuName?: string | null; installedModels: InstalledModel[];
   checkedAtMs: number; endpoint: string; mode: Mode; hostDetails: HostDetails; checks: Check[];

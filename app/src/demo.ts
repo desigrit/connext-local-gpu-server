@@ -36,6 +36,7 @@ export function demoSnapshot(settings: Settings, scenario: string): Snapshot {
   }
   if (remote && settings.diagnosticsKey) {
     result.hostDetails = 'linked';
+    result.serverName = 'The Jungle PC';
     result.checks[1] = { ...result.checks[1], state: 'ok', label: 'Active', help: null, detail: 'The paired host companion reports Tailscale online on the GPU PC.' };
     result.checks[2] = { ...result.checks[2], state: 'ok', label: 'Active', detail: 'The paired host companion verified its matching TCP forward.' };
   }
@@ -58,7 +59,7 @@ export function demoSnapshot(settings: Settings, scenario: string): Snapshot {
   if (scenario === 'pairing' || scenario === 'companion') {
     result.hostDetails = scenario === 'pairing' ? 'unauthorized' : 'unreachable';
     for (const index of [1, 2]) result.checks[index] = { ...result.checks[index], state: 'unknown', label: scenario === 'pairing' ? 'Key not accepted' : 'Unverified' };
-    result.gpuName = null; result.gpuHistory = null;
+    result.gpuName = null; result.gpuHistory = null; result.serverName = null;
   }
   if (scenario === 'empty') {
     result.installedModels = []; result.modelCount = 0; result.gpuHistory = null;

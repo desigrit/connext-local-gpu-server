@@ -23,7 +23,7 @@ If the PC is offline, the app can report that it cannot reach the services. It c
 
 ## Download the companion on Windows
 
-Download the companion for [Windows x64](https://github.com/desigrit/shambu/releases/download/v0.2.0/Shambu-Host-Windows-x64.zip) or [Windows ARM64](https://github.com/desigrit/shambu/releases/download/v0.2.0/Shambu-Host-Windows-ARM64.zip). Extract it, open Windows PowerShell as Administrator in that folder, and run:
+Download the companion for [Windows x64](https://github.com/desigrit/shambu/releases/download/host-v0.2.1/Shambu-Host-Windows-x64.zip) or [Windows ARM64](https://github.com/desigrit/shambu/releases/download/host-v0.2.1/Shambu-Host-Windows-ARM64.zip). Extract it, open Windows PowerShell as Administrator in that folder, and run:
 
 ~~~powershell
 .\Install-ShambuAgent.ps1 -AgentExe .\shambu-agent.exe
@@ -143,6 +143,8 @@ Inference estimates are stored separately in ollama-activity.json. An older hist
 The host app displays and copies the advertised Tailscale address and matching Serve TCP port when that configuration is available. Its readiness probes continue to use the configured loopback endpoint. GPU names come from the host's driver query. Installed model names and sizes come directly from the Ollama API on the device performing the check.
 
 ## Protocol and storage
+
+Companion 0.2.1 shares the server name saved in Shambu on the GPU PC. Change it under Settings on that PC; paired devices pick it up on their next refresh. The companion rereads the saved name while the desktop app is closed. It only uses a local host connection matching its Ollama port. Older companions keep working, with the client's saved name as a fallback.
 
 Host readings use authenticated **GET /health**. Authenticated **POST /pairing/new** creates a short-lived code; **POST /pairing** redeems it once for the existing strong credential. Responses are never cached. Browser Origin headers are refused, pairing bodies are limited to 512 bytes, and five failed code attempts lock that code until it is replaced. There is no shell, control endpoint, model invocation endpoint, or browser CORS permission.
 

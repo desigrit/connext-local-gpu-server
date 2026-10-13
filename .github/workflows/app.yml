@@ -116,6 +116,25 @@ jobs:
           path: app/update-assets/*.tar.gz
           if-no-files-found: error
 
+      - name: Build Windows host companion
+        if: runner.os == 'Windows'
+        run: cargo build --release --locked -p shambu-agent --target ${{ matrix.target }}
+      - name: Package Windows host companion
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path host-package,host-assets -Force | Out-Null
+          Copy-Item -LiteralPath 'target/${{ matrix.target }}/release/shambu-agent.exe' -Destination host-package
+          Copy-Item -LiteralPath '../scripts/Install-ShambuAgent.ps1','../scripts/Uninstall-ShambuAgent.ps1','../scripts/ShambuAgent.Common.ps1' -Destination host-package
+          Copy-Item -LiteralPath '../docs/host-agent-download.md' -Destination host-package/README.md
+          Compress-Archive -Path host-package/* -DestinationPath 'host-assets/Shambu-Host-${{ matrix.artifact }}.zip'
+      - uses: actions/upload-artifact@v6
+        if: runner.os == 'Windows'
+        with:
+          name: Shambu-Host-${{ matrix.artifact }}
+          path: app/host-assets/*.zip
+          if-no-files-found: error
+
   android:
     runs-on: ubuntu-latest
     defaults:
