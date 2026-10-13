@@ -5,8 +5,9 @@ import { STALE_AFTER_MS } from './timing';
 import { gpuBarVariants, type GpuBarVariant } from './gpuBarVariants';
 
 const HOUR = 60 * 60 * 1000;
-const gib = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 });
-const memory = (mib: number | null | undefined) => mib == null ? 'N/A' : gib.format(mib / 1024);
+const usedMemory = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false });
+const totalMemory = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1, useGrouping: false });
+const memory = (mib: number | null | undefined, used = false) => mib == null ? 'N/A' : (used ? usedMemory : totalMemory).format(mib / 1024);
 const fullTime = (time: number) => new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' }).format(time);
 
 function tooltipTime(time: number) {
@@ -48,11 +49,26 @@ export default function GpuActivity({ history, gpuName, metrics, now, stale, var
       <Gpu className="row-icon" size={19} strokeWidth={1.65} aria-hidden="true" /><h2 className="row-title">GPU usage</h2>
       <div className="gpu-details">
         <p className="gpu-name">{deviceName || 'Details not linked'}</p>
-        {(metrics?.devices ?? [null]).map(gpu => <p className="gpu-metrics" key={gpu?.index ?? 'unavailable'}>
-          {metrics && metrics.devices.length > 1 && <span>GPU {gpu?.index}</span>}
-          <span>GPU load <strong>{gpu?.loadPercent == null ? 'N/A' : gpu.loadPercent + '%'}</strong></span>
-          <span>VRAM <strong>{gpu?.memoryUsedMib == null && gpu?.memoryTotalMib == null ? 'N/A' : memory(gpu?.memoryUsedMib) + ' / ' + memory(gpu?.memoryTotalMib) + ' GiB'}</strong></span>
-        </p>)}
+        {(metrics?.devices ?? [null]).map(gpu => {
+          const hasMemory = gpu?.memoryUsedMib != null || gpu?.memoryTotalMib != null;
+          const numberColumns = {
+            '--gpu-used-width': Math.max(5, memory(gpu?.memoryTotalMib, true).length) + 'ch',
+            '--gpu-total-width': Math.max(3, memory(gpu?.memoryTotalMib).length) + 'ch',
+          } as CSSProperties;
+          return <div className="gpu-readings" key={gpu?.index ?? 'unavailable'}>
+            {metrics && metrics.devices.length > 1 && <p className="gpu-index">GPU {gpu?.index}</p>}
+            <dl className="gpu-metrics" style={numberColumns}>
+              <div className="gpu-metric-row">
+                <dt>GPU load:{' '}</dt>
+                <dd><span className="gpu-load-number">{gpu?.loadPercent ?? 'N/A'}</span><span className="gpu-load-unit">{gpu?.loadPercent == null ? '' : '%'}</span></dd>
+              </div>
+              <div className="gpu-metric-row">
+                <dt>VRAM:{' '}</dt>
+                <dd><span className="gpu-memory-used">{memory(gpu?.memoryUsedMib, true)}</span><span className="gpu-memory-divider">{hasMemory ? ' / ' : ''}</span><span className="gpu-memory-total">{hasMemory ? memory(gpu?.memoryTotalMib) : ''}</span><span className="gpu-memory-unit">{hasMemory ? ' GiB' : ''}</span></dd>
+              </div>
+            </dl>
+          </div>;
+        })}
       </div>
     </div>}
     <div className="activity-body">

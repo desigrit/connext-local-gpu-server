@@ -42,7 +42,7 @@ async function installHost(page: Page) {
 
 test('paired GPU load and memory sit below the name and refresh without a readiness probe', async ({ page }) => {
   await installHost(page);
-  await expect(page.locator('.gpu-metrics')).toContainText('VRAM 16 / 48 GiB');
+  await expect(page.locator('.gpu-metrics')).toContainText('VRAM: 16.0 / 48 GiB');
   await expect(page.locator('.gpu-details')).toHaveCSS('text-align', 'right');
   await expect(page.getByText('Remote GPU:', { exact: false })).toHaveCount(0);
   const name = await page.locator('.gpu-name').boundingBox();
@@ -51,22 +51,22 @@ test('paired GPU load and memory sit below the name and refresh without a readin
   const checks = await page.evaluate(() => window.gpuFixture.checks);
   await page.evaluate(() => { window.gpuFixture.metrics!.devices[0].loadPercent = 0; window.gpuFixture.metrics!.devices[0].memoryUsedMib = 0; });
   await page.clock.runFor(5100);
-  await expect(page.locator('.gpu-metrics')).toContainText('GPU load 0%');
-  await expect(page.locator('.gpu-metrics')).toContainText('VRAM 0 / 48 GiB');
+  await expect(page.locator('.gpu-metrics')).toContainText('GPU load: 0%');
+  await expect(page.locator('.gpu-metrics')).toContainText('VRAM: 0.0 / 48 GiB');
   expect(await page.evaluate(() => window.gpuFixture.checks)).toBe(checks);
   await page.evaluate(() => { window.gpuFixture.metrics!.devices[0].loadPercent = null; });
   await page.clock.runFor(5100);
-  await expect(page.locator('.gpu-metrics')).toContainText('GPU load N/A');
-  await expect(page.locator('.gpu-metrics')).toContainText('VRAM 0 / 48 GiB');
+  await expect(page.locator('.gpu-metrics')).toContainText('GPU load: N/A');
+  await expect(page.locator('.gpu-metrics')).toContainText('VRAM: 0.0 / 48 GiB');
 });
 
 test('expired GPU readings disappear even while the next request is stalled', async ({ page }) => {
   await installHost(page);
   await page.evaluate(() => { window.gpuFixture.hold = true; window.gpuFixture.metrics!.sampleAgeMs = 15001; });
   await page.clock.runFor(16000);
-  await expect(page.locator('.gpu-metrics')).toHaveText('GPU load N/AVRAM N/A');
+  await expect(page.locator('.gpu-metrics')).toHaveText('GPU load: N/AVRAM: N/A');
   await page.evaluate(() => { window.gpuFixture.hold = false; window.gpuFixture.release.splice(0).forEach(resolve => resolve()); });
-  await expect(page.locator('.gpu-metrics')).toHaveText('GPU load N/AVRAM N/A');
+  await expect(page.locator('.gpu-metrics')).toHaveText('GPU load: N/AVRAM: N/A');
   await expect(page.getByRole('heading', { name: 'Your server is within reach.' })).toBeVisible();
 });
 
@@ -79,13 +79,13 @@ test('hidden windows pause polling and resume with new readings', async ({ page 
   const before = await page.evaluate(() => window.gpuFixture.calls);
   await page.clock.runFor(20000);
   expect(await page.evaluate(() => window.gpuFixture.calls)).toBe(before);
-  await expect(page.locator('.gpu-metrics')).toContainText('GPU load N/A');
+  await expect(page.locator('.gpu-metrics')).toContainText('GPU load: N/A');
   await page.evaluate(() => {
     window.gpuFixture.metrics!.devices[0].loadPercent = 23;
     Object.defineProperty(document, 'hidden', { configurable: true, value: false });
     document.dispatchEvent(new Event('visibilitychange'));
   });
-  await expect(page.locator('.gpu-metrics')).toContainText('GPU load 23%');
+  await expect(page.locator('.gpu-metrics')).toContainText('GPU load: 23%');
 });
 
 test('a late response from the old server cannot populate a new connection', async ({ page }) => {
@@ -97,7 +97,7 @@ test('a late response from the old server cannot populate a new connection', asy
   await page.evaluate(() => { window.gpuFixture.metrics = null; window.gpuFixture.hold = false; });
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await page.evaluate(() => window.gpuFixture.release.splice(0).forEach(resolve => resolve()));
-  await expect(page.locator('.gpu-metrics')).toHaveText('GPU load N/AVRAM N/A');
+  await expect(page.locator('.gpu-metrics')).toHaveText('GPU load: N/AVRAM: N/A');
   await page.clock.runFor(2100);
   await expect(page.locator('.endpoint')).toHaveText('http://192.0.2.11:11434');
 });

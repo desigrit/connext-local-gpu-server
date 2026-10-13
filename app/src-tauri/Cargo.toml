@@ -1,6 +1,6 @@
 [package]
 name = "shambu"
-version = "1.0.3"
+version = "1.0.4"
 description = "A quiet window into your local inference server"
 edition = "2021"
 default-run = "shambu"

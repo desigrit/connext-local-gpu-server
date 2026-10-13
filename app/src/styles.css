@@ -132,9 +132,15 @@ details[open] .row-chevron { transform: rotate(180deg); }
 .activity-body { margin-left: 33px; padding-bottom: 16px; }
 .gpu-details { margin: 0 19px 0 auto; min-width: 0; text-align: right; }
 .gpu-name { margin: 0; color: var(--muted); font-size: 12px; font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
-.gpu-metrics { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 2px 14px; margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; font-variant-numeric: tabular-nums; }
-.gpu-metrics span { white-space: nowrap; }
-.gpu-metrics strong { color: var(--ink); font-weight: 600; }
+.gpu-metrics { display: grid; grid-template-columns: max-content calc(var(--gpu-used-width) + var(--gpu-total-width) + 6ch); gap: 2px 8px; width: max-content; margin: 6px 0 0 auto; color: var(--muted); font-size: 11px; line-height: 1.6; font-variant-numeric: tabular-nums; text-align: left; }
+.gpu-metric-row { display: contents; }
+.gpu-metrics dt, .gpu-metrics dd { margin: 0; white-space: nowrap; }
+.gpu-metrics dd { display: grid; grid-template-columns: var(--gpu-used-width) 2ch var(--gpu-total-width) 4ch; color: var(--ink); font-weight: 600; }
+.gpu-load-number, .gpu-memory-used, .gpu-memory-total { text-align: right; }
+.gpu-load-unit { padding-left: 1px; }
+.gpu-memory-divider { text-align: center; }
+.gpu-memory-unit { padding-left: 4px; }
+.gpu-index { margin: 8px 0 0; color: var(--muted); font-size: 11px; }
 .activity-strip { --bar-width: 4px; --bar-height: 30px; --bar-gap: 3px; --bar-radius: 1.5px; --bar-idle: #b7c5b0; --bar-edge: transparent; }
 .bars-slender { --bar-width: 6px; --bar-height: 30px; --bar-gap: 3px; --bar-radius: 2px; --bar-idle: #d5dfce; }
 .bars-tall { --bar-width: 4px; --bar-height: 38px; --bar-gap: 3px; --bar-idle: #c6d2be; }
