@@ -33,4 +33,4 @@ There’s an easter egg. Try **Ctrl + Shift + K** on a PC or Mac.
 
 [Releases](https://github.com/desigrit/shambu/releases) · [Troubleshooting](docs/operations.md) · [Build from source](app/README.md) · [Privacy](docs/privacy.md)
 
-Future updates appear beside the version number in the app. A tiny pill, a fresh Shambu.
+On Windows and Mac, future updates appear beside the version number in the app.
