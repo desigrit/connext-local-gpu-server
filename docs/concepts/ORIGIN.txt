@@ -1,3 +1,13 @@
 Vine concepts generated with the OpenAI image tool using a synthetic Shambu screenshot as reference. Flat and softly shaded alternatives are visual proposals only, not shipped app screenshots. All addresses and readings are synthetic.
 
 01-dabba-eye.svg through 06-lotus.svg are original geometric SVG concepts authored for Shambu. icon-options.html and icon-options.png compare them at display and taskbar sizes. No external character art is used. These options are not applied to the app until selected.
+
+vines-overgrown-v2.png: generated with the built-in OpenAI image tool from docs/previews/app.png and vines-flat.png. This is the denser flat-creeper concept requested on 2026-10-13.
+
+shambu-matchbox-vermilion.png and shambu-matchbox-forest.png: generated with the built-in OpenAI image tool using the Shikari Shambu portrait and user-supplied jungle reference from app/assets/archive/shikari-shambu/. Each received one refinement for flatter colors and cleaner boundaries. Character and source-art credits are preserved in that archive's README.md. These are concept studies, not replacement app assets.
+
+Matchbox research: Museum of Art & Photography, Light it up!, https://artsandculture.google.com/story/0AXRlx78fFkQqA ; Rajesh Joshi, Match Box Art, https://www.rajeshjoshi.com/match-box-art-by-rajesh-joshi/ . These were visual and contextual inspiration; no matchbox label is reproduced in the new icons.
+
+matchbox-and-creepers-prompts.txt preserves the complete generation and refinement prompts. shambu-matchbox.html and shambu-matchbox-comparison.png compare the two icons at 16, 24 and 32 CSS pixels on light and dark backgrounds.
+
+shambu-stick-sketch.png: a simpler line-art study requested after the matchbox portraits. Generated with the built-in OpenAI image tool from app/assets/archive/shikari-shambu/shikari-shambu-source.png. The full prompt is in shambu-stick-sketch-prompt.txt. Character and original-art credits remain in the Shikari Shambu archive.

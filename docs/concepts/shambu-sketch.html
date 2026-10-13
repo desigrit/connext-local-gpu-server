@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Shambu pen sketch</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #293c32; background: #f7f4ed; font: 15px/1.5 system-ui, sans-serif; }
+    main { max-width: 1060px; padding: 40px 48px 32px; margin: auto; }
+    h1 { font-size: 28px; font-weight: 550; letter-spacing: -.025em; margin: 0 0 28px; }
+    h2 { font-size: 17px; font-weight: 550; margin: 0 0 14px; }
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+    section { min-width: 0; }
+    .portrait { display: block; width: 260px; height: 260px; margin: 0 auto 24px; object-fit: contain; }
+    .samples { display: flex; gap: 30px; justify-content: center; align-items: center; min-height: 90px; padding: 14px 24px; }
+    .light { background: #fff; border-radius: 9px 9px 0 0; }
+    .dark { background: #232a30; color: #c1c9c3; border-radius: 0 0 9px 9px; }
+    figure { margin: 0; display: grid; justify-items: center; align-items: center; gap: 6px; width: 48px; }
+    .sample-image { height: 32px; display: flex; align-items: center; }
+    figcaption { font-size: 11px; font-variant-numeric: tabular-nums; color: #647167; }
+    .dark figcaption { color: #aab7ae; }
+    footer { margin-top: 28px; font-size: 12px; color: #617066; }
+    a { color: inherit; text-underline-offset: 3px; }
+    a:focus-visible { outline: 2px solid #536d56; outline-offset: 5px; }
+    ::selection { background: #d8dfc8; color: #203c2e; }
+    @media (max-width: 640px) { main { padding: 28px 22px; } .options { grid-template-columns: 1fr; gap: 32px; } h1 { font-size: 24px; } }
+  </style>
+</head>
+<body>
+<main style="max-width: 600px;">
+  <h1>Shambu in a few strokes</h1>
+  <div class="options" style="grid-template-columns: 1fr;">
+    <section>
+      
+      <a href="shambu-stick-sketch.png"><img class="portrait" src="shambu-stick-sketch.png" alt="A minimal ink sketch of Shambu: hat, nose, moustache and smile"></a>
+      <div class="samples light" aria-label="On a light background">
+        <figure><div class="sample-image"><img src="shambu-stick-sketch.png" width="16" height="16" alt=""></div><figcaption>16 px</figcaption></figure>
+        <figure><div class="sample-image"><img src="shambu-stick-sketch.png" width="24" height="24" alt=""></div><figcaption>24 px</figcaption></figure>
+        <figure><div class="sample-image"><img src="shambu-stick-sketch.png" width="32" height="32" alt=""></div><figcaption>32 px</figcaption></figure>
+      </div>
+      <div class="samples dark" aria-label="On a dark background">
+        <figure><div class="sample-image"><img src="shambu-stick-sketch.png" width="16" height="16" alt=""></div><figcaption>16 px</figcaption></figure>
+        <figure><div class="sample-image"><img src="shambu-stick-sketch.png" width="24" height="24" alt=""></div><figcaption>24 px</figcaption></figure>
+        <figure><div class="sample-image"><img src="shambu-stick-sketch.png" width="32" height="32" alt=""></div><figcaption>32 px</figcaption></figure>
+      </div>
+    </section>
+    
+  </div>
+  
+</main>
+
+
+</body></html>

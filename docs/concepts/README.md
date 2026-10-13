@@ -1,8 +1,29 @@
 # Visual directions
 
-These are proposals for comparison, not screenshots of an implemented theme. The shipped app stays unchanged until a direction is selected.
+## Shambu in a few strokes
 
-## Icon options
+![Minimal Shambu pen sketch at app and taskbar sizes](shambu-stick-sketch-preview.png)
+
+A low hat, a round nose, the sweeping moustache and a grin. [Icon](shambu-stick-sketch.png) · [Size preview](shambu-sketch.html) · [Generation prompt](shambu-stick-sketch-prompt.txt).
+
+## Overgrown creepers
+
+Thick, tangled growth around a clear white center.
+
+![Overgrown flat creepers around Shambu](vines-overgrown-v2.png)
+
+## Earlier matchbox portraits
+
+![Two Shambu icons with previews at 16, 24 and 32 pixels](shambu-matchbox-comparison.png)
+
+1. [Vermilion](shambu-matchbox-vermilion.png): a round badge, broad hat and unmistakable grin.
+2. [Forest label](shambu-matchbox-forest.png): a framed matchbox portrait in bottle green, mustard and cream.
+
+[Open the size comparison](shambu-matchbox.html).
+
+Color and composition references: [Indian matchbox labels at the Museum of Art & Photography](https://artsandculture.google.com/story/0AXRlx78fFkQqA) and [Rajesh Joshi's matchbox artwork](https://www.rajeshjoshi.com/match-box-art-by-rajesh-joshi/). Character references are in the [Shikari Shambu archive](../../app/assets/archive/shikari-shambu/README.md). [Generation prompts](matchbox-and-creepers-prompts.txt).
+
+## Earlier icon options
 
 ![Six original flat icon options at app and taskbar sizes](icon-options.png)
 
@@ -15,7 +36,7 @@ Open [the comparison page](icon-options.html) locally to inspect the source artw
 5. [Kolam signal](05-kolam.svg): a looped floor pattern becomes a lens.
 6. [Lotus lens](06-lotus.svg): a lotus with a very specific day job.
 
-## Vines at the edges
+## Earlier vine studies
 
 The center stays light and clear. Creepers live only along the outer margins.
 
@@ -27,4 +48,4 @@ The center stays light and clear. Creepers live only along the outer margins.
 
 ![Softly shaded vine concept](vines-dimensional.png)
 
-The vine previews were generated from a synthetic app screenshot. Minor interface details are illustrative. [Asset provenance](ORIGIN.txt).
+[Asset provenance](ORIGIN.txt).
