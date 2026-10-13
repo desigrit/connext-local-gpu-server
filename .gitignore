@@ -39,3 +39,8 @@ app/playwright-report/
 .impeccable/mocks/
 .impeccable/surface-draft.md
 *.tsbuildinfo
+
+# Android signing material stays local or in encrypted CI secrets.
+*.jks
+*.keystore
+keystore.properties

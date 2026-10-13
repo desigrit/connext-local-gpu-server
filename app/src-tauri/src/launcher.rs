@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
@@ -7,7 +7,6 @@ pub enum CompanionApp {
     Ollama,
 }
 
-#[cfg(not(target_os = "android"))]
 impl CompanionApp {
     fn name(self) -> &'static str {
         match self {
@@ -87,12 +86,8 @@ pub async fn open(app: &tauri::AppHandle, target: CompanionApp) -> Result<String
             )
         })?;
     Ok(match target {
-        CompanionApp::Tailscale => {
-            "Opening Tailscale on this PC. Its controls may appear in the system tray."
-        }
-        CompanionApp::Ollama => {
-            "Opening Ollama on this PC. If no window appears, check its system tray icon."
-        }
+        CompanionApp::Tailscale => "Opening Tailscale. Check the system tray.",
+        CompanionApp::Ollama => "Opening Ollama. Check the system tray.",
     }
     .into())
 }
@@ -130,12 +125,8 @@ pub async fn open(_app: &tauri::AppHandle, target: CompanionApp) -> Result<Strin
         ));
     }
     Ok(match target {
-        CompanionApp::Tailscale => {
-            "Opening Tailscale on this Mac. Its controls may appear in the menu bar."
-        }
-        CompanionApp::Ollama => {
-            "Opening Ollama on this Mac. This opens the local app, not the app on your GPU PC."
-        }
+        CompanionApp::Tailscale => "Opening Tailscale. Check the menu bar.",
+        CompanionApp::Ollama => "Opening Ollama on this Mac.",
     }
     .into())
 }
@@ -160,6 +151,166 @@ pub async fn open(app: &tauri::AppHandle, target: CompanionApp) -> Result<String
 #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "android")))]
 pub async fn open(_app: &tauri::AppHandle, target: CompanionApp) -> Result<String, String> {
     Err(format!("Open {} using this device's app launcher. Direct opening is supported on Windows, macOS, and Android for Tailscale.", target.name()))
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Availability {
+    #[cfg(not(target_os = "android"))]
+    Installed,
+    #[cfg(not(target_os = "android"))]
+    Missing,
+    #[cfg(not(target_os = "windows"))]
+    Unknown,
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    Unsupported,
+}
+
+pub async fn availability(app: &tauri::AppHandle, target: CompanionApp) -> Availability {
+    #[cfg(target_os = "windows")]
+    {
+        use tauri::Manager;
+        if windows_candidates(
+            target,
+            app.path().local_data_dir().ok(),
+            ["ProgramW6432", "ProgramFiles", "ProgramFiles(x86)"]
+                .into_iter()
+                .filter_map(std::env::var_os)
+                .map(std::path::PathBuf::from),
+        )
+        .iter()
+        .any(|path| path.is_file())
+        {
+            Availability::Installed
+        } else {
+            Availability::Missing
+        }
+    }
+    #[cfg(target_os = "macos")]
+    {
+        let _ = app;
+        let result = tokio::time::timeout(
+            std::time::Duration::from_secs(5),
+            tokio::process::Command::new("/usr/bin/open")
+                .args(["-Ra", target.name()])
+                .kill_on_drop(true)
+                .stdout(std::process::Stdio::null())
+                .stderr(std::process::Stdio::null())
+                .status(),
+        )
+        .await;
+        match result {
+            Ok(Ok(status)) if status.success() => Availability::Installed,
+            Ok(Ok(_)) => Availability::Missing,
+            _ => Availability::Unknown,
+        }
+    }
+    #[cfg(target_os = "android")]
+    {
+        let _ = app;
+        match target {
+            CompanionApp::Ollama => Availability::Unsupported,
+            CompanionApp::Tailscale => Availability::Unknown,
+        }
+    }
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "android")))]
+    {
+        let _ = (app, target);
+        Availability::Unsupported
+    }
+}
+
+pub async fn install(app: &tauri::AppHandle, target: CompanionApp) -> Result<String, String> {
+    use tauri_plugin_opener::OpenerExt;
+    #[cfg(target_os = "windows")]
+    {
+        use tauri::Manager;
+        let winget = app
+            .path()
+            .local_data_dir()
+            .map_err(|_| "Cannot find Windows App Installer.")?
+            .join("Microsoft/WindowsApps/winget.exe");
+        if winget.is_file() {
+            let package = match target {
+                CompanionApp::Ollama => "Ollama.Ollama",
+                CompanionApp::Tailscale => "Tailscale.Tailscale",
+            };
+            // Fixed official package IDs only. Winget verifies the installer hash; the
+            // standard installer owns elevation and consent. Never invoke a shell.
+            let status = tokio::time::timeout(
+                std::time::Duration::from_secs(1800),
+                tokio::process::Command::new(winget)
+                    .args([
+                        "install",
+                        "--id",
+                        package,
+                        "--exact",
+                        "--source",
+                        "winget",
+                        "--interactive",
+                        "--accept-source-agreements",
+                        "--accept-package-agreements",
+                        "--disable-interactivity",
+                    ])
+                    .creation_flags(0x08000000)
+                    .kill_on_drop(true)
+                    .stdin(std::process::Stdio::null())
+                    .stdout(std::process::Stdio::null())
+                    .stderr(std::process::Stdio::null())
+                    .status(),
+            )
+            .await
+            .map_err(|_| "Installation timed out. Check the installer, then try again.")?
+            .map_err(|_| "Could not start the installer. Try the official download.")?;
+            if !status.success() {
+                return Err(
+                    "Installation did not finish. Retry, or use the official download.".into(),
+                );
+            }
+            return Ok(format!(
+                "{} installed. Open it to finish setup.",
+                target.name()
+            ));
+        }
+    }
+    let url = official_download(target)?;
+    app.opener()
+        .open_url(url, None::<&str>)
+        .map_err(|_| "Could not open the official download. Try your browser.")?;
+    Ok(format!("Opening the official {} download.", target.name()))
+}
+
+fn official_download(target: CompanionApp) -> Result<&'static str, String> {
+    #[cfg(target_os = "windows")]
+    {
+        Ok(match target {
+            CompanionApp::Ollama => "https://ollama.com/download/windows",
+            CompanionApp::Tailscale => "https://tailscale.com/download/windows",
+        })
+    }
+    #[cfg(target_os = "macos")]
+    {
+        Ok(match target {
+            CompanionApp::Ollama => "https://ollama.com/download/mac",
+            CompanionApp::Tailscale => "https://tailscale.com/download/mac",
+        })
+    }
+    #[cfg(target_os = "android")]
+    {
+        match target {
+            CompanionApp::Tailscale => {
+                Ok("https://play.google.com/store/apps/details?id=com.tailscale.ipn")
+            }
+            CompanionApp::Ollama => {
+                Err("Install Ollama on your GPU PC. Android connects to it remotely.".into())
+            }
+        }
+    }
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "android")))]
+    {
+        let _ = target;
+        Err("Use the official app download for your operating system.".into())
+    }
 }
 
 #[cfg(test)]

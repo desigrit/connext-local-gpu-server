@@ -1,1 +1,3 @@
 Synthetic Shambu interface previews, captured from this repository using Playwright on 2026-10-12. No real addresses, pairing keys, model readings, or user data are used. Regenerate with app/scripts/render-state-previews.mjs against the local Vite development server.
+
+app.png, app-mobile.png, and settings-pairing.png: rendered from the updated development preview with synthetic address 192.0.2.10 and sample code SHAMBU42. Preview controls hidden for the product screenshot. No private data.

@@ -213,7 +213,7 @@ components:
   activity-times:
     textColor: "{colors.muted}"
     typography: "{typography.activity-times}"
-    width: "min(100%, 222px)"
+    width: "min(100%, 438px)"
 ---
 
 # Design System: Shambu
@@ -292,8 +292,8 @@ The readiness sentence carries the page. Other text stays compact, with distinct
 - **Field:** `field` defines editable values.
 - **Controls and metadata:** `control` belongs to the primary form action; `metadata` supports labels and guidance. Quiet actions use larger text (12px); compact Settings uses smaller text (11px). Form labels use stronger weight (700).
 - **Brand:** `brand` sets the Shambu name beside its icon, reducing to a compact size (16px) on phones.
-- **GPU name:** `gpu-name` identifies the detected server GPU beneath the section heading.
-- **Activity times:** `activity-times` labels the history at 24h, 12h, and Now.
+- **GPU name:** `gpu-name` identifies the detected server GPU at the right of the section heading.
+- **Activity times:** `activity-times` labels the history at 48h, 24h, and Now.
 - **Hour tooltip:** `tooltip` uses tabular figures for the local hour, with a stronger state word (750).
 - **App hint:** `app-hint` identifies the device-local launch action on hover or focus.
 
@@ -309,7 +309,7 @@ The native desktop window defaults to a centered landscape size (1120px by 760px
 
 The dashboard keeps one column at every width. Readiness leads with an icon-only Settings action at the top right. The header bottom margin is 20px normally and 24px compact. The operating-system title bar carries the app identity.
 
-The full-width status list follows the endpoint with a 20px margin. GPU usage continues the row structure, with a 33px text inset (30px compact) and 16px bottom padding. The selected Slender bar and aligned range labels are 222px wide, capped to the available width. The device label has a 12px bottom margin.
+The full-width status list follows the endpoint with a 20px margin. GPU usage continues the row structure, with a 33px text inset (30px compact) and 16px bottom padding. The selected Slender bar and aligned range labels are 438px wide, capped to the available width. The device label has a 12px bottom margin.
 
 At 480px, side padding becomes 22px and the header gap becomes 12px. Settings keeps its 44px icon target and accessible name. At 359px, side padding reduces to 14px.
 
@@ -379,7 +379,7 @@ Hover affects the summary, and opening it rotates the chevron (180 degrees over 
 
 The section begins with the GPU icon and **GPU usage**, using the same title style and alignment as the status rows. Beneath it, show **Remote GPU: Nvidia Example GPU** for recognized NVIDIA devices, or **Remote GPU: Details not linked** when unavailable. The section ends with the same fine divider as the readings.
 
-Twenty-five cells cover the rolling 24-hour window, including partial end hours. The selected Slender bars are 6px wide and 30px high with a 3px gap. Pale idle bars and filled forest-green active bars retain straight sides. The aligned **24h**, **12h**, and **Now** labels sit below.
+Twenty-five cells cover the rolling 48-hour window, including partial end hours. The selected Slender bars are 6px wide and 30px high with a 3px gap. Pale idle bars and filled forest-green active bars retain straight sides. The aligned **24h**, **12h**, and **Now** labels sit below.
 
 A filled pill means GPU use of at least 5% was observed while Ollama had a model in GPU memory. This is an estimate: other GPU work can contribute, and sampling can miss short activity. Empty and unmonitored hours display **Idle**.
 

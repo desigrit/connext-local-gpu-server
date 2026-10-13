@@ -25,7 +25,14 @@ fn load_settings(state: State<'_, AppState>) -> Result<Settings, String> {
 }
 
 #[tauri::command]
-fn save_settings(settings: Settings, state: State<'_, AppState>) -> Result<Settings, String> {
+async fn save_settings(
+    mut settings: Settings,
+    pairing_code: Option<String>,
+    state: State<'_, AppState>,
+) -> Result<Settings, String> {
+    if let Some(code) = pairing_code.filter(|code| !code.is_empty()) {
+        settings = readiness::pair_host(settings, &code).await?;
+    }
     let url = readiness::validate_settings(&settings)?;
     let settings = Settings {
         endpoint: url.as_str().trim_end_matches('/').into(),
@@ -40,7 +47,18 @@ fn save_settings(settings: Settings, state: State<'_, AppState>) -> Result<Setti
     let text =
         serde_json::to_vec_pretty(&settings).map_err(|_| "Could not encode the settings.")?;
     // Only user-entered connection settings are saved. Probe results never go to disk.
-    fs::write(&state.config_path, text).map_err(|_| "Could not save the connection settings.")?;
+    use std::io::Write;
+    let mut options = fs::OpenOptions::new();
+    options.create(true).truncate(true).write(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    options
+        .open(&state.config_path)
+        .and_then(|mut file| file.write_all(&text))
+        .map_err(|_| "Could not save the connection settings.")?;
     Ok(settings)
 }
 
@@ -63,7 +81,6 @@ async fn check_readiness(
     Ok(snapshot)
 }
 
-#[tauri::command]
 fn get_host_pairing_key(app: tauri::AppHandle) -> Result<String, String> {
     use std::io::Read;
     let path = app
@@ -105,6 +122,27 @@ fn get_host_pairing_key(app: tauri::AppHandle) -> Result<String, String> {
 }
 
 #[tauri::command]
+async fn get_pairing_code(app: tauri::AppHandle) -> Result<readiness::PairingCode, String> {
+    readiness::create_pairing_code(&get_host_pairing_key(app)?).await
+}
+
+#[tauri::command]
+async fn companion_availability(
+    app: tauri::AppHandle,
+    target: launcher::CompanionApp,
+) -> launcher::Availability {
+    launcher::availability(&app, target).await
+}
+
+#[tauri::command]
+async fn install_companion_app(
+    app: tauri::AppHandle,
+    target: launcher::CompanionApp,
+) -> Result<String, String> {
+    launcher::install(&app, target).await
+}
+
+#[tauri::command]
 async fn open_companion_app(
     app: tauri::AppHandle,
     target: launcher::CompanionApp,
@@ -114,7 +152,6 @@ async fn open_companion_app(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default();
-    #[cfg(target_os = "android")]
     let builder = builder.plugin(
         tauri_plugin_opener::Builder::new()
             .open_js_links_on_click(false)
@@ -138,8 +175,10 @@ pub fn run() {
             load_settings,
             save_settings,
             check_readiness,
-            get_host_pairing_key,
-            open_companion_app
+            get_pairing_code,
+            open_companion_app,
+            companion_availability,
+            install_companion_app
         ])
         .run(tauri::generate_context!())
         .expect("Could not start Shambu");

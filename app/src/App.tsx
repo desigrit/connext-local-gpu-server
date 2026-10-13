@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowUpRight, Check as CheckIcon, CircleHelp, Copy, Monitor, Settings2, TriangleAlert } from 'lucide-react';
 import { ArrowClockwise20Regular } from '@fluentui/react-icons';
-import { android, checkReadiness, copyHostKey, copyText, defaultSettings, demo, loadSettings, native, saveSettings, validateSettings, type ConnectionIssue } from './bridge';
+import { android, checkReadiness, copyText, defaultSettings, demo, loadSettings, native, saveSettings, validateSettings, type ConnectionIssue } from './bridge';
 import GpuActivity from './GpuActivity';
+import HostPairing from './HostPairing';
 import StatusRow from './StatusRow';
 import { getReadinessStatus } from './readiness';
 import { gpuBarVariant } from './gpuBarVariants';
@@ -24,7 +25,7 @@ export default function App() {
   const [error, setError] = useState('');
   const [formError, setFormError] = useState<ConnectionIssue | null>(null);
   const [copied, setCopied] = useState(false);
-  const [keyCopied, setKeyCopied] = useState(false);
+  const [pairingCode, setPairingCode] = useState('');
   const [now, setNow] = useState(Date.now());
   const lastCheck = useRef(0);
   const busyRef = useRef(false);
@@ -36,10 +37,12 @@ export default function App() {
   const runCheck = useCallback(async (connection: Settings) => {
     if (busyRef.current || validateSettings(connection) || (!native && !demo)) return;
     busyRef.current = true; lastCheck.current = Date.now(); setBusy(true); setError('');
+    const minimum = new Promise(resolve => setTimeout(resolve, 2000));
     try {
-      const result = await checkReadiness(connection);
+      const [result] = await Promise.all([checkReadiness(connection), minimum]);
       if (mounted.current) { setSnapshot(result); setNow(Date.now()); }
     } catch (failure) {
+      await minimum;
       if (mounted.current) setError(failure instanceof Error ? failure.message : String(failure));
     } finally {
       busyRef.current = false;
@@ -93,9 +96,10 @@ export default function App() {
   const externalEndpoint = settings?.mode === 'remote' ? settings.endpoint : snapshot?.externalEndpoint;
 
 
-  function openSettings() { setDraft(settings ?? defaultSettings); setEditing(true); setFormError(null); }
-  function closeSettings() { setEditing(false); setFormError(null); settingsButton.current?.focus(); }
+  function openSettings() { setPairingCode(''); setDraft(settings ?? defaultSettings); setEditing(true); setFormError(null); }
+  function closeSettings() { setPairingCode(''); setEditing(false); setFormError(null); settingsButton.current?.focus(); }
   function chooseMode(mode: Mode) {
+    setPairingCode('');
     setDraft(previous => ({ ...previous, mode, endpoint: mode === 'host' ? 'http://127.0.0.1:11434' : previous.mode === 'host' ? '' : previous.endpoint }));
     setFormError(null);
   }
@@ -111,9 +115,13 @@ export default function App() {
       input?.focus();
       return;
     }
+    if (pairingCode && !/^[A-HJ-NP-Z2-9]{8}$/.test(pairingCode)) {
+      setFormError({ field: 'diagnosticsKey', message: 'Enter the 8-character code shown on your GPU PC.' });
+      document.getElementById('pairing-key')?.focus(); return;
+    }
     setSaving(true); setFormError(null);
     try {
-      const saved = await saveSettings(draft);
+      const saved = await saveSettings(draft, draft.mode === 'remote' ? pairingCode : '');
       setSnapshot(null); setSettings(saved); setDraft(saved); closeSettings();
     } catch (failure) { setFormError({ field: null, message: failure instanceof Error ? failure.message : String(failure) }); }
     finally { setSaving(false); }
@@ -128,12 +136,6 @@ export default function App() {
     } catch { setError('Could not copy the URL. You can select and copy the address below.'); }
   }
 
-  async function copyPairingKey() {
-    setFormError(null);
-    try { await copyHostKey(); setKeyCopied(true); }
-    catch (failure) { setFormError({ field: null, message: failure instanceof Error ? failure.message : String(failure) }); }
-  }
-
   return <main className="app-shell">
     <header className="app-header">
       <div className="readiness-message">
@@ -144,7 +146,7 @@ export default function App() {
           {(!native && !demo) ? (import.meta.env.DEV && <a href="?demo=healthy">Preview</a>) : <button className="icon-button refresh-button" onClick={() => settings && void runCheck(settings)} disabled={busy || !settings?.endpoint || saving} aria-label={busy ? 'Checking server' : 'Refresh status'}><ArrowClockwise20Regular className={busy ? 'spin' : ''} aria-hidden="true" /></button>}
         </div>
       </div>
-      <button ref={settingsButton} className={`icon-button connection-button ${editing ? 'selected' : ''}`} onClick={() => { setDraft(settings ?? defaultSettings); setEditing(value => !value); setFormError(null); }} aria-label="Settings" aria-expanded={editing} aria-controls="connection-settings">
+      <button ref={settingsButton} className={`icon-button connection-button ${editing ? 'selected' : ''}`} onClick={() => editing ? closeSettings() : openSettings()} aria-label="Settings" aria-expanded={editing} aria-controls="connection-settings">
         <Settings2 size={18} aria-hidden="true" />
       </button>
     </header>
@@ -162,21 +164,17 @@ export default function App() {
         <label htmlFor="server-name">Server name</label>
         <input aria-invalid={formError?.field === 'name'} aria-describedby={formError?.field === 'name' ? 'connection-error' : undefined} id="server-name" value={draft.name} maxLength={60} autoComplete="off" onChange={event => setDraft({ ...draft, name: event.target.value })} />
         <label htmlFor="server-url">Ollama URL</label>
-        <input ref={endpointInput} id="server-url" type="url" value={draft.endpoint} autoCapitalize="none" autoComplete="off" spellCheck={false} placeholder={draft.mode === 'host' ? 'http://127.0.0.1:11434' : 'http://<your-server-ip>:11434'} onChange={event => setDraft({ ...draft, endpoint: event.target.value })} aria-describedby={formError?.field === 'endpoint' ? 'connection-error connection-hint' : 'connection-hint'} aria-invalid={formError?.field === 'endpoint'} />
+        <input ref={endpointInput} id="server-url" type="url" value={draft.endpoint} autoCapitalize="none" autoComplete="off" spellCheck={false} placeholder={draft.mode === 'host' ? 'http://127.0.0.1:11434' : 'http://<your-server-ip>:11434'} onChange={event => setDraft({ ...draft, endpoint: event.target.value, diagnosticsKey: '' })} aria-describedby={formError?.field === 'endpoint' ? 'connection-error connection-hint' : 'connection-hint'} aria-invalid={formError?.field === 'endpoint'} />
         <p id="connection-hint" className="field-hint">{draft.mode === 'host' ? 'Use the local Ollama address on this computer.' : 'Use the GPU PC’s Tailscale IP. Keep Tailscale connected on both devices.'} Settings stay on this device.</p>
         {draft.mode === 'remote' ? <div className="host-link-fields">
-          <label htmlFor="pairing-key">Host pairing key <span>(optional)</span></label>
-          <input id="pairing-key" type="password" value={draft.diagnosticsKey} autoComplete="off" spellCheck={false} placeholder="Paste the key from your GPU PC" onChange={event => setDraft({ ...draft, diagnosticsKey: event.target.value })} aria-invalid={formError?.field === 'diagnosticsKey'} aria-describedby={formError?.field === 'diagnosticsKey' ? 'connection-error pairing-hint' : 'pairing-hint'} />
-          <p id="pairing-hint" className="field-hint">Add this to see Tailscale and forwarding on the GPU PC itself. In Shambu on that PC, open Settings and copy its pairing key.</p>
+          <div className="pairing-caption"><label htmlFor="pairing-key">Pairing code <span>(optional)</span></label>{draft.diagnosticsKey && <span className="paired-note">Paired <button type="button" className="text-action" onClick={() => setDraft({ ...draft, diagnosticsKey: '' })}>Unpair</button></span>}</div>
+          <input id="pairing-key" className="code-input" type="text" value={pairingCode} autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={9} placeholder={draft.diagnosticsKey ? 'Already paired' : 'ABCD 2345'} onChange={event => setPairingCode(event.target.value.toUpperCase().replace(/[\s-]/g, '').slice(0, 8))} aria-invalid={formError?.field === 'diagnosticsKey'} aria-describedby={formError?.field === 'diagnosticsKey' ? 'connection-error pairing-hint' : 'pairing-hint'} />
+          <p id="pairing-hint" className="field-hint">Find the code in Settings on your GPU PC. It links GPU history and the PC’s connection checks. Pair once per device.</p>
           <details className="advanced-connection"><summary>Custom host status port</summary>
             <label htmlFor="diagnostics-url">Host status URL</label>
             <input aria-invalid={formError?.field === 'diagnosticsUrl'} aria-describedby={formError?.field === 'diagnosticsUrl' ? 'connection-error' : undefined} id="diagnostics-url" type="url" value={draft.diagnosticsUrl} autoCapitalize="none" autoComplete="off" spellCheck={false} placeholder="Automatic: same server, port 11435" onChange={event => setDraft({ ...draft, diagnosticsUrl: event.target.value })} />
           </details>
-        </div> : <div className="host-sharing">
-          <p>Share this PC’s checks with your other devices using the Shambu host companion.</p>
-          <button type="button" className="quiet-button" onClick={copyPairingKey} disabled={!native}><Copy size={15} />{keyCopied ? 'Pairing key copied' : 'Copy pairing key'}</button>
-          <span className="sr-only" role="status">{keyCopied ? 'Host pairing key copied to clipboard' : ''}</span>
-        </div>}
+        </div> : <HostPairing />}
         {formError && <p id="connection-error" className="form-error" role="alert">{formError.message}</p>}
         <div className="settings-actions">
           <button type="button" className="quiet-button cancel-button" onClick={closeSettings} disabled={saving}>Cancel</button>
@@ -200,8 +198,8 @@ export default function App() {
       {checks.filter(check => check.id !== 'gpu').map(check => <StatusRow key={check.id} check={check} stale={stale} models={snapshot?.installedModels ?? []} mode={settings?.mode ?? 'host'} busy={busy} onRetry={() => settings && void runCheck(settings)} onSettings={openSettings} />)}
     </section>
 
-    {snapshot?.mode === 'remote' && snapshot.hostDetails !== 'linked' && <button className="host-link-prompt" onClick={() => { setDraft(settings ?? defaultSettings); setEditing(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-      <CircleHelp size={15} /><span>{snapshot.hostDetails === 'unauthorized' ? 'Update the host pairing key' : snapshot.hostDetails === 'unreachable' ? 'Check the host companion connection' : 'Link host details'}</span><ArrowUpRight size={14} />
+    {snapshot?.mode === 'remote' && snapshot.hostDetails !== 'linked' && <button className="host-link-prompt" onClick={() => { openSettings(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+      <CircleHelp size={15} /><span>{snapshot.hostDetails === 'unauthorized' ? 'Pair this device again' : snapshot.hostDetails === 'unreachable' ? 'Check the host companion connection' : 'Link host details'}</span><ArrowUpRight size={14} />
     </button>}
     {gpuCheck && ['warning', 'error'].includes(gpuCheck.state) && <div className={'gpu-warning state-' + gpuCheck.state}><strong>{gpuCheck.label}</strong><p>{gpuCheck.help || gpuCheck.detail}</p></div>}
     </div>

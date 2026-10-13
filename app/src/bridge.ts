@@ -44,15 +44,17 @@ export function validateSettings(settings: Settings): ConnectionIssue | null {
   return null;
 }
 
-export async function saveSettings(settings: Settings): Promise<Settings> {
+export async function saveSettings(settings: Settings, pairingCode = ''): Promise<Settings> {
   const error = validateSettings(settings);
   if (error) throw new Error(error.message);
   const normalized = {
     ...settings, name: settings.name.trim(), endpoint: settings.endpoint.trim().replace(/\/$/, ''),
     diagnosticsKey: settings.diagnosticsKey.trim(), diagnosticsUrl: settings.diagnosticsUrl.trim().replace(/\/$/, ''),
   };
-  if (native) return invoke('save_settings', { settings: normalized });
+  if (pairingCode && !/^[A-HJ-NP-Z2-9]{8}$/.test(pairingCode)) throw new Error('Enter the 8-character code shown on your GPU PC.');
+  if (native) return invoke('save_settings', { settings: normalized, pairingCode: pairingCode || null });
   if (demo) {
+    if (pairingCode) normalized.diagnosticsKey = 'a'.repeat(64);
     // Preview sessions intentionally never retain credentials.
     sessionStorage.setItem('shambu-demo-settings', JSON.stringify({ ...normalized, diagnosticsKey: '' }));
     return normalized;
@@ -65,10 +67,15 @@ export async function copyText(text: string) {
   return navigator.clipboard.writeText(text);
 }
 
-export async function copyHostKey() {
-  if (!native) throw new Error('Copy the pairing key from the installed app on your GPU PC.');
-  const key = await invoke<string>('get_host_pairing_key');
-  await writeText(key);
+export interface PairingCode { code: string; expiresAtMs: number }
+let pendingPairingCode: Promise<PairingCode> | null = null;
+export async function getPairingCode(): Promise<PairingCode> {
+  if (native) {
+    pendingPairingCode ??= invoke<PairingCode>('get_pairing_code').finally(() => { pendingPairingCode = null; });
+    return pendingPairingCode;
+  }
+  if (demo) return { code: 'SHAMBU42', expiresAtMs: Date.now() + 300000 };
+  throw new Error('Open Shambu on your GPU PC to create a code.');
 }
 
 export async function checkReadiness(settings: Settings): Promise<Snapshot> {
@@ -84,10 +91,22 @@ export async function checkReadiness(settings: Settings): Promise<Snapshot> {
 export type CompanionApp = 'tailscale' | 'ollama';
 
 export async function openCompanionApp(target: CompanionApp): Promise<string> {
+  if (demo) return `Opening ${target === 'ollama' ? 'Ollama' : 'Tailscale'}. Check the system tray.`;
   if (!native) throw new Error('Open the installed Shambu app to launch apps on this device.');
   try {
     return await invoke<string>('open_companion_app', { target });
   } catch (error) {
     throw new Error(typeof error === 'string' ? error : 'Could not open the app. Try your device\'s app launcher.');
   }
+}
+
+export type Availability = 'installed' | 'missing' | 'unknown' | 'unsupported';
+export async function companionAvailability(target: CompanionApp): Promise<Availability> {
+  if (native) return invoke('companion_availability', { target });
+  if (demo) return new URLSearchParams(location.search).get('demo') === 'missing' ? 'missing' : 'installed';
+  return 'unknown';
+}
+export async function installCompanionApp(target: CompanionApp): Promise<string> {
+  if (!native) throw new Error('Open the installed Shambu app to install apps on this device.');
+  return invoke('install_companion_app', { target });
 }

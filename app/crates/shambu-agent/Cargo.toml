@@ -1,6 +1,6 @@
 [package]
 name = "shambu-agent"
-version = "0.1.0"
+version = "0.2.0"
 description = "Read-only private host diagnostics for Shambu"
 edition = "2021"
 

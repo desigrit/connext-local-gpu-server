@@ -1,5 +1,7 @@
 mod local;
+mod pairing;
 mod remote;
+pub use pairing::{create_pairing_code, pair_host, valid_code, PairingCode};
 
 pub use local::gpu_active;
 pub use remote::{

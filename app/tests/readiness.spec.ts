@@ -60,7 +60,7 @@ test('remote settings reject localhost and persist a valid address', async ({ pa
 test('refresh runs every five minutes and stale readings never stay green', async ({ page }) => {
   await page.clock.install();
   await page.goto('/?demo=healthy');
-  await page.clock.runFor(1000);
+  await page.clock.runFor(2500);
   await expect(page.getByRole('heading', { name: 'Your server is within reach.' })).toBeVisible();
   await page.clock.runFor(110000);
   await expect(page.locator('.freshness')).toContainText('Just now');
@@ -76,7 +76,7 @@ test('refresh runs every five minutes and stale readings never stay green', asyn
   await expect(page.locator('.connection-status')).not.toHaveClass(/is-connected/);
   await expect(page.getByText('These readings are out of date.')).toBeVisible();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
-  await page.clock.runFor(1000);
+  await page.clock.runFor(2500);
   await expect(page.locator('.freshness')).toContainText('Just now');
   await expect(page.locator('.connection-status')).toHaveClass(/is-connected/);
 });
@@ -115,11 +115,11 @@ test('pairing validation identifies its field and a valid key links host details
   await expect(page.getByLabel('Server name')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.getByLabel('Ollama URL')).toHaveAttribute('aria-invalid', 'false');
   await page.getByLabel('Server name').fill('Home server');
-  await page.getByLabel('Host pairing key').fill('incomplete');
+  await page.getByLabel('Pairing code').fill('incomplete');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(page.getByLabel('Host pairing key')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.getByLabel('Pairing code')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.getByLabel('Ollama URL')).toHaveAttribute('aria-invalid', 'false');
-  await page.getByLabel('Host pairing key').fill('a'.repeat(64));
+  await page.getByLabel('Pairing code').fill('SHAMBU42');
   await page.getByText('Custom host status port', { exact: true }).click();
   await page.getByLabel('Host status URL').fill('http://192.0.2.20:11435');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
@@ -134,14 +134,14 @@ test('pairing validation identifies its field and a valid key links host details
 });
 
 
-test('a slim 24-hour strip exposes custom hover and keyboard hour readings', async ({ page }) => {
+test('a slim 48-hour strip exposes custom hover and keyboard hour readings', async ({ page }) => {
   await page.goto('/?demo=healthy');
   await expect(page.getByRole('heading', { name: 'Your server is within reach.' })).toBeVisible();
-  await expect(page.locator('.hour-column')).toHaveCount(25);
+  await expect(page.locator('.hour-column')).toHaveCount(49);
   expect(await page.locator('.hour-active').count()).toBeGreaterThan(0);
   await expect(page.getByRole('button', { name: /^(24h|48h)$/ })).toHaveCount(0);
   await expect(page.locator('.activity-key, .activity-explainer')).toHaveCount(0);
-  await expect(page.locator('.activity-times')).toHaveText('24h12hNow');
+  await expect(page.locator('.activity-times')).toHaveText('48h24hNow');
   await expect(page.getByRole('slider')).toHaveCount(0);
   const last = page.locator('.hour-column').last();
   await last.hover();
@@ -151,8 +151,8 @@ test('a slim 24-hour strip exposes custom hover and keyboard hour readings', asy
   const hoveredReading = await page.getByRole('tooltip').textContent();
   await last.click();
   await last.press('ArrowLeft');
-  await expect(page.locator('.hour-column').nth(23)).toBeFocused();
-  await expect(page.locator('.hour-column').nth(23)).toHaveClass(/hour-selected/);
+  await expect(page.locator('.hour-column').nth(47)).toBeFocused();
+  await expect(page.locator('.hour-column').nth(47)).toHaveClass(/hour-selected/);
   await expect(page.getByRole('tooltip')).not.toHaveText(hoveredReading!);
   await page.keyboard.press('Home');
   await expect(page.locator('.hour-column').first()).toBeFocused();
@@ -162,7 +162,7 @@ test('a slim 24-hour strip exposes custom hover and keyboard hour readings', asy
   await page.goto('/?demo=remote');
   await expect(page.getByRole('heading', { name: 'A little attention needed.' })).toBeVisible();
   await expect(page.locator('.hour-active')).toHaveCount(0);
-  await expect(page.locator('.hour-column[aria-label$=": Idle"]')).toHaveCount(25);
+  await expect(page.locator('.hour-column[aria-label$=": Idle"]')).toHaveCount(49);
 });
 
 test('activity buckets cover boundary hours without using legacy or future data', async ({ page }) => {
@@ -182,7 +182,7 @@ test('activity buckets cover boundary hours without using legacy or future data'
       legacyActive: legacy.some((item: { active: boolean }) => item.active),
     };
   });
-  expect(result).toEqual({ shortActive: 2, firstActive: true, lastActive: true, legacyActive: false });
+  expect(result).toEqual({ shortActive: 3, firstActive: true, lastActive: true, legacyActive: false });
 });
 
 
@@ -208,7 +208,7 @@ test('hour tooltips use the device timezone without displaying its name', async 
   const page = await context.newPage();
   await page.clock.install({ time: new Date('2026-10-13T04:30:00Z') });
   await page.goto('/?demo=healthy');
-  await page.clock.runFor(1000);
+  await page.clock.runFor(2500);
   await page.locator('.hour-column').last().hover();
   await expect(page.getByRole('tooltip')).toHaveText('9:30 AM · Idle');
   await context.close();
@@ -229,4 +229,59 @@ test('cancel discards connection edits while save persists them', async ({ page 
   await expect(page.getByRole('heading', { name: 'Saved name', exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Saved name', exact: true })).toBeVisible();
+});
+
+
+test('refresh keeps the previous reading for at least two seconds', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/?demo=tailscale');
+  await page.clock.runFor(2500);
+  await expect(page.locator('.connection-status')).toHaveText('Connection issue');
+  await page.getByRole('button', { name: 'Simulate recovery' }).click();
+  await page.clock.runFor(1900);
+  await expect(page.getByRole('button', { name: 'Checking server' })).toBeDisabled();
+  await expect(page.locator('.connection-status')).toHaveText('Connection issue');
+  await page.clock.runFor(200);
+  await expect(page.locator('.connection-status')).toHaveText('Connected');
+});
+
+test('launch feedback is transient and row help waits two seconds', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/?demo=healthy');
+  await page.clock.runFor(2500);
+  await page.getByRole('button', { name: 'Open Ollama on this device' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Opening Ollama' })).toBeVisible();
+  await page.clock.runFor(5000);
+  await expect(page.getByText('Opening Ollama. Check the system tray.')).toHaveCount(0);
+  await page.getByText('Forwarding', { exact: true }).hover();
+  await page.clock.runFor(1800);
+  await expect(page.locator('.row-tooltip')).toHaveCount(0);
+  await page.clock.runFor(300);
+  await expect(page.locator('.row-tooltip')).toContainText('private route');
+  await page.keyboard.press('Escape');
+  await page.mouse.move(0, 0);
+  await expect(page.locator('.row-tooltip')).toHaveCount(0);
+});
+
+test('host pairing is visible and copyable without showing the stored credential', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/?demo=healthy');
+  await expect(page.getByRole('heading', { name: 'Your server is within reach.' })).toBeVisible();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await expect(page.getByLabel('Pairing code')).toHaveText('SHAM BU42');
+  await page.getByRole('button', { name: 'Copy code', exact: true }).click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('SHAMBU42');
+  await expect(page.getByRole('button', { name: 'Copied', exact: true })).toBeVisible();
+  expect(await page.locator('.connection-panel').innerText()).not.toContain('a'.repeat(64));
+});
+
+test('missing local apps offer install actions without pretending the remote app is installed', async ({ page }) => {
+  await page.goto('/?demo=missing');
+  await expect(page.getByRole('button', { name: 'Install Ollama', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Install Tailscale', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Remote server', exact: true }).click();
+  await page.getByLabel('Ollama URL').fill('http://192.0.2.10:11434');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Install Ollama', exact: true })).toHaveCount(0);
 });

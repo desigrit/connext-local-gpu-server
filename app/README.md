@@ -26,7 +26,7 @@ On the GPU PC, choose **Settings > This computer** and use `http://127.0.0.1:114
 
 On another Windows PC, a Mac, or Android, choose **Remote server** and enter your GPU PC's Tailscale URL, such as `http://<gpu-pc-tailscale-ip>:11434`. Keep Tailscale connected on both devices. The app does not install or sign in to Tailscale.
 
-To see the GPU PC's own Tailscale and forwarding status remotely, [set up the host companion](../docs/host-agent.md) once. In Shambu on that PC, open **Settings > Copy pairing key**. Paste the key into **Settings > Host pairing key** on each remote device. Without pairing, Ollama and GPU allocation checks still work; host-only checks remain explicitly unverified.
+To see the GPU PC's own Tailscale and forwarding status remotely, [set up the host companion](../docs/host-agent.md) once. In Shambu on that PC, open **Settings > Copy code**. Paste the key into **Settings > Host pairing key** on each remote device. Without pairing, Ollama and GPU allocation checks still work; host-only checks remain explicitly unverified.
 
 The single-column dashboard centers in the window when it fits. Readiness leads the page, with an icon-only **Settings** action at the top right. Settings opens in place, with **Cancel** and **Save** at the bottom right. Cancel discards edits; Save stores them on this device and checks the server. Colored dots accompany status words, and **Model library** expands into real installed models and sizes.
 

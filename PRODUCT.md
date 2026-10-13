@@ -16,7 +16,7 @@ People with an Ollama GPU server at home who want to check its readiness from th
 
 ## Product Purpose
 
-One screen answers whether the server can be reached and which part of the connection needs attention. Compact hourly pills show observed Ollama GPU activity over a rolling 24-hour window. Launch, inspect, recover, close.
+One screen answers whether the server can be reached and which part of the connection needs attention. Compact hourly pills show observed Ollama GPU activity over a rolling 48-hour window. Launch, inspect, recover, close.
 
 ## Operating Context
 
@@ -40,7 +40,7 @@ Show Just now for readings younger than two minutes, then whole minutes. Refresh
 
 Four aligned rows use colored state dots beside their words. Ollama uses its bundled mark; Tailscale uses the user's supplied nine-dot PNG with original pixels preserved and its white background blended into the page. Their links open local apps. Only the installed model library expands; its real model names and sizes include the Qwen mark when appropriate. Keep failure guidance visible with Check again, Edit address, and relevant app-launch actions. Private host pairing remains in Settings.
 
-The main server strip shows the Tailscale URL other devices use. GPU usage follows the readings with a GPU icon and Remote GPU device label. The selected Slender direction uses 25 thin vertical bars, one per hourly bucket, with straight sides, rounded ends, and visible gaps. Active hours fill forest green; Idle hours have a pale fill. 24h, 12h, and Now labels mark the rolling window. Activity is an estimate, not an inference request count. Empty and unmonitored hours stay Idle.
+The main server strip shows the Tailscale URL other devices use. GPU usage follows the readings with a GPU icon and Remote GPU device label. The selected Slender direction uses 49 thin vertical bars, one per hourly bucket, with straight sides, rounded ends, and visible gaps. Active hours fill forest green; Idle hours have a pale fill. 48h, 24h, and Now labels mark the rolling window. Activity is an estimate, not an inference request count. Empty and unmonitored hours stay Idle.
 
 Browser development previews provide a clearly labeled synthetic-state selector and simulated recovery. Production builds omit the selector. The [UX state guide](docs/ux-states.md) covers healthy, failure, unverified, stale, and recovery paths.
 

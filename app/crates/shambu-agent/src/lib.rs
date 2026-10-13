@@ -1,12 +1,13 @@
 pub mod config;
 mod history;
+mod pairing;
 
 use axum::{
-    extract::{Request, State},
+    extract::{DefaultBodyLimit, Request, State},
     http::{header, HeaderMap, StatusCode},
     middleware::{self, Next},
     response::{IntoResponse, Response},
-    routing::get,
+    routing::{get, post},
     Json, Router,
 };
 use readiness::{GpuHistory, HealthEnvelope, Settings, Snapshot, PROTOCOL_VERSION};
@@ -72,6 +73,7 @@ impl SnapshotCache {
 struct AgentState {
     key: [u8; 64],
     cache: SnapshotCache,
+    pairing: pairing::Pairing,
 }
 
 fn authorized(headers: &HeaderMap, key: &[u8; 64]) -> bool {
@@ -89,7 +91,7 @@ fn authorized(headers: &HeaderMap, key: &[u8; 64]) -> bool {
 }
 
 async fn authenticate(State(state): State<AgentState>, request: Request, next: Next) -> Response {
-    let mut response = if !authorized(request.headers(), &state.key) {
+    if !authorized(request.headers(), &state.key) {
         (
             StatusCode::UNAUTHORIZED,
             [(header::WWW_AUTHENTICATE, "Bearer")],
@@ -108,6 +110,14 @@ async fn authenticate(State(state): State<AgentState>, request: Request, next: N
             "This endpoint accepts no query or request body.",
         )
             .into_response()
+    } else {
+        next.run(request).await
+    }
+}
+
+async fn private_response(request: Request, next: Next) -> Response {
+    let mut response = if request.headers().contains_key(header::ORIGIN) {
+        (StatusCode::FORBIDDEN, "Use the Shambu app to connect.").into_response()
     } else {
         next.run(request).await
     };
@@ -145,6 +155,7 @@ pub fn router(cache: SnapshotCache, key: &str) -> Result<Router, String> {
     let state = AgentState {
         cache,
         key: fixed_key,
+        pairing: pairing::Pairing::default(),
     };
     Ok(Router::new()
         .route(
@@ -152,7 +163,11 @@ pub fn router(cache: SnapshotCache, key: &str) -> Result<Router, String> {
             get(health).head(|| async { StatusCode::METHOD_NOT_ALLOWED }),
         )
         .fallback(|| async { (StatusCode::NOT_FOUND, "Not found.") })
+        .route("/pairing/new", post(pairing::create))
         .layer(middleware::from_fn_with_state(state.clone(), authenticate))
+        .route("/pairing", post(pairing::exchange))
+        .layer(DefaultBodyLimit::max(512))
+        .layer(middleware::from_fn(private_response))
         .with_state(state))
 }
 

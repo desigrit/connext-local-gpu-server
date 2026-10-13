@@ -21,6 +21,16 @@ This distinction matters. A green Tailscale indicator on your phone does not pro
 
 If the PC is offline, the app can report that it cannot reach the services. It cannot distinguish a power outage from a disconnected network without an independent device observing the PC.
 
+## Download the companion on Windows
+
+The [latest release](https://github.com/desigrit/shambu/releases/latest) includes a Shambu-Host-Windows package for x64 or ARM64. Extract it, open Windows PowerShell as Administrator in that folder, and run:
+
+~~~powershell
+.\Install-ShambuAgent.ps1 -AgentExe .\shambu-agent.exe
+~~~
+
+If the companion is already installed, uninstall its managed task first using the included Uninstall-ShambuAgent.ps1, then install the new executable. The private configuration, credential, and history are preserved. Ollama is not restarted. Keep the existing Tailscale forwards.
+
 ## Build the companion on Windows
 
 From the repository's app directory:
@@ -69,7 +79,7 @@ The installer:
 - Triggers every minute for recovery; IgnoreNew prevents duplicate instances.
 - Waits for an authenticated fresh response, without asking Ollama to run a model.
 
-S4U does not save your Windows password and cannot access encrypted files or authenticated network shares. The task uses local files and checks services on this PC. [Microsoft S4U reference](https://learn.microsoft.com/en-us/windows/win32/taskschd/principal-logontype). It does not change the separate Ollama task, Tailscale, sleep settings, drivers, or updates. Keep the PC awake and Tailscale in unattended mode as described in the [server setup](../README.md).
+S4U does not save your Windows password and cannot access encrypted files or authenticated network shares. The task uses local files and checks services on this PC. [Microsoft S4U reference](https://learn.microsoft.com/en-us/windows/win32/taskschd/principal-logontype). It does not change the separate Ollama task, Tailscale, sleep settings, drivers, or updates. Keep the PC awake and Tailscale in unattended mode as described in the [server setup](server-setup.md).
 
 When updating the companion, uninstall its managed task, rebuild, then install again. Its pairing key is preserved. The installation check confirms the task starts in its configured account. Test a full reboot separately before relying on it while traveling.
 
@@ -93,14 +103,14 @@ The setup uses Tailscale to encrypt network traffic. The local HTTP listener is 
 
 ## Link a remote Shambu app
 
-1. Open Shambu on the GPU PC. In Connection settings, use **Copy pairing key**.
+1. Open Shambu on the GPU PC. In Settings, copy the visible eight-character pairing code.
 2. Open Shambu on the Mac, Android device, or other Windows PC.
 3. Choose Remote server and enter the GPU PC's Tailscale Ollama base URL.
-4. Paste the pairing key into the host-details field and save.
+4. Enter that code in the Pairing code field and save. A code works once and expires after five minutes; use New code to pair another device.
 
 Use your own Tailscale address, not localhost. The companion URL is derived from that same address on port 11435. An optional custom URL can use another port or HTTP/HTTPS scheme, but must use the same hostname or IP. Redirects are refused, so a server cannot redirect the credential elsewhere.
 
-The pairing key is a read-only credential. Copy it only to devices you trust. Shambu stores connection settings on each device and does not upload them to GitHub or a cloud service. Clipboard history and cross-device clipboard sync may retain copied secrets; clear the clipboard after pairing if needed.
+The short code exchanges for a strong credential that Shambu saves privately. The code has five attempts before it must be replaced on the GPU PC. Pair only devices you trust. Shambu stores connection settings on each device and does not upload them to GitHub or a cloud service. Clipboard history and cross-device clipboard sync may retain copied secrets; clear the clipboard after pairing if needed.
 
 ## What the companion proves
 
@@ -118,7 +128,7 @@ An idle GPU is reported as idle. A visible driver alone does not prove a future 
 
 ## Estimated inference activity during the last 48 hours
 
-The GPU usage section shows a rolling 24-hour window as 25 hourly pills, including partial hours at both ends. A filled pill marks an hour with observed estimated Ollama GPU activity. Every qualifying sample marks its UTC hour, so continuous activity fills every hour it crosses. A fixed read-only NVIDIA utilization query runs every five seconds, independently of the readiness checks. A sample counts as active only when at least one GPU has 5% utilization and a cached Ollama running-model response shows a model allocated to GPU memory. That model evidence must be no more than 15 seconds old. A model merely staying loaded does not create activity.
+The GPU usage section shows a rolling 48-hour window as 49 slender hourly bars, including partial hours at both ends. A filled pill marks an hour with observed estimated Ollama GPU activity. Every qualifying sample marks its UTC hour, so continuous activity fills every hour it crosses. A fixed read-only NVIDIA utilization query runs every five seconds, independently of the readiness checks. A sample counts as active only when at least one GPU has 5% utilization and a cached Ollama running-model response shows a model allocated to GPU memory. That model evidence must be no more than 15 seconds old. A model merely staying loaded does not create activity.
 
 Activity begins a new burst on the first observed active sample, or when at least 60 seconds have elapsed since the previous qualifying active sample. Brief quiet gaps stay in the same burst, including bursts that cross an hour boundary. Burst-start timestamps are retained separately for counts; the hourly pills use all hours with qualifying samples.
 
@@ -134,7 +144,7 @@ The host app displays and copies the advertised Tailscale address and matching S
 
 ## Protocol and storage
 
-The only resource is authenticated **GET /health**. Other paths and methods are rejected. There is no shell, control endpoint, model invocation endpoint, or browser CORS permission.
+Host readings use authenticated **GET /health**. Authenticated **POST /pairing/new** creates a short-lived code; **POST /pairing** redeems it once for the existing strong credential. Responses are never cached. Browser Origin headers are refused, pairing bodies are limited to 512 bytes, and five failed code attempts lock that code until it is replaced. There is no shell, control endpoint, model invocation endpoint, or browser CORS permission.
 
 The bearer credential uses 32 bytes from the operating system's secure random source, encoded as 64 lowercase hexadecimal characters. Equal-length credential comparisons use constant-time comparison. The agent prints only generic lifecycle messages, never the credential, probe payload, or local identity.
 
