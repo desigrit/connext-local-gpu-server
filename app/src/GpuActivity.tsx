@@ -2,6 +2,7 @@ import { useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEven
 import type { GpuHistory } from './types';
 import { Gpu } from 'lucide-react';
 import { STALE_AFTER_MS } from './timing';
+import { gpuBarVariants, type GpuBarVariant } from './gpuBarVariants';
 
 const HOUR = 60 * 60 * 1000;
 const fullTime = (time: number) => new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' }).format(time);
@@ -23,7 +24,8 @@ export function activityHours(history: GpuHistory | null | undefined, now: numbe
   });
 }
 
-export default function GpuActivity({ history, gpuName, now, stale }: { history?: GpuHistory | null; gpuName?: string | null; now: number; stale: boolean }) {
+export default function GpuActivity({ history, gpuName, now, stale, variant = 'slender', compact = false }: { history?: GpuHistory | null; gpuName?: string | null; now: number; stale: boolean; variant?: GpuBarVariant; compact?: boolean }) {
+  const marks = gpuBarVariants.find(item => item.id === variant)?.marks ?? 1;
   const id = useId().replaceAll(':', '');
   const [hovered, setHovered] = useState<number | null>(null);
   const [focused, setFocused] = useState<number | null>(null);
@@ -39,10 +41,10 @@ export default function GpuActivity({ history, gpuName, now, stale }: { history?
     if (event.key === 'Escape') { setHovered(null); setFocused(null); }
   }
   const deviceName = gpuName?.replace(/^NVIDIA\s+/i, 'Nvidia ').replace(/^(Quadro|GeForce|RTX|Tesla)\b/i, 'Nvidia $1');
-  return <section className={'activity-strip' + (earlier ? ' activity-old' : '')} aria-label="GPU usage over the last 24 hours">
-    <div className="status-line activity-heading"><Gpu className="row-icon" size={19} strokeWidth={1.65} aria-hidden="true" /><h2 className="row-title">GPU usage</h2></div>
+  return <section className={'activity-strip bars-' + variant + (earlier ? ' activity-old' : '')} aria-label="GPU usage over the last 24 hours">
+    {!compact && <div className="status-line activity-heading"><Gpu className="row-icon" size={19} strokeWidth={1.65} aria-hidden="true" /><h2 className="row-title">GPU usage</h2></div>}
     <div className="activity-body">
-    <p className="gpu-name">{deviceName ? 'Remote GPU: ' + deviceName : 'Remote GPU: Details not linked'}</p>
+    {!compact && <p className="gpu-name">{deviceName ? 'Remote GPU: ' + deviceName : 'Remote GPU: Details not linked'}</p>}
     <p className="sr-only" id={id + '-help'}>Observed GPU activity while an Ollama model was in GPU memory. Other GPU work can contribute. Empty and unmonitored hours are Idle. Use left and right arrows to inspect hours.{earlier ? ' These are earlier readings.' : ''}</p>
     <div className="hour-track" onPointerLeave={() => setHovered(null)}>
       <div className="hour-columns" role="group" aria-label="Hourly GPU activity" aria-describedby={id + '-help'}>
@@ -54,7 +56,9 @@ export default function GpuActivity({ history, gpuName, now, stale }: { history?
           onFocus={() => { setFocused(index); setTabStop(index); }}
           onBlur={() => setFocused(null)}
           onClick={() => { setFocused(index); setTabStop(index); }}
-          onKeyDown={event => navigate(event, index)} />)}
+          onKeyDown={event => navigate(event, index)}>
+          <span className="hour-marks" aria-hidden="true">{Array.from({ length: marks }, (_, mark) => <span className="hour-mark" key={mark} />)}</span>
+        </button>)}
       </div>
       {chosen && <div className="hour-tooltip" id={id + '-tooltip'} role="tooltip" style={{ '--position': ((selected! + .5) / hours.length * 100) + '%' } as CSSProperties}>
         {tooltipTime(chosen.start)} · <strong>{chosen.active ? 'Active' : 'Idle'}</strong>

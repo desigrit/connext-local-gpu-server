@@ -10,7 +10,7 @@ The PC runs the model. Your other devices send requests and receive results. App
 
 A single-screen app for Windows, Mac, and Android checks Ollama, Tailscale, forwarding, GPU allocation, and installed models. Windows and the other native backends use Rust through Tauri. Checks never load a model.
 
-The centered dashboard begins with the R2-D2 icon and **Shambu**, with **Settings** at the right and the native title bar preserved. Combined connection status, age, and refresh sit under the readiness heading. Green **Connected** requires verified current evidence across the connection and readiness checks; idle GPU use is healthy. Colored row dots and visible recovery actions help identify the next step.
+The centered dashboard starts with readiness and an icon-only Settings action at the top right. Combined connection status, age, and refresh sit under the heading. Green **Connected** requires verified current evidence across the connection and readiness checks; idle GPU use is healthy. Colored row dots and visible recovery actions help identify the next step.
 
 Checks refresh every five minutes while the app is visible and Settings is closed. **GPU usage** identifies the server GPU and shows 25 hourly pills across the rolling 24-hour window, with Active or Idle details on hover, touch, or keyboard focus.
 

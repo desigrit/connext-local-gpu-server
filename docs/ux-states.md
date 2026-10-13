@@ -4,7 +4,7 @@
 
 For a live development preview, run the app's Vite development server and open its local URL with ?demo=healthy. The preview selector covers all the states below. **Simulate recovery** changes the sample result to healthy and runs a preview check. These controls never appear in the installed app.
 
-The page starts with the centered Shambu name and existing R2-D2 icon, with Settings at the right. The installed app retains its native title bar. Settings explains which GPU server this device checks.
+The page starts with readiness and an icon-only Settings action at the top right. The native title bar carries the app identity. Settings explains which server this device checks and ends with Cancel and Save on the right. Cancel discards edits; Save stores them and checks.
 
 The combined summary uses green **Connected** only when current Ollama, Tailscale, forwarding, host evidence, GPU readiness, and model-library checks support it. GPU Idle is acceptable. Before the first result it reads **Checking** or **Not checked**. A fresh previous failure remains visible during refresh.
 
@@ -25,7 +25,7 @@ Launch links open the installed app on **this device**. See [native app links](n
 
 The last check reads **Just now** for less than two minutes, then **2 minutes ago**, **3 minutes ago**, and so on. Automatic checks run every five minutes while the app is visible and Settings is closed. A failed refresh or a reading at least five minutes and thirty seconds old marks existing evidence stale.
 
-The **GPU usage** section shares the status-row icon and heading style. It identifies the device with **Remote GPU: Nvidia Example GPU**, or **Remote GPU: Details not linked**. Its 25 vertical hourly pills cover the rolling 24-hour window, including the partial ends, with **24h**, **12h**, and **Now** labels below. Pills are filled only where qualifying GPU activity was observed. Hover, tap, or use the arrow keys for a tooltip such as **9 AM · Idle**. Hours use the device's local time zone, including daylight saving, without displaying the zone name. Minute offsets are retained where a local zone is offset by a fraction of an hour.
+The **GPU usage** section shares the row icon and heading style. It identifies **Remote GPU: Nvidia Example GPU**, or **Remote GPU: Details not linked**. Its 25 Slender bars cover the rolling 24-hour window, with **24h**, **12h**, and **Now** below. Active hours use a forest-green fill; Idle hours use a pale fill. Hover, tap, or use arrow keys for a tooltip such as **9 AM · Idle**, in the device local time zone.
 
 ## Ollama offline
 

@@ -70,11 +70,6 @@ typography:
     fontFamily: "Manrope Variable, Segoe UI, sans-serif"
     fontSize: "11px"
     fontWeight: 500
-  brand:
-    fontFamily: "Manrope Variable, Segoe UI, sans-serif"
-    fontSize: "18px"
-    fontWeight: 750
-    letterSpacing: "-0.3px"
   activity-times:
     fontFamily: "Manrope Variable, Segoe UI, sans-serif"
     fontSize: "10px"
@@ -88,8 +83,8 @@ rounded:
   dot: "50%"
   app-link: "4px"
   text-action: "3px"
-  hour: "4px"
-  pill: "999px"
+  hour: "2px"
+  pill: "2px"
 spacing:
   "2": "2px"
   "4": "4px"
@@ -177,7 +172,7 @@ components:
   hour-button:
     backgroundColor: "transparent"
     rounded: "{rounded.hour}"
-    height: "36px"
+    height: "44px"
     padding: "3px 0"
   state-dot:
     backgroundColor: "currentColor"
@@ -203,10 +198,10 @@ components:
     height: "36px"
     padding: "0"
   hour-pill:
-    backgroundColor: "{colors.surface}"
+    backgroundColor: "#d5dfce"
     rounded: "{rounded.pill}"
     height: "30px"
-    width: "100%"
+    width: "6px"
   hour-pill-active:
     backgroundColor: "{colors.activity-active}"
   hour-pill-selected:
@@ -218,17 +213,7 @@ components:
   activity-times:
     textColor: "{colors.muted}"
     typography: "{typography.activity-times}"
-    width: "min(100%, 600px)"
-  brand-header:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink}"
-  brand-identity:
-    textColor: "{colors.ink}"
-    typography: "{typography.brand}"
-  brand-icon:
-    size: "48px"
-  brand-icon-compact:
-    size: "42px"
+    width: "min(100%, 222px)"
 ---
 
 # Design System: Shambu
@@ -237,14 +222,14 @@ components:
 
 **Creative North Star: "The Pocket Companion"**
 
-Shambu is a quiet status instrument for a personal GPU server. A centered brand header leads into a readiness sentence, its combined connection status, an external address, and four aligned readings. Chalk surfaces, green ink, and fine rules keep the interface light.
+Shambu is a quiet status instrument for a personal GPU server. A readiness sentence and connection age lead into an external address, four aligned readings, and thin hourly bars. Chalk surfaces, green ink, and fine rules keep the interface light.
 
-The existing R2-D2 artwork and Shambu name identify the page, with Settings at the right. App marks identify local launch links. A GPU usage section follows the readings with a detected-device label and compact hourly pills.
+The native R2-D2 icon carries the product identity. Readiness and an icon-only Settings action lead the main viewport. App marks identify local launch links, and GPU usage closes the readings with slender hourly bars.
 
 **Key Characteristics:**
 
 - A light interface centered horizontally and vertically when space allows.
-- A centered Shambu identity above readiness and connection freshness.
+- A readiness heading and connection freshness with icon-only Settings at the right.
 - Four continuous status rows with colored dots and visible recovery guidance.
 - App launch marks, real installed models, and a compact GPU usage section.
 - The existing R2-D2 artwork in the page identity and native app icon.
@@ -322,11 +307,11 @@ The centered frame supports a minimum CSS viewport width (320px). The root fills
 
 The native desktop window defaults to a centered landscape size (1120px by 760px), adjusted to the screen's usable area and scale. At the desktop breakpoint (800px), the frame expands (1000px maximum width), with equal top and bottom padding (36px) and horizontal padding (56px). The page and supported native title-bar surface share chalk. See the [native launcher and window guide](docs/native-launchers.md) for platform differences.
 
-The dashboard keeps one column at every width. A three-track brand header centers the identity and places Settings at the right. Its bottom margin and the readiness section's bottom margin match (20px normally, 24px compact). The operating-system title bar and window controls remain intact above the page.
+The dashboard keeps one column at every width. Readiness leads with an icon-only Settings action at the top right. The header bottom margin is 20px normally and 24px compact. The operating-system title bar carries the app identity.
 
-The full-width status list follows the endpoint with a top margin (20px). GPU usage continues the row structure beneath any recovery or host-link guidance. Its body aligns with the row text (33px left inset, 30px compact), ends with bottom padding (16px), and limits the history and time labels to a shared width (600px maximum). The device name has a bottom margin (12px).
+The full-width status list follows the endpoint with a 20px margin. GPU usage continues the row structure, with a 33px text inset (30px compact) and 16px bottom padding. The selected Slender bar and aligned range labels are 222px wide, capped to the available width. The device label has a 12px bottom margin.
 
-At the compact breakpoint (480px), side padding becomes (22px), the header gap tightens (12px), and Settings retains its visible label. At the narrow breakpoint (359px), side padding reduces again (14px).
+At 480px, side padding becomes 22px and the header gap becomes 12px. Settings keeps its 44px icon target and accessible name. At 359px, side padding reduces to 14px.
 
 Status rows have a minimum height (62px) normally, (56px) on desktop, and (60px) on compact screens. Main buttons, inputs, and icon controls have a minimum target (44px); server-location choices have a minimum height (40px). Text recovery actions use a compact target height (36px). Hour buttons are equal-width cells with a fixed height (36px) and one shared keyboard entry point.
 
@@ -340,7 +325,7 @@ The temporary hour tooltip uses green ink with chalk text and a small shadow (`0
 
 ## Shapes
 
-Gently rounded corners distinguish fields, controls, and containers. Status dots are circles (6px). Hour pills are vertical marks (30px height) with fully rounded ends (999px radius) and a thin edge (1px). Each pill sits inside a transparent rounded button (4px radius). The hour tooltip uses the field radius (7px).
+Gently rounded corners distinguish fields and controls. Status dots are 6px circles. The selected Slender bars are 6px by 30px, with straight sides and 2px rounded ends. Transparent hour buttons have a 44px height. The tooltip radius is 7px.
 
 State words remain unboxed. App launch links have a small corner radius (4px), and text recovery actions use a smaller radius (3px).
 
@@ -350,7 +335,7 @@ Most operational symbols use Lucide SVG linework. Refresh uses Fluent `ArrowCloc
 
 ### Brand Header, Settings, and Freshness
 
-The centered page identity combines the existing R2-D2 image (48px square normally, 42px compact) with Shambu. Settings sits at the right and retains its icon and visible label. The native title bar remains above this page header.
+The readiness heading leads the page. Settings is an icon-only action at the top right with a 44px target and accessible name. The product name and icon appear only in the native app identity.
 
 The readiness sentence remains a heading with polite live status announcements. Settings opens in the document flow and explains its purpose: **Choose which GPU server this device checks.** Closing it returns focus to the action. The selected action uses quiet sage.
 
@@ -364,7 +349,7 @@ During a check, the refresh icon rotates (0.9s, linear). Reduced-motion preferen
 
 ### Buttons and Fields
 
-**Save & check** uses green ink, chalk text, and rounded control corners. Hover changes its fill over a short transition (140ms, ease-out). Quiet actions become ink on quiet sage; pairing adds the field-edge border. Disabled buttons reduce opacity (0.5) and use a default cursor.
+**Save** stores connection settings and immediately checks. It uses green ink, chalk text, and rounded corners. **Cancel** discards edits and returns focus to Settings. The actions align at the panel bottom right. Disabled controls remain visibly muted.
 
 Fields have visible labels, chalk fill, a fine field-edge border, and a minimum height (44px). Validation connects its message to the relevant field, focuses that field, and announces the message as an alert. Pairing remains within Settings, with the host key entered in a password field on remote devices.
 
@@ -394,7 +379,7 @@ Hover affects the summary, and opening it rotates the chevron (180 degrees over 
 
 The section begins with the GPU icon and **GPU usage**, using the same title style and alignment as the status rows. Beneath it, show **Remote GPU: Nvidia Example GPU** for recognized NVIDIA devices, or **Remote GPU: Details not linked** when unavailable. The section ends with the same fine divider as the readings.
 
-Twenty-five equal-width cells cover the rolling 24-hour window, including partial hours at both ends. The grid has a small gap (2px) and maximum width (600px). Each cell contains a vertical pill (30px high) within a button (36px high). The aligned **24h**, **12h**, and **Now** labels sit below the bar.
+Twenty-five cells cover the rolling 24-hour window, including partial end hours. The selected Slender bars are 6px wide and 30px high with a 3px gap. Pale idle bars and filled forest-green active bars retain straight sides. The aligned **24h**, **12h**, and **Now** labels sit below.
 
 A filled pill means GPU use of at least 5% was observed while Ollama had a model in GPU memory. This is an estimate: other GPU work can contribute, and sampling can miss short activity. Empty and unmonitored hours display **Idle**.
 
@@ -418,16 +403,16 @@ The product name remains Shambu. The larger R2-D2 foreground and original forest
 
 - **Do** use the implemented palette and self-hosted Manrope.
 - **Do** keep connection state, age, and refresh directly under the readiness heading.
-- **Do** pair status dots with words and keep the Settings label visible.
+- **Do** pair status dots with words and name the Settings icon for assistive technology.
 - **Do** keep failure guidance and recovery actions visible.
 - **Do** show real model names and preserve the bundled app and Qwen marks.
 - **Do** preserve hour inspection, keyboard focus, and reduced-motion behavior.
-- **Do** reuse the active R2-D2 artwork in the centered Shambu header and native icon.
+- **Do** keep the active R2-D2 artwork in the native icon.
 - **Do** use generic examples and keep personal connection details out of public artifacts.
 
 ### Don't:
 
-- **Don't** add decorative hero artwork around the centered Shambu identity.
+- **Don't** add a repeated product label or mascot to the main viewport.
 - **Don't** give ordinary status rows empty disclosures or hide recovery guidance behind a click.
 - **Don't** turn the readiness list into a grid of separate cards.
 - **Don't** describe the binary history as request counts or exact inference attribution.

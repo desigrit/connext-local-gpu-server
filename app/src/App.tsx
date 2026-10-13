@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, Check as CheckIcon, CircleHelp, Copy, Monitor, Settings2, TriangleAlert, X } from 'lucide-react';
+import { ArrowUpRight, Check as CheckIcon, CircleHelp, Copy, Monitor, Settings2, TriangleAlert } from 'lucide-react';
 import { ArrowClockwise20Regular } from '@fluentui/react-icons';
 import { android, checkReadiness, copyHostKey, copyText, defaultSettings, demo, loadSettings, native, saveSettings, validateSettings, type ConnectionIssue } from './bridge';
 import GpuActivity from './GpuActivity';
 import StatusRow from './StatusRow';
-import shambuIcon from './assets/shambu-icon.png';
 import { getReadinessStatus } from './readiness';
+import { gpuBarVariant } from './gpuBarVariants';
 import { CHECK_INTERVAL_MS, STALE_AFTER_MS, checkedAge } from './timing';
 import { PreviewControls } from './PreviewControls';
 import type { Check, Mode, Settings, Snapshot } from './types';
@@ -135,13 +135,7 @@ export default function App() {
   }
 
   return <main className="app-shell">
-    <header className="brand-header">
-      <div className="app-identity"><img src={shambuIcon} width="48" height="48" alt="" /><span>Shambu</span></div>
-      <button ref={settingsButton} className={`quiet-button connection-button ${editing ? 'selected' : ''}`} onClick={() => { setDraft(settings ?? defaultSettings); setEditing(value => !value); setFormError(null); }} aria-label="Settings" aria-expanded={editing} aria-controls="connection-settings">
-        <Settings2 size={16} aria-hidden="true" /><span>Settings</span>
-      </button>
-    </header>
-    <section className="app-header" aria-labelledby="readiness-heading">
+    <header className="app-header">
       <div className="readiness-message">
         <h1 id="readiness-heading" aria-live="polite" aria-atomic="true">{headline}</h1>
         <div className="freshness">
@@ -150,12 +144,15 @@ export default function App() {
           {(!native && !demo) ? (import.meta.env.DEV && <a href="?demo=healthy">Preview</a>) : <button className="icon-button refresh-button" onClick={() => settings && void runCheck(settings)} disabled={busy || !settings?.endpoint || saving} aria-label={busy ? 'Checking server' : 'Refresh status'}><ArrowClockwise20Regular className={busy ? 'spin' : ''} aria-hidden="true" /></button>}
         </div>
       </div>
-    </section>
+      <button ref={settingsButton} className={`icon-button connection-button ${editing ? 'selected' : ''}`} onClick={() => { setDraft(settings ?? defaultSettings); setEditing(value => !value); setFormError(null); }} aria-label="Settings" aria-expanded={editing} aria-controls="connection-settings">
+        <Settings2 size={18} aria-hidden="true" />
+      </button>
+    </header>
 
     {demo && <PreviewControls onRecover={() => settings && void runCheck(settings)} busy={busy} />}
 
     {editing && <section id="connection-settings" className="connection-panel" aria-labelledby="connection-heading">
-      <div className="panel-heading"><h2 id="connection-heading">Settings</h2><button className="icon-button" onClick={closeSettings} aria-label="Close settings"><X size={18} /></button></div>
+      <div className="panel-heading"><h2 id="connection-heading">Settings</h2></div>
       <p className="settings-purpose">Choose which GPU server this device checks.</p>
       <form onSubmit={submit} noValidate>
         <fieldset className="mode-control"><legend className="sr-only">Server location</legend>
@@ -181,7 +178,10 @@ export default function App() {
           <span className="sr-only" role="status">{keyCopied ? 'Host pairing key copied to clipboard' : ''}</span>
         </div>}
         {formError && <p id="connection-error" className="form-error" role="alert">{formError.message}</p>}
-        <button type="submit" className="primary-button save-button" disabled={saving || busy || (!native && !demo)}>{saving ? 'Saving…' : 'Save & check'}<ArrowUpRight size={16} /></button>
+        <div className="settings-actions">
+          <button type="button" className="quiet-button cancel-button" onClick={closeSettings} disabled={saving}>Cancel</button>
+          <button type="submit" className="primary-button save-button" disabled={saving || busy || (!native && !demo)}>{saving ? 'Saving…' : 'Save'}</button>
+        </div>
       </form>
     </section>}
 
@@ -205,7 +205,7 @@ export default function App() {
     </button>}
     {gpuCheck && ['warning', 'error'].includes(gpuCheck.state) && <div className={'gpu-warning state-' + gpuCheck.state}><strong>{gpuCheck.label}</strong><p>{gpuCheck.help || gpuCheck.detail}</p></div>}
     </div>
-    <GpuActivity history={snapshot?.gpuHistory} gpuName={snapshot?.gpuName} now={now} stale={stale} />
+    <GpuActivity history={snapshot?.gpuHistory} gpuName={snapshot?.gpuName} now={now} stale={stale} variant={demo ? gpuBarVariant(new URLSearchParams(location.search).get("bars")) : "slender"} />
     </div>
 
 

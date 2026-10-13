@@ -19,8 +19,12 @@ export function PreviewControls({ onRecover, busy }: { onRecover: () => void; bu
     <label className="sr-only" htmlFor="preview-state">Preview state</label>
     <select id="preview-state" value={scenario} onChange={event => {
       sessionStorage.removeItem('shambu-demo-settings');
-      location.search = '?demo=' + encodeURIComponent(event.target.value);
+      const next = new URL(location.href);
+      next.searchParams.set('demo', event.target.value);
+      next.searchParams.delete('recovered');
+      location.href = next.toString();
     }}>{scenarios.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
+    <a href="?bars=compare">Compare bars</a>
     {scenario !== 'healthy' && <button className="text-action" onClick={recover} disabled={busy}>Simulate recovery</button>}
     {recovered && <span role="status">Recovery simulated.</span>}
   </aside>;

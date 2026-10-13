@@ -28,7 +28,7 @@ On another Windows PC, a Mac, or Android, choose **Remote server** and enter you
 
 To see the GPU PC's own Tailscale and forwarding status remotely, [set up the host companion](../docs/host-agent.md) once. In Shambu on that PC, open **Settings > Copy pairing key**. Paste the key into **Settings > Host pairing key** on each remote device. Without pairing, Ollama and GPU allocation checks still work; host-only checks remain explicitly unverified.
 
-The single-column dashboard centers in the window when it fits. A page header centers the existing R2-D2 icon and **Shambu**, with **Settings** at the right. The operating-system title bar remains intact. Settings explains which GPU server this device checks. Colored dots accompany the status words, and **Model library** expands into real installed model names and sizes, with a Qwen mark for Qwen models.
+The single-column dashboard centers in the window when it fits. Readiness leads the page, with an icon-only **Settings** action at the top right. Settings opens in place, with **Cancel** and **Save** at the bottom right. Cancel discards edits; Save stores them on this device and checks the server. Colored dots accompany status words, and **Model library** expands into real installed models and sizes.
 
 Failed checks show their evidence, recovery advice, and **Check again** directly. Ollama failures also offer **Edit address**. Stale readings offer **Refresh now**; an app-wide check error offers **Try again**. See the [UX state guide](../docs/ux-states.md) for each state and recovery path.
 
@@ -44,7 +44,7 @@ Windows and macOS can open installed Ollama and Tailscale. Android offers Tailsc
 
 The **GPU usage** section follows the status rows. A GPU icon and heading lead into **Remote GPU: Nvidia Example GPU**, or **Remote GPU: Details not linked** when the device name is unavailable.
 
-The bar shows a rolling **24-hour** window, with one vertical pill per hourly bucket. A filled pill means activity was observed in that hour; an outlined pill is Idle. The window includes partial hours at either end, so it displays 25 pills. **24h**, **12h**, and **Now** labels mark the range.
+The bar shows a rolling **24-hour** window, with one slender vertical bar per hourly bucket. Active hours are forest green, while Idle hours use a pale fill. Straight sides and gently rounded ends keep each bar distinct, with a small visible gap. Partial hours at either end produce 25 bars. **24h**, **12h**, and **Now** labels mark the range.
 
 Hover, tap, or focus a pill to inspect its hour in a custom tooltip, such as **9 AM · Idle**. Times use your device's local zone without displaying an abbreviation. Tab enters the strip at the latest or last inspected hour. Left and right arrows move between hours, Home and End move to the first and last, and Escape closes the tooltip. Empty and unmonitored hours display **Idle**.
 
@@ -138,3 +138,5 @@ Choose **Simulate recovery** to replace a failure scenario with healthy sample r
 The app source lives in `src/`, the native window and settings bridge in `src-tauri/`, and the platform-independent Rust probes in `crates/readiness/`. Brand text and artwork references are centralized in `src/brand.ts`.
 
 Artwork sources and platform-icon provenance are recorded in the [branding notes](../docs/branding.md).
+
+The development-only [bar comparison](http://127.0.0.1:1420/?bars=compare) shows six options with identical sample hours. Each can be previewed in the dashboard. Slender is the selected app direction.
