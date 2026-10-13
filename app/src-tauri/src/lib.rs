@@ -1,6 +1,9 @@
 mod launcher;
 #[cfg(desktop)]
 mod native_window;
+#[cfg(desktop)]
+mod tray;
+#[cfg(desktop)]
 mod updates;
 
 use readiness::{Settings, Snapshot};
@@ -153,6 +156,10 @@ async fn open_companion_app(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default();
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_single_instance::init(|app, _, _| {
+        tray::show_window(app);
+    }));
     let builder = builder.plugin(
         tauri_plugin_opener::Builder::new()
             .open_js_links_on_click(false)
@@ -160,20 +167,26 @@ pub fn run() {
     );
     #[cfg(desktop)]
     let builder = builder
-        .on_window_event(native_window::on_window_event)
+        .on_window_event(|window, event| {
+            native_window::on_window_event(window, event);
+            tray::on_window_event(window, event);
+        })
         .plugin(
             tauri_plugin_updater::Builder::new()
                 .pubkey(updates::PUBLIC_KEY.trim())
                 .build(),
         );
-    #[cfg(target_os = "android")]
-    let builder = builder.plugin(updates::plugin());
+    #[cfg(desktop)]
+    let builder = builder.manage(updates::UpdateState::default());
     builder
-        .manage(updates::UpdateState::default())
         .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
             #[cfg(desktop)]
-            native_window::configure(app.handle());
+            {
+                native_window::configure(app.handle());
+                // A missing system tray must never stop the main app from opening.
+                let _ = tray::setup(app.handle());
+            }
             let config_path = app.path().app_config_dir()?.join("connection.json");
             app.manage(AppState {
                 config_path,
@@ -189,10 +202,19 @@ pub fn run() {
             open_companion_app,
             companion_availability,
             install_companion_app,
+            #[cfg(desktop)]
             updates::check_app_update,
+            #[cfg(desktop)]
             updates::download_app_update,
+            #[cfg(desktop)]
             updates::install_app_update
         ])
-        .run(tauri::generate_context!())
-        .expect("Could not start Shambu");
+        .build(tauri::generate_context!())
+        .expect("Could not start Shambu")
+        .run(|_app, _event| {
+            #[cfg(target_os = "macos")]
+            if matches!(_event, tauri::RunEvent::Reopen { .. }) {
+                tray::show_window(_app);
+            }
+        });
 }

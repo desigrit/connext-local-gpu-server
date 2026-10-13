@@ -1,6 +1,6 @@
 # App updates
 
-Shambu shows its installed version at the bottom left. A small **Update** pill appears when a newer release is available. Click it to download, then choose **Restart** on Windows or Mac. Android shows **Install** and asks for confirmation through its package installer. Canceling that confirmation leaves the update ready to try again.
+Shambu shows its installed version at the bottom left. A small **Update** pill appears when a newer release is available. Click it to download, then choose **Restart** on Windows or Mac. Android shows only its version number; its updates are handled by Google Play.
 
 Checks run at launch and every six hours while the app is visible. A failed check retries after fifteen minutes, or when the device reconnects. Downloads start only when requested. Failed downloads offer **Retry**. Failed installations keep the verified download ready for another attempt. Closing Shambu discards an uninstalled download.
 
@@ -12,7 +12,7 @@ The regular release has four downloads: Windows x64, Windows ARM64, Apple Silico
 
 1. Bump the app version in the npm package and lockfile, Tauri configuration, and Shambu's Cargo package and lockfile. Add release notes, run the checks, and dispatch the app workflow with `release=true`.
 2. Download all four platform artifacts and the Mac updater artifact into one local staging directory. Sign the Android APK using the existing Android release key.
-3. Sign the updater files locally, using the original updater key:
+3. Sign the three desktop updater files locally, using the original updater key:
 
    ```sh
    cd app
@@ -25,7 +25,7 @@ The regular release has four downloads: Windows x64, Windows ARM64, Apple Silico
 
 The updater private key remains in ignored, restricted local storage. Do not upload it to GitHub or CI. The public key is in `app/src-tauri/updater.pub` and the updater configuration. Back up the private key securely; existing installations trust that key for future updates.
 
-Downloads use HTTPS and only this repository's release URLs. Tauri verifies desktop packages; the Android bridge performs the same Minisign verification before passing the APK to the system installer. Signed version binding prevents a manifest from relabeling an older package as a newer update. Android also enforces its package-signing identity. Failed verification never enables installation. See the [Tauri updater documentation](https://v2.tauri.app/plugin/updater/).
+Downloads use HTTPS and only this repository's release URLs. Tauri verifies desktop packages before installation. Signed version binding prevents a manifest from relabeling an older package as a newer update. Failed verification never enables installation. See the [Tauri updater documentation](https://v2.tauri.app/plugin/updater/).
 
 ## Development previews
 

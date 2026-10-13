@@ -22,7 +22,6 @@ const artifacts = {
   'windows-x86_64': 'Shambu-Windows-x64-Setup.exe',
   'windows-aarch64': 'Shambu-Windows-ARM64-Setup.exe',
   'darwin-aarch64': macName,
-  'android-aarch64': 'Shambu-Android-arm64.apk',
 };
 const cli = fileURLToPath(new URL('../node_modules/@tauri-apps/cli/tauri.js', import.meta.url));
 const platforms = {};

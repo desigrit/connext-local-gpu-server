@@ -17,7 +17,7 @@ export function UpdateFooter() {
   phaseRef.current = phase;
 
   useEffect(() => {
-    if (!native && !demo) return;
+    if (android || (!native && !demo)) return;
     let disposed = false;
     let checking = false;
     let nextCheck = 0;
@@ -73,8 +73,7 @@ export function UpdateFooter() {
     locked.current = true; setPhase('installing'); setError('');
     try {
       await installAppUpdate();
-      // Android owns the confirmation screen; keep Install available if it is dismissed.
-      if (android || !native) setPhase('ready');
+      if (!native) setPhase('ready');
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : String(failure));
       setPhase('install-error');
@@ -82,7 +81,7 @@ export function UpdateFooter() {
   }, []);
 
   const ready = ['ready', 'installing', 'install-error'].includes(phase);
-  const action = ready ? (android ? 'Install' : 'Restart') : phase === 'download-error' ? 'Retry' : 'Update';
+  const action = ready ? 'Restart' : phase === 'download-error' ? 'Retry' : 'Update';
   return <footer className="version-footer" aria-label="App version and updates">
     <span className="app-version">v{__APP_VERSION__}</span>
     {update && <div className="update-control">
@@ -98,10 +97,10 @@ export function UpdateFooter() {
         onClick={() => void (ready ? install() : download())} disabled={phase === 'installing'}
         aria-label={ready ? `${action} to update to ${update.version}` : `${action} to ${update.version}`}
         aria-describedby={error ? 'update-error' : undefined}>
-        {phase === 'installing' ? (android ? 'Opening…' : 'Restarting…') : action}
+        {phase === 'installing' ? 'Restarting…' : action}
       </button>}
       {error && <p className="update-error" id="update-error" role="alert">{error}</p>}
     </div>}
-    <span className="sr-only" role="status" aria-live="polite">{phase === 'available' ? `Shambu ${update?.version} is available.` : phase === 'ready' ? `Update ready. ${android ? 'Install' : 'Restart'} when you’re ready.` : phase === 'downloading' ? 'Downloading update.' : ''}</span>
+    <span className="sr-only" role="status" aria-live="polite">{phase === 'available' ? `Shambu ${update?.version} is available.` : phase === 'ready' ? 'Update ready. Restart when you’re ready.' : phase === 'downloading' ? 'Downloading update.' : ''}</span>
   </footer>;
 }

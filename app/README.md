@@ -132,7 +132,7 @@ Choose **Simulate recovery** to replace a failure scenario with healthy sample r
 - Server probes have a four-second timeout, a response-size limit, no redirects, and no proxy inheritance. Authenticated reverse proxies and custom certificate authorities are not supported by this first version.
 - Desktop subprocesses use fixed arguments and known executable locations. They never run user-entered shell commands.
 - Android reads the host's status through the companion. It does not inspect the Android Tailscale app or claim that the phone's VPN is connected.
-- Closing the app stops its polling. The separately installed host companion remains available for other devices. This is not a reboot guarantee, GPU stress test, or inference benchmark.
+- Closing the desktop window keeps Shambu in the tray; choose Quit Shambu to stop it. The separately installed host companion remains available for other devices. This is not a reboot guarantee, GPU stress test, or inference benchmark.
 - The application reports the configured server's responses. It does not prove the identity of an arbitrary HTTP endpoint.
 
 The app source lives in `src/`, the native window and settings bridge in `src-tauri/`, and the platform-independent Rust probes in `crates/readiness/`. Brand text and artwork references are centralized in `src/brand.ts`.
@@ -143,4 +143,4 @@ The development-only [bar comparison](http://127.0.0.1:1420/?bars=compare) shows
 
 ## In-app updates
 
-The [update guide](../docs/updates.md) covers the version footer, desktop restart flow, Android installation, signed release feed, and maintainer publishing steps. Update signing happens locally after CI builds the packages.
+The [update guide](../docs/updates.md) covers the version footer, desktop restart flow, Play Store-managed Android updates, signed release feed, and maintainer publishing steps. Update signing happens locally after CI builds the packages.

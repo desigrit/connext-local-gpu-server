@@ -30,8 +30,6 @@ pub struct UpdateState(Mutex<Pending>);
 struct Pending {
     #[cfg(desktop)]
     update: Option<tauri_plugin_updater::Update>,
-    #[cfg(target_os = "android")]
-    update: Option<android::Release>,
     bytes: Option<Vec<u8>>,
 }
 
@@ -81,8 +79,6 @@ pub async fn check_app_update(
             .await
             .map_err(|_| "Could not check for updates. Try again later.")?
     };
-    #[cfg(target_os = "android")]
-    let update = android::check(&app).await?;
     if let Some(ref update) = update {
         validate_download_url(update.download_url.as_str())?;
     }
@@ -130,8 +126,6 @@ pub async fn download_app_update(
             .await
             .map_err(|_| "Download could not be verified. Check your connection and retry.")?
     };
-    #[cfg(target_os = "android")]
-    let bytes = android::download(update, on_progress).await?;
     // download() resolves only after signature verification, not on its last chunk.
     pending.bytes = Some(bytes);
     Ok(())
@@ -160,18 +154,10 @@ pub async fn install_app_update(
         })?;
         app.restart();
     }
-    #[cfg(target_os = "android")]
-    android::install(&app, update, bytes).await
 }
 
-#[cfg(target_os = "android")]
-mod android;
-
-#[cfg(any(target_os = "android", test))]
+#[cfg(test)]
 mod verification;
-
-#[cfg(target_os = "android")]
-pub use android::plugin;
 
 #[cfg(test)]
 mod tests {

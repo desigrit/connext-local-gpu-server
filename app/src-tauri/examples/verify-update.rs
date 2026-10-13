@@ -13,8 +13,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let platforms = manifest["platforms"]
         .as_object()
         .ok_or("Missing platforms")?;
-    if platforms.len() != 4 {
-        return Err("Expected four update platforms".into());
+    if platforms.len() != 3 {
+        return Err("Expected three desktop update platforms".into());
     }
     for (platform, entry) in platforms {
         let url = url::Url::parse(entry["url"].as_str().ok_or("Missing URL")?)?;

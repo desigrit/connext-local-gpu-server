@@ -52,12 +52,13 @@ test('unknown download sizes stay indeterminate until verification finishes', as
   await expect(page.getByRole('button', { name: 'Restart to update to 1.1.0' })).toBeVisible();
 });
 
-test('Android hands off to Install, and the footer fits a small screen', async ({ browser }) => {
+test('Android shows its version without update controls, even when a newer release exists', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 360, height: 720 }, userAgent: 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/130.0 Mobile Safari/537.36' });
   const page = await context.newPage();
   await page.goto('/?demo=healthy&update=available');
-  await page.getByRole('button', { name: 'Update to 1.1.0' }).click();
-  await expect(page.getByRole('button', { name: 'Install to update to 1.1.0' })).toBeVisible();
+  const footer = page.getByRole('contentinfo', { name: 'App version and updates' });
+  await expect(footer).toContainText('v1.0.2');
+  await expect(footer.getByRole('button')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const audit = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
   expect(audit.violations).toEqual([]);

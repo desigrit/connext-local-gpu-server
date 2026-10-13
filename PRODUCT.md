@@ -53,4 +53,6 @@ Browser development previews provide a clearly labeled synthetic-state selector 
 - Keep diagnostics read-only and lightweight.
 - Keep configuration private and local.
 
-The footer shows the installed app version at the bottom left, with a compact Update pill beside it only when an update is available. Download progress becomes Restart after verification on desktop, or Install on Android. Keep the standard arrow cursor on all app content and controls.
+The footer shows the installed app version at the bottom left, with a compact Update pill beside it only when an update is available. Download progress becomes Restart after verification on desktop, while Android shows only its installed version and leaves updates to Google Play. Keep the standard arrow cursor on all app content and controls.
+
+On desktop, closing the window hides it in the system tray or Mac menu bar. Left-clicking the icon or launching Shambu again restores the same window. The tray menu offers Open Shambu and Quit Shambu. Only Quit Shambu exits the desktop app.
