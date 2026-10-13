@@ -13,7 +13,7 @@ fn fitted_size(
     // Leave a small margin inside the usable screen area, including on HiDPI displays.
     let width = (f64::from(work_area.width.saturating_sub(frame.width)) / scale - 32.0).max(1.0);
     let height = (f64::from(work_area.height.saturating_sub(frame.height)) / scale - 32.0).max(1.0);
-    Some(LogicalSize::new(width.min(1120.0), height.min(760.0)))
+    Some(LogicalSize::new(width.min(1300.0), height.min(840.0)))
 }
 
 fn fit_to_screen(window: &WebviewWindow) -> tauri::Result<()> {
@@ -115,7 +115,7 @@ mod tests {
             1.0,
         )
         .unwrap();
-        assert_eq!((size.width, size.height), (1120.0, 760.0));
+        assert_eq!((size.width, size.height), (1300.0, 840.0));
     }
 
     #[test]
@@ -124,7 +124,7 @@ mod tests {
         let frame = PhysicalSize::new(16, 48);
         let scale = 1.5;
         let size = fitted_size(area, frame, scale).unwrap();
-        assert!(size.width < 1120.0 && size.height < 580.0);
+        assert!(size.width < 1300.0 && size.height < 580.0);
         assert!(
             size.width * scale + f64::from(frame.width) <= f64::from(area.width) - 32.0 * scale
         );

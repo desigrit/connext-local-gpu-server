@@ -106,7 +106,7 @@ The setup uses Tailscale to encrypt network traffic. The local HTTP listener is 
 1. Open Shambu on the GPU PC. In Settings, copy the visible eight-character pairing code.
 2. Open Shambu on the Mac, Android device, or other Windows PC.
 3. Choose Remote server and enter the GPU PC's Tailscale Ollama base URL.
-4. Enter that code in the Pairing code field and save. A code works once and expires after five minutes; use New code to pair another device.
+4. Enter that code in the Pairing code field and save. A code works once and expires after five minutes. Settings shows a countdown and renews expired codes automatically. Reopen Settings to create a fresh code for another device.
 
 Use your own Tailscale address, not localhost. The companion URL is derived from that same address on port 11435. An optional custom URL can use another port or HTTP/HTTPS scheme, but must use the same hostname or IP. Redirects are refused, so a server cannot redirect the credential elsewhere.
 

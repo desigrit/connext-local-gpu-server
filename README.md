@@ -6,7 +6,7 @@ Your GPU is at home. You are somewhere else. Shambu checks that the two of you a
 
 One small window shows whether Ollama, Tailscale, and the private connection are working, which models are available, and how the GPU is doing: live load, memory usage, and 48 hours of activity.
 
-![Shambu showing a healthy server and 48 hours of GPU activity](docs/previews/app.png)
+![Shambu showing server status, live GPU readings, and 48 hours of activity](docs/previews/app.png)
 
 ## Get the app
 

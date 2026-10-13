@@ -25,7 +25,7 @@ Launch links open the installed app on **this device**. See [native app links](n
 
 The last check reads **Just now** for less than two minutes, then **2 minutes ago**, **3 minutes ago**, and so on. Automatic checks run every five minutes while the app is visible and Settings is closed. A failed refresh or a reading at least five minutes and thirty seconds old marks existing evidence stale.
 
-The **GPU usage** section shares the row icon and heading style. It identifies **Remote GPU: Nvidia Example GPU**, or **Remote GPU: Details not linked**. Its 25 Slender bars cover the rolling 48-hour window, with **24h**, **12h**, and **Now** below. Active hours use a forest-green fill; Idle hours use a pale fill. Hover, tap, or use arrow keys for a tooltip such as **9 AM · Idle**, in the device local time zone.
+The **GPU usage** section shares the row icon and heading style. The GPU name appears on the right, above separate GPU load and VRAM readings. Its 49 Slender bars cover the rolling 48-hour window, including partial hours at either end, with **48h**, **24h**, and **Now** below. Active hours use a forest-green fill; Idle hours use a pale fill. Hover, tap, or use arrow keys for a tooltip such as **9 AM · Idle**, in the device local time zone.
 
 ## Ollama offline
 

@@ -20,6 +20,7 @@ test('desktop starts clean, toggles with Control and remembers the choice', asyn
 test('the shortcut ignores other modifiers and held-key repeats', async ({ page }) => {
   await page.goto('/?demo=healthy');
   const shell = page.locator('.app-shell');
+  await expect(shell).toHaveAttribute('data-theme', 'clean');
   await page.keyboard.press('Control+K');
   await page.keyboard.press('Meta+Shift+K');
   await page.keyboard.press('Control+Alt+Shift+K');

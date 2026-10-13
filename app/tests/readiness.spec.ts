@@ -11,8 +11,8 @@ test('healthy screen exposes the external URL, GPU name, and installed models', 
   await page.getByRole('button', { name: 'Copy server URL', exact: true }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('http://192.0.2.10:11434');
   await expect(page.getByText('Nvidia Quadro RTX 8000', { exact: true })).toBeVisible();
-  await expect(page.locator('.status-row summary')).toHaveCount(1);
-  await page.locator('summary').filter({ hasText: 'Model library' }).click();
+  await expect(page.locator('.model-toggle')).toHaveCount(1);
+  await page.getByRole('button', { name: /Model library/ }).click();
   await expect(page.getByRole('list', { name: 'Installed models' }).getByRole('listitem')).toHaveCount(3);
   await expect(page.getByText('qwen3:8b', { exact: true })).toBeVisible();
   await expect(page.getByText('4.9 GB', { exact: true })).toBeVisible();
@@ -45,7 +45,7 @@ test('remote settings reject localhost and persist a valid address', async ({ pa
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByRole('button', { name: 'Remote server', exact: true }).click();
   await page.getByLabel('Ollama URL').fill('http://localhost:11434');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
   await expect(page.getByRole('alert')).toHaveText('Localhost means this device. Enter the address of your GPU PC.');
   await page.getByLabel('Ollama URL').fill('http://192.0.2.10:11434');
   await page.getByLabel('Server name').fill('Home server');
@@ -129,18 +129,18 @@ test('pairing validation identifies its field and a valid key links host details
   await expect(page.getByText('Details not linked', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByLabel('Server name').fill('');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
   await expect(page.getByLabel('Server name')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.getByLabel('Ollama URL')).toHaveAttribute('aria-invalid', 'false');
   await page.getByLabel('Server name').fill('Home server');
   await page.getByLabel('Pairing code').fill('incomplete');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
   await expect(page.getByLabel('Pairing code')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.getByLabel('Ollama URL')).toHaveAttribute('aria-invalid', 'false');
   await page.getByLabel('Pairing code').fill('SHAMBU42');
   await page.getByText('Custom host status port', { exact: true }).click();
   await page.getByLabel('Host status URL').fill('http://192.0.2.20:11435');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
   await expect(page.getByLabel('Host status URL')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.getByLabel('Ollama URL')).toHaveAttribute('aria-invalid', 'false');
   await page.getByLabel('Host status URL').fill('');
@@ -217,7 +217,7 @@ test('brand launch links are explicit and recovery previews return to healthy', 
   await expect(page.getByRole('heading', { name: 'Your server is within reach.' })).toBeVisible();
   await expect(page.locator('.status-label').filter({ hasText: /^Active$/ })).toHaveCount(3);
   await expect(page.locator('.freshness')).toContainText('Just now');
-  await page.locator('summary').filter({ hasText: 'Model library' }).click();
+  await page.getByRole('button', { name: /Model library/ }).click();
   await expect(page.getByRole('img', { name: 'Qwen', exact: true })).toHaveCount(2);
 });
 

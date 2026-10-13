@@ -3790,7 +3790,7 @@ dependencies = [
 
 [[package]]
 name = "shambu"
-version = "1.0.4"
+version = "1.0.5"
 dependencies = [
  "base64 0.22.1",
  "minisign-verify",

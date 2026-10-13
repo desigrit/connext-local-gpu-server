@@ -26,9 +26,9 @@ On the GPU PC, choose **Settings > This computer** and use `http://127.0.0.1:114
 
 On another Windows PC, a Mac, or Android, choose **Remote server** and enter your GPU PC's Tailscale URL, such as `http://<gpu-pc-tailscale-ip>:11434`. Keep Tailscale connected on both devices. Missing local apps offer installation actions. Finish Tailscale sign-in in its own app.
 
-To see the GPU PC's own Tailscale and forwarding status remotely, [set up the host companion](../docs/host-agent.md) once. In Shambu on that PC, open **Settings** and copy the visible eight-character code. Enter it under **Pairing code** on the remote device. A code works once and expires after five minutes; use **New code** for the next device. Without pairing, Ollama and GPU allocation checks still work; host-only checks remain explicitly unverified.
+To see the GPU PC's own Tailscale and forwarding status remotely, [set up the host companion](../docs/host-agent.md) once. In Shambu on that PC, open **Settings** and copy the visible eight-character code. Enter it under **Pairing code** on the remote device. A code works once and expires after five minutes. The countdown shows its remaining time, and a new code appears automatically at expiry while Settings is visible. Reopening Settings also creates a new code. Without pairing, host-only checks remain unverified.
 
-The single-column dashboard centers in the window when it fits. Readiness leads the page, with an icon-only **Settings** action at the top right. Settings opens in place, with **Cancel** and **Save** at the bottom right. Cancel discards edits; Save stores them on this device and checks the server. Colored dots accompany status words, and **Model library** expands into real installed models and sizes.
+The single-column dashboard opens at 1300 × 840, fitting smaller displays when needed. Readiness leads the page, with an icon-only **Settings** action at the top right. Settings and **Model library** expand smoothly downward while the header stays in place. Settings has **Cancel** and **Save** at the bottom right, plus a back arrow that also discards edits. Save becomes available when the form has a valid change. Paired devices show **Change** and **Unpair** actions. Small click animations respect the device's reduced-motion preference.
 
 Failed checks show their evidence, recovery advice, and **Check again** directly. Ollama failures also offer **Edit address**. Stale readings offer **Refresh now**; an app-wide check error offers **Try again**. See the [UX state guide](../docs/ux-states.md) for each state and recovery path.
 
@@ -42,7 +42,7 @@ Windows and macOS can open installed Ollama and Tailscale. Android offers Tailsc
 
 ## GPU history
 
-The **GPU usage** section follows the status rows. A GPU icon and heading lead into **Remote GPU: Nvidia Example GPU**, or **Remote GPU: Details not linked** when the device name is unavailable.
+The **GPU usage** section follows the status rows. The GPU name sits at the right of the heading, with GPU load and VRAM on separate lines beneath it. Readings align to the right with reserved number widths, so their labels stay still. VRAM uses whole numbers, such as **41/48 G**.
 
 The bar shows a rolling **48-hour** window, with one slender vertical bar per hourly bucket. Active hours are forest green, while Idle hours use a pale fill. Straight sides and gently rounded ends keep each bar distinct, with a small visible gap. Partial hours at either end produce 49 bars. **48h**, **24h**, and **Now** labels mark the range.
 

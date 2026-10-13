@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Check as CheckIcon, CircleHelp, Copy, Monitor, Settings2, TriangleAlert } from 'lucide-react';
 import { ArrowClockwise20Regular } from '@fluentui/react-icons';
-import { android, checkReadiness, copyText, defaultSettings, demo, loadSettings, native, saveSettings, validateSettings, type ConnectionIssue } from './bridge';
+import { android, checkReadiness, copyText, defaultSettings, demo, loadSettings, native, saveSettings, validateSettings } from './bridge';
 import GpuActivity from './GpuActivity';
-import HostPairing from './HostPairing';
+import Collapsible from './Collapsible';
+import ConnectionPanel from './ConnectionPanel';
 import StatusRow from './StatusRow';
 import { getReadinessStatus } from './readiness';
 import { gpuBarVariant } from './gpuBarVariants';
@@ -11,47 +12,51 @@ import { CHECK_INTERVAL_MS, STALE_AFTER_MS, checkedAge } from './timing';
 import { PreviewControls } from './PreviewControls';
 import { useWindowTheme } from './useWindowTheme';
 import { useGpuMetrics } from './useGpuMetrics';
+import { useAnchoredLayout } from './useAnchoredLayout';
+import { useClickFeedback } from './useClickFeedback';
 import { UpdateFooter } from './UpdateFooter';
-import type { Check, Mode, Settings, Snapshot } from './types';
+import type { Check, Settings, Snapshot } from './types';
 
 const initialChecks: Check[] = [
   ['ollama', 'Ollama local URL'], ['tailscale', 'Tailscale'], ['forwarding', 'Forwarding'], ['gpu', 'GPU inference'], ['models', 'Model library'],
 ].map(([id, title]) => ({ id, title, state: 'unknown', label: 'Waiting', detail: 'Run a check to see this status.', help: null }));
 
 export default function App() {
+  const shell = useAnchoredLayout();
+  useClickFeedback();
   const theme = useWindowTheme(!android);
   const [settings, setSettings] = useState<Settings | null>(null);
   const gpuMetrics = useGpuMetrics(settings);
-  const [draft, setDraft] = useState<Settings>(defaultSettings);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [formError, setFormError] = useState<ConnectionIssue | null>(null);
   const [copied, setCopied] = useState(false);
-  const [pairingCode, setPairingCode] = useState('');
   const [now, setNow] = useState(Date.now());
   const lastCheck = useRef(0);
   const busyRef = useRef(false);
+  const checkVersion = useRef(0);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mounted = useRef(false);
-  const endpointInput = useRef<HTMLInputElement>(null);
   const settingsButton = useRef<HTMLButtonElement>(null);
 
   const runCheck = useCallback(async (connection: Settings) => {
     if (busyRef.current || validateSettings(connection) || (!native && !demo)) return;
+    const version = ++checkVersion.current;
     busyRef.current = true; lastCheck.current = Date.now(); setBusy(true); setError('');
     const minimum = new Promise(resolve => setTimeout(resolve, 2000));
     try {
       const [result] = await Promise.all([checkReadiness(connection), minimum]);
-      if (mounted.current) { setSnapshot(result); setNow(Date.now()); }
+      if (mounted.current && version === checkVersion.current) { setSnapshot(result); setNow(Date.now()); }
     } catch (failure) {
       await minimum;
-      if (mounted.current) setError(failure instanceof Error ? failure.message : String(failure));
+      if (mounted.current && version === checkVersion.current) setError(failure instanceof Error ? failure.message : String(failure));
     } finally {
-      busyRef.current = false;
-      if (mounted.current) setBusy(false);
+      if (version === checkVersion.current) {
+        busyRef.current = false;
+        if (mounted.current) setBusy(false);
+      }
     }
   }, []);
 
@@ -59,11 +64,11 @@ export default function App() {
     mounted.current = true;
     loadSettings().then(value => {
       if (!mounted.current) return;
-      setSettings(value); setDraft(value);
+      setSettings(value);
       if (!value.endpoint) setEditing(true);
     }).catch(failure => {
       if (!mounted.current) return;
-      setSettings(defaultSettings); setDraft(defaultSettings); setEditing(true);
+      setSettings(defaultSettings); setEditing(true);
       setError(String(failure));
     });
     return () => { mounted.current = false; if (copyTimer.current) clearTimeout(copyTimer.current); };
@@ -89,7 +94,6 @@ export default function App() {
     const timer = setInterval(() => setNow(Date.now()), 10000);
     return () => clearInterval(timer);
   }, []);
-  useEffect(() => { if (editing) endpointInput.current?.focus(); }, [editing]);
 
   const checks = snapshot?.checks ?? initialChecks;
   const gpuCheck = snapshot?.checks.find(check => check.id === 'gpu');
@@ -101,38 +105,17 @@ export default function App() {
   const externalEndpoint = settings?.mode === 'remote' ? settings.endpoint : snapshot?.externalEndpoint;
   const remoteServerName = settings?.mode === 'remote' && snapshot?.mode === 'remote' && snapshot.endpoint === settings.endpoint
     ? snapshot.serverName?.trim() : undefined;
-  const useRemoteName = draft.mode === 'remote' && draft.endpoint.trim().replace(/\/$/, '') === settings?.endpoint && draft.diagnosticsUrl === settings?.diagnosticsUrl && Boolean(remoteServerName);
-
-
-  function openSettings() { setPairingCode(''); setDraft(settings ?? defaultSettings); setEditing(true); setFormError(null); }
-  function closeSettings() { setPairingCode(''); setEditing(false); setFormError(null); settingsButton.current?.focus(); }
-  function chooseMode(mode: Mode) {
-    setPairingCode('');
-    setDraft(previous => ({ ...previous, mode, endpoint: mode === 'host' ? 'http://127.0.0.1:11434' : previous.mode === 'host' ? '' : previous.endpoint }));
-    setFormError(null);
-  }
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    const validation = validateSettings(draft);
-    if (validation) {
-      setFormError(validation);
-      const fieldIds = { name: 'server-name', endpoint: 'server-url', diagnosticsKey: 'pairing-key', diagnosticsUrl: 'diagnostics-url' };
-      const input = validation.field ? document.getElementById(fieldIds[validation.field]) : null;
-      const disclosure = input?.closest('details');
-      if (disclosure) disclosure.open = true;
-      input?.focus();
-      return;
-    }
-    if (pairingCode && !/^[A-HJ-NP-Z2-9]{8}$/.test(pairingCode)) {
-      setFormError({ field: 'diagnosticsKey', message: 'Enter the 8-character code shown on your GPU PC.' });
-      document.getElementById('pairing-key')?.focus(); return;
-    }
-    setSaving(true); setFormError(null);
+  function openSettings() { setEditing(true); }
+  function dismissSettings() { setEditing(false); settingsButton.current?.focus({ preventScroll: true }); }
+  function closeSettings() { if (!saving) dismissSettings(); }
+  async function saveConnection(connection: Settings, code: string) {
+    setSaving(true);
     try {
-      const saved = await saveSettings(draft, draft.mode === 'remote' ? pairingCode : '');
-      setSnapshot(null); setSettings(saved); setDraft(saved); closeSettings();
-    } catch (failure) { setFormError({ field: null, message: failure instanceof Error ? failure.message : String(failure) }); }
-    finally { setSaving(false); }
+      const saved = await saveSettings(connection, code);
+      checkVersion.current++; busyRef.current = false; setBusy(false);
+      setSnapshot(null); setSettings(saved); dismissSettings();
+    } finally { setSaving(false); }
+    requestAnimationFrame(() => settingsButton.current?.focus({ preventScroll: true }));
   }
   async function copyEndpoint() {
     if (!externalEndpoint) return;
@@ -146,7 +129,7 @@ export default function App() {
 
   return <>
     {theme === 'vines' && <div className="vine-frame" aria-hidden="true" />}
-    <main className="app-shell" data-theme={theme}>
+    <main ref={shell} className="app-shell" data-theme={theme}>
     <header className="app-header">
       <div className="readiness-message">
         <h1 id="readiness-heading" aria-live="polite" aria-atomic="true">{headline}</h1>
@@ -156,42 +139,17 @@ export default function App() {
           {(!native && !demo) ? (import.meta.env.DEV && <a href="?demo=healthy">Preview</a>) : <button className="icon-button refresh-button" onClick={() => settings && void runCheck(settings)} disabled={busy || !settings?.endpoint || saving} aria-label={busy ? 'Checking server' : 'Refresh status'}><ArrowClockwise20Regular className={busy ? 'spin' : ''} aria-hidden="true" /></button>}
         </div>
       </div>
-      <button ref={settingsButton} className={`icon-button connection-button ${editing ? 'selected' : ''}`} onClick={() => editing ? closeSettings() : openSettings()} aria-label="Settings" aria-expanded={editing} aria-controls="connection-settings">
+      <button ref={settingsButton} className={`icon-button connection-button ${editing ? 'selected' : ''}`} onClick={() => editing ? closeSettings() : openSettings()} disabled={saving} aria-label="Settings" aria-expanded={editing} aria-controls="connection-settings">
         <Settings2 size={18} aria-hidden="true" />
       </button>
     </header>
 
     {demo && <PreviewControls onRecover={() => settings && void runCheck(settings)} busy={busy} />}
 
-    {editing && <section id="connection-settings" className="connection-panel" aria-labelledby="connection-heading">
-      <div className="panel-heading"><h2 id="connection-heading">Settings</h2></div>
-      <p className="settings-purpose">Choose which GPU server this device checks.</p>
-      <form onSubmit={submit} noValidate>
-        <fieldset className="mode-control"><legend className="sr-only">Server location</legend>
-          {!android && <button type="button" aria-pressed={draft.mode === 'host'} onClick={() => chooseMode('host')}><Monitor size={16} />This computer</button>}
-          <button type="button" aria-pressed={draft.mode === 'remote'} onClick={() => chooseMode('remote')}><ArrowUpRight size={16} />Remote server</button>
-        </fieldset>
-        <label htmlFor="server-name">Server name</label>
-        <input aria-invalid={formError?.field === 'name'} aria-describedby={formError?.field === 'name' ? 'connection-error' : undefined} id="server-name" value={useRemoteName ? remoteServerName : draft.name} readOnly={useRemoteName} maxLength={60} autoComplete="off" onChange={event => setDraft({ ...draft, name: event.target.value })} />
-        <label htmlFor="server-url">Ollama URL</label>
-        <input ref={endpointInput} id="server-url" type="url" value={draft.endpoint} autoCapitalize="none" autoComplete="off" spellCheck={false} placeholder={draft.mode === 'host' ? 'http://127.0.0.1:11434' : 'http://<your-server-ip>:11434'} onChange={event => setDraft({ ...draft, endpoint: event.target.value, diagnosticsKey: '' })} aria-describedby={formError?.field === 'endpoint' ? 'connection-error connection-hint' : 'connection-hint'} aria-invalid={formError?.field === 'endpoint'} />
-        <p id="connection-hint" className="field-hint">{draft.mode === 'host' ? 'Use the local Ollama address on this computer.' : 'Use the GPU PC’s Tailscale IP. Keep Tailscale connected on both devices.'} Settings stay on this device.</p>
-        {draft.mode === 'remote' ? <div className="host-link-fields">
-          <div className="pairing-caption"><label htmlFor="pairing-key">Pairing code <span>(optional)</span></label>{draft.diagnosticsKey && <span className="paired-note">Paired <button type="button" className="text-action" onClick={() => setDraft({ ...draft, diagnosticsKey: '' })}>Unpair</button></span>}</div>
-          <input id="pairing-key" className="code-input" type="text" value={pairingCode} autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={9} placeholder={draft.diagnosticsKey ? 'Already paired' : 'ABCD 2345'} onChange={event => setPairingCode(event.target.value.toUpperCase().replace(/[\s-]/g, '').slice(0, 8))} aria-invalid={formError?.field === 'diagnosticsKey'} aria-describedby={formError?.field === 'diagnosticsKey' ? 'connection-error pairing-hint' : 'pairing-hint'} />
-          <p id="pairing-hint" className="field-hint">Find the code in Settings on your GPU PC. It links GPU history and the PC’s connection checks. Pair once per device.</p>
-          <details className="advanced-connection"><summary>Custom host status port</summary>
-            <label htmlFor="diagnostics-url">Host status URL</label>
-            <input aria-invalid={formError?.field === 'diagnosticsUrl'} aria-describedby={formError?.field === 'diagnosticsUrl' ? 'connection-error' : undefined} id="diagnostics-url" type="url" value={draft.diagnosticsUrl} autoCapitalize="none" autoComplete="off" spellCheck={false} placeholder="Automatic: same server, port 11435" onChange={event => setDraft({ ...draft, diagnosticsUrl: event.target.value })} />
-          </details>
-        </div> : <HostPairing />}
-        {formError && <p id="connection-error" className="form-error" role="alert">{formError.message}</p>}
-        <div className="settings-actions">
-          <button type="button" className="quiet-button cancel-button" onClick={closeSettings} disabled={saving}>Cancel</button>
-          <button type="submit" className="primary-button save-button" disabled={saving || busy || (!native && !demo)}>{saving ? 'Saving…' : 'Save'}</button>
-        </div>
-      </form>
-    </section>}
+    <Collapsible id="connection-settings" open={editing}>
+      <ConnectionPanel open={editing} settings={settings ?? defaultSettings} serverName={remoteServerName ?? undefined}
+        needsPairing={snapshot?.hostDetails === 'unauthorized'} saving={saving} onCancel={closeSettings} onSave={saveConnection} />
+    </Collapsible>
 
     <section className="server-strip" aria-label="Selected server">
       <div className="server-identity"><Monitor size={18} strokeWidth={1.6} aria-hidden="true" /><div><h2>{remoteServerName || settings?.name || 'My GPU server'}</h2><p className="endpoint">{externalEndpoint || (settings?.mode === 'host' ? 'Tailscale URL unavailable' : 'No address yet')}</p></div></div>

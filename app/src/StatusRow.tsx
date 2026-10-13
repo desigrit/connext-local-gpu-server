@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { ArrowDownUp, ArrowUpRight, ChevronDown, CircleHelp, HardDrive, Download } from 'lucide-react';
 import { android, companionAvailability, installCompanionApp, openCompanionApp, type Availability, type CompanionApp } from './bridge';
 import DelayedTooltip from './DelayedTooltip';
+import Collapsible from './Collapsible';
 import ollamaIcon from './assets/brands/ollama.svg';
 import tailscaleIcon from './assets/brands/tailscale.png';
 import qwenIcon from './assets/brands/qwen.png';
@@ -21,6 +22,8 @@ export default function StatusRow({ check, stale, models, mode, busy, onRetry, o
   check: Check; stale: boolean; models: InstalledModel[]; mode: Mode; busy: boolean;
   onRetry: () => void; onSettings: () => void;
 }) {
+  const modelListId = useId();
+  const [modelsOpen, setModelsOpen] = useState(false);
   const [launchMessage, setLaunchMessage] = useState('');
   const [launchFailed, setLaunchFailed] = useState(false);
   const [launching, setLaunching] = useState(false);
@@ -63,18 +66,20 @@ export default function StatusRow({ check, stale, models, mode, busy, onRetry, o
   const content = <>
     <DelayedTooltip text={descriptions[check.id] ?? check.detail}>
       {canLaunch ? <button className="row-app-link" onClick={() => void launch(app)} disabled={launching || installing} aria-label={'Open ' + launchName + ' on this device'}>{icon}<span>{check.title}</span><ArrowUpRight size={13} aria-hidden="true" /></button>
-        : <span className="row-label-help" tabIndex={0}>{icon}<span className="row-title">{check.title}</span></span>}
+        : <span className="row-label-help" tabIndex={check.id === 'models' ? undefined : 0}>{icon}<span className="row-title">{check.title}</span></span>}
     </DelayedTooltip>
     <span className="status-label"><span className="state-dot" aria-hidden="true" />{label}</span>
   </>;
   const className = 'status-row state-' + check.state + (stale ? ' stale' : '');
-  if (check.id === 'models' && models.length) return <details className={className}>
-    <summary className="status-line">{content}<ChevronDown className="row-chevron" size={14} aria-hidden="true" /></summary>
+  if (check.id === 'models' && models.length) return <div className={className}>
+    <button type="button" className="status-line model-toggle" aria-expanded={modelsOpen} aria-controls={modelListId} onClick={() => setModelsOpen(open => !open)}>{content}<ChevronDown className="row-chevron" size={14} aria-hidden="true" /></button>
+    <Collapsible id={modelListId} open={modelsOpen}>
     <ul className="model-list" aria-label="Installed models">{models.map(model => <li key={model.name}>
       {/^(?:[^/]+\/)?qwen/i.test(model.name) ? <img src={qwenIcon} className="model-icon" alt="Qwen" /> : <HardDrive className="model-icon" size={17} aria-hidden="true" />}
       <span className="model-name">{model.name}</span><span className="model-size">{modelSize(model.size)}</span>
     </li>)}</ul>
-  </details>;
+    </Collapsible>
+  </div>;
   return <div className={className}>
     <div className="status-line">{content}<span className="row-chevron-space" /></div>
     {needsAttention && <div className="row-detail">
