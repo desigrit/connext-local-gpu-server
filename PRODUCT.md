@@ -38,7 +38,7 @@ Desktop defaults to a centered 1120 by 760 window, fitted to the available displ
 
 Place combined connection status, a hyphen, relative check age, and the Fluent refresh icon directly under the readiness heading. Green Connected requires fresh, verified Ollama, Tailscale, forwarding, host details, and model readiness. An idle GPU is healthy. Connection failures, missing evidence, and GPU or model warnings keep the combined status out of green even when Ollama responds. Use Disconnected, Connection issue, Needs attention, or Check needed as appropriate.
 
-Show Just now for readings younger than two minutes, then whole minutes. Refresh automatically every five minutes while visible and outside Settings. Readings become stale after 330 seconds; show a clear recovery action.
+Show Just now for readings younger than two minutes, then whole minutes. Refresh automatically every five minutes while visible and outside Settings. Readings become stale after 330 seconds. Keep the last-checked time and refresh icon without an extra stale-readings message.
 
 Four aligned rows use colored state dots beside their words. Ollama uses its bundled mark; Tailscale uses the user's supplied nine-dot PNG with original pixels preserved and its white background blended into the page. Their links open local apps. Only the installed model library expands; its real model names and sizes include the Qwen mark when appropriate. Keep failure guidance visible with Check again, Edit address, and relevant app-launch actions. Private host pairing remains in Settings.
 
@@ -52,3 +52,5 @@ Browser development previews provide a clearly labeled synthetic-state selector 
 - Make the broken link and next action easy to find.
 - Keep diagnostics read-only and lightweight.
 - Keep configuration private and local.
+
+The footer shows the installed app version at the bottom left, with a compact Update pill beside it only when an update is available. Download progress becomes Restart after verification on desktop, or Install on Android. Keep the standard arrow cursor on all app content and controls.

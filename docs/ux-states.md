@@ -18,7 +18,7 @@ The combined summary uses green **Connected** only when current Ollama, Tailscal
 | Host companion offline | Amber Check needed in the summary. Ollama can remain reachable while its host diagnostics are unverified. | Check the [host companion](host-agent.md), its private forward, and the host status URL in Settings. |
 | CPU fallback | Amber Needs attention in the summary. The reachable server has a visible CPU detected warning about model allocation. | Check the GPU driver and Ollama's loaded-model allocation on the GPU PC. Restart Ollama only after its active work finishes. |
 | No models | Amber Needs attention in the summary and an Empty model library with a download instruction. | Open Ollama on the GPU PC, download a model, then check again. |
-| Stale readings | Muted old statuses, Check needed, the reading age, and Refresh now. | Refresh once the app and connection are available. Stale data is never presented as a fresh all-clear. |
+| Stale readings | Muted old statuses, Check needed, the reading age, and the refresh icon. | Refresh once the app and connection are available. Stale data is never presented as a fresh all-clear. |
 | Host not linked | Amber Check needed in the summary, with Not linked host checks. The Ollama row can remain Active. Unobserved GPU hours stay Idle. | Use Link host details and the optional pairing key to inspect the GPU PC's own checks. |
 
 Launch links open the installed app on **this device**. See [native app links](native-launchers.md) for platform behavior. Opening another app does not mark a check healthy; only a new readiness result does that.

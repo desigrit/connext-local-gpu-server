@@ -1,4 +1,2 @@
-* text=auto
-*.md text eol=lf
-*.json text eol=lf
-*.ps1 text eol=crlf
+# Signed test content must retain its exact bytes across Windows and Unix.
+app/src-tauri/testdata/update.txt -text

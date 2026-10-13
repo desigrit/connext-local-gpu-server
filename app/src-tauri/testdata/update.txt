@@ -1,0 +1,1 @@
+Shambus signed updater test fixture.

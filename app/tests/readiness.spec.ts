@@ -74,7 +74,8 @@ test('refresh runs every five minutes and stale readings never stay green', asyn
   await page.clock.runFor(340000);
   await expect(page.getByRole('heading', { name: 'Time for a fresh look.' })).toBeVisible();
   await expect(page.locator('.connection-status')).not.toHaveClass(/is-connected/);
-  await expect(page.getByText('These readings are out of date.')).toBeVisible();
+  await expect(page.getByText('These readings are out of date.')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Refresh status', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await page.clock.runFor(2500);
   await expect(page.locator('.freshness')).toContainText('Just now');

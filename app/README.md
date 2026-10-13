@@ -105,8 +105,8 @@ Build success proves compilation and packaging. It does not replace running the 
 ## Verify without using the GPU
 
 ```sh
-cargo test -p readiness -p shambu-agent
-cargo clippy -p readiness -p shambu-agent --all-targets -- -D warnings
+cargo test -p readiness -p shambu-agent -p shambu
+cargo clippy -p readiness -p shambu-agent -p shambu --all-targets -- -D warnings
 npm run build
 npx playwright install chromium
 npm test
@@ -129,7 +129,7 @@ Choose **Simulate recovery** to replace a failure scenario with healthy sample r
 - Your server address, display name, and optional pairing key are saved in the app's private local configuration folder as `connection.json`. The file is not encrypted. The pairing key grants read-only host diagnostics; keep it private.
 - No telemetry, accounts, analytics, or diagnostic uploads. Fonts and icons are bundled.
 - Status readings stay in memory. The host companion privately saves recent GPU burst timestamps, active hourly buckets, and collector timing state. Tailscale peer lists, logs, and model contents are neither displayed nor saved.
-- Requests have a four-second timeout, a response-size limit, no redirects, and no proxy inheritance. Authenticated reverse proxies and custom certificate authorities are not supported by this first version.
+- Server probes have a four-second timeout, a response-size limit, no redirects, and no proxy inheritance. Authenticated reverse proxies and custom certificate authorities are not supported by this first version.
 - Desktop subprocesses use fixed arguments and known executable locations. They never run user-entered shell commands.
 - Android reads the host's status through the companion. It does not inspect the Android Tailscale app or claim that the phone's VPN is connected.
 - Closing the app stops its polling. The separately installed host companion remains available for other devices. This is not a reboot guarantee, GPU stress test, or inference benchmark.
@@ -140,3 +140,7 @@ The app source lives in `src/`, the native window and settings bridge in `src-ta
 Artwork sources and platform-icon provenance are recorded in the [branding notes](../docs/branding.md).
 
 The development-only [bar comparison](http://127.0.0.1:1420/?bars=compare) shows six options with identical sample hours. Each can be previewed in the dashboard. Slender is the selected app direction.
+
+## In-app updates
+
+The [update guide](../docs/updates.md) covers the version footer, desktop restart flow, Android installation, signed release feed, and maintainer publishing steps. Update signing happens locally after CI builds the packages.

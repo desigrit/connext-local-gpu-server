@@ -10,6 +10,7 @@ import { gpuBarVariant } from './gpuBarVariants';
 import { CHECK_INTERVAL_MS, STALE_AFTER_MS, checkedAge } from './timing';
 import { PreviewControls } from './PreviewControls';
 import { useWindowTheme } from './useWindowTheme';
+import { UpdateFooter } from './UpdateFooter';
 import type { Check, Mode, Settings, Snapshot } from './types';
 
 const initialChecks: Check[] = [
@@ -194,7 +195,6 @@ export default function App() {
     </section>
 
     {error && <div className="error-banner" role="alert"><TriangleAlert size={18} aria-hidden="true" /><div><p>{error}</p><button className="text-action" onClick={() => settings && void runCheck(settings)} disabled={busy}>Try again</button></div></div>}
-    {stale && !error && <div className="stale-notice"><p>These readings are out of date.</p><button className="text-action" onClick={() => settings && void runCheck(settings)} disabled={busy}>Refresh now</button></div>}
 
     <div className="readings-grid">
     <div className="readings-list">
@@ -211,5 +211,5 @@ export default function App() {
     </div>
 
 
-  </main></>;
+  </main><UpdateFooter /></>;
 }

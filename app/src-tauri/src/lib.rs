@@ -1,6 +1,7 @@
 mod launcher;
 #[cfg(desktop)]
 mod native_window;
+mod updates;
 
 use readiness::{Settings, Snapshot};
 use std::{fs, path::PathBuf};
@@ -158,8 +159,17 @@ pub fn run() {
             .build(),
     );
     #[cfg(desktop)]
-    let builder = builder.on_window_event(native_window::on_window_event);
+    let builder = builder
+        .on_window_event(native_window::on_window_event)
+        .plugin(
+            tauri_plugin_updater::Builder::new()
+                .pubkey(updates::PUBLIC_KEY.trim())
+                .build(),
+        );
+    #[cfg(target_os = "android")]
+    let builder = builder.plugin(updates::plugin());
     builder
+        .manage(updates::UpdateState::default())
         .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
             #[cfg(desktop)]
@@ -178,7 +188,10 @@ pub fn run() {
             get_pairing_code,
             open_companion_app,
             companion_availability,
-            install_companion_app
+            install_companion_app,
+            updates::check_app_update,
+            updates::download_app_update,
+            updates::install_app_update
         ])
         .run(tauri::generate_context!())
         .expect("Could not start Shambu");
