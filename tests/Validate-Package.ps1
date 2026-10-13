@@ -2,7 +2,7 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $files = @(Get-ChildItem -LiteralPath $root -Recurse -File -Force |
-    Where-Object { $_.FullName -notmatch '[\\/](\.git|\.local)[\\/]' -and $_.Name -ne 'config.local.json' })
+    Where-Object { $_.FullName -notmatch '[\\/](\.git|\.local|node_modules|target|dist|gen|test-results|playwright-report|\.impeccable)[\\/]' -and $_.Name -ne 'config.local.json' })
 foreach ($file in $files | Where-Object { $_.Extension -eq '.ps1' }) {
     $tokens = $null; $errors = $null
     $null = [System.Management.Automation.Language.Parser]::ParseFile($file.FullName,[ref]$tokens,[ref]$errors)

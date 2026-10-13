@@ -1,0 +1,40 @@
+// Synthetic preview data only. Never used by a native build.
+import type { Settings, Snapshot } from './types';
+export function demoSnapshot(settings: Settings, scenario: string): Snapshot {
+  const remote = settings.mode === 'remote';
+  const currentHour = new Date(); currentHour.setMinutes(0, 0, 0);
+  const hourlyCounts = [0, 0, 0, 1, 2, 0, 0, 3, 5, 2, 0, 0, 1, 0, 4, 6, 2, 0, 0, 3, 1, 2, 0, 0];
+  const bursts = hourlyCounts.flatMap((count, hour) => Array.from({ length: count }, (_, index) => currentHour.getTime() - (23 - hour) * 3600000 + (index + 1) * 60000));
+  const result: Snapshot = {
+    gpuHistory: remote && !settings.diagnosticsKey ? null : { sampledAtMs: Date.now(), bursts },
+    hostDetails: remote ? 'not-linked' : 'local', checkedAtMs: Date.now(), endpoint: settings.endpoint, mode: settings.mode, version: '0.0.0-demo',
+    latencyMs: 12, modelCount: 3, loadedModels: [],
+    checks: [
+      { id: 'ollama', title: remote ? 'Ollama server' : 'Ollama local URL', state: 'ok', label: 'Active', detail: 'Ollama replied in 12 ms.', help: null },
+      { id: 'tailscale', title: 'Tailscale', state: 'ok', label: 'Connected', detail: 'Tailscale reports this device online. Peer access depends on your tailnet policy.', help: null },
+      { id: 'forwarding', title: remote ? 'Server route' : 'Forwarding', state: 'ok', label: remote ? 'Reachable' : 'Active', detail: remote ? "This device can reach the server. The host's forwarding configuration is not inspected remotely." : "The matching TCP forward responded through this PC's Tailscale address.", help: 'Check from another device before traveling.' },
+      { id: 'gpu', title: 'GPU inference', state: 'idle', label: 'Idle', detail: remote ? 'No model is loaded on the server. GPU hardware and driver readiness have not been verified.' : 'An NVIDIA GPU is visible to the driver. No model is loaded, so Ollama GPU use is not yet verified.', help: null },
+      { id: 'models', title: 'Model library', state: 'ok', label: '3 available', detail: 'Models are installed on the server. This check does not load them.', help: null },
+    ],
+  };
+  if (scenario === 'offline') {
+    result.checks[0] = { ...result.checks[0], state: 'error', label: 'Unreachable', detail: 'Could not connect to this address.', help: 'Check that Ollama is running and the port is correct.' };
+    result.checks[2] = { ...result.checks[2], state: 'warning', label: 'Not responding', detail: 'A matching forward is configured, but the Ollama check through it failed.' };
+    result.checks[3] = { ...result.checks[3], state: 'unknown', label: 'Unverified', detail: 'The server did not reply.' };
+    result.checks[4] = { ...result.checks[4], state: 'unknown', label: 'Unverified', detail: 'The server did not reply.' };
+    result.latencyMs = null; result.modelCount = null; result.version = null;
+  }
+  if (scenario === 'cpu') {
+    result.checks[3] = { ...result.checks[3], state: 'warning', label: 'CPU detected', detail: 'At least one loaded model has no GPU memory allocation.', help: 'Check ollama ps and the GPU driver. Restart Ollama only after active work finishes.' };
+  }
+  if (remote) {
+    result.checks[1] = { ...result.checks[1], title: 'Tailscale on server', state: 'unknown', label: 'Not linked', detail: 'Link the host companion to see the server’s own Tailscale status.', help: 'Copy the pairing key from Shambu on the GPU PC, then paste it into Connection here.' };
+    result.checks[2] = { ...result.checks[2], title: 'Forwarding', state: 'unknown', label: 'Not linked', detail: 'The Ollama endpoint is reachable. Its forwarding configuration has not been inspected.' };
+  }
+  if (remote && settings.diagnosticsKey) {
+    result.hostDetails = 'linked';
+    result.checks[1] = { ...result.checks[1], state: 'ok', label: 'Connected', detail: 'The paired host companion reports Tailscale online on the GPU PC.' };
+    result.checks[2] = { ...result.checks[2], state: 'ok', label: 'Active', detail: 'The paired host companion verified its matching TCP forward.' };
+  }
+  return result;
+}

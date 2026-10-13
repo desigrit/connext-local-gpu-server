@@ -1,0 +1,133 @@
+name: Build readiness app
+
+on:
+  push:
+    branches: [main]
+    paths: ['app/**', '.github/workflows/app.yml']
+  pull_request:
+    paths: ['app/**', '.github/workflows/app.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: npm ci
+      - run: npm run build
+      - run: cargo fmt --all --check
+      - run: cargo test -p readiness -p shambu-agent --locked
+      - run: cargo clippy -p readiness -p shambu-agent --all-targets --locked -- -D warnings
+      - run: npx playwright install chromium
+      - run: npm test
+      - name: Check existing setup scripts
+        working-directory: .
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests/Validate-Package.ps1
+
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bundle: nsis
+            artifact: Windows-x64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            bundle: dmg
+            artifact: Mac-Apple-Silicon
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            bundle: dmg
+            artifact: Mac-Intel
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: app
+    env:
+      APPLE_SIGNING_IDENTITY: '-'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: 'app -> target'
+          key: ${{ matrix.target }}
+      - run: npm ci
+      - run: npm run tauri -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundle }} --ci
+      - name: Build Windows host companion
+        if: runner.os == 'Windows'
+        run: cargo build -p shambu-agent --release --target ${{ matrix.target }} --locked
+      - uses: actions/upload-artifact@v6
+        with:
+          name: Shambu-${{ matrix.artifact }}
+          path: |
+            app/target/${{ matrix.target }}/release/bundle/nsis/*.exe
+            app/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+            app/target/${{ matrix.target }}/release/shambu-agent.exe
+          if-no-files-found: error
+
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android build tools
+        run: |
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358'
+          echo "NDK_HOME=$ANDROID_HOME/ndk/28.2.13676358" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: 'app -> target'
+          key: android-aarch64
+      - run: npm ci
+      - run: npm run tauri -- android init --ci --skip-targets-install
+      - run: npm run android:prepare
+      - run: npm run tauri -- android build --debug --apk --target aarch64 --ci
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: Shambu-Android-arm64-preview
+          path: app/src-tauri/gen/android/app/build/outputs/apk/**/*.apk
+          if-no-files-found: error

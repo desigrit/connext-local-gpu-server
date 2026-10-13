@@ -26,3 +26,16 @@ blobs/
 *.7z
 .DS_Store
 Thumbs.db
+
+# Native app dependencies, generated projects, build output, and local review evidence.
+node_modules/
+target/
+dist/
+app/src-tauri/gen/
+app/.cache/
+app/test-results/
+app/playwright-report/
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/surface-draft.md
+*.tsbuildinfo

@@ -1,8 +1,18 @@
-# connext-local-gpu-server
+# Shambu
 
-Connext is a guide and a small set of Windows scripts for running Ollama on a GPU PC and reaching it privately through Tailscale. Use the same endpoint from a laptop at home, a phone on mobile data, or a computer while traveling.
+Shambu is a small app that keeps an eye on your private GPU server. One page shows Ollama, Tailscale, forwarding, installed models, and a firefly chart of hourly GPU activity on Windows, macOS, and Android.
+
+This repository also includes the Windows setup guide and startup scripts for running Ollama on a GPU PC and reaching it privately through Tailscale. Use the same endpoint from a laptop at home, a phone on mobile data, or a computer while traveling.
 
 The PC runs the model. Your other devices send requests and receive results. Applications need an Ollama or compatible API connection setting; this does not turn the PC into a directly attached graphics card for another device.
+
+## Readiness app
+
+A single-screen app for Windows, Mac, and Android checks Ollama, Tailscale, forwarding, GPU allocation, and installed models. Windows and the other native backends use Rust through Tauri. Checks never load a model.
+
+See the [app guide](app/README.md) for setup and the [host companion guide](docs/host-agent.md) for pairing remote devices. Download platform packages from a successful [build workflow run](https://github.com/desigrit/shambu/actions/workflows/app.yml). The current packages are development builds.
+
+Named after Shikari Shambu, with original character artwork credited in the [branding notes](docs/branding.md).
 
 ## What is included
 
@@ -124,8 +134,8 @@ Use these scripts if the server should work while you are away and nobody is sig
 Clone this repository into a permanent local folder. Keep that folder in place while the task is installed.
 
 ```powershell
-git clone https://github.com/desigrit/connext-local-gpu-server.git
-Set-Location connext-local-gpu-server
+git clone https://github.com/desigrit/shambu.git
+Set-Location shambu
 Copy-Item config.example.json config.local.json
 notepad config.local.json
 ```
