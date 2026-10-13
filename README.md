@@ -36,4 +36,3 @@ Shambu is the lookout. Apps such as [Zebby](https://github.com/desigrit/zebby-th
 Named after Shikari Shambu, one of the comic-book characters I grew up with. This one also keeps an eye on things, preferably without leaving his chair.
 
 [Releases](https://github.com/desigrit/shambu/releases) · [Troubleshooting](docs/operations.md) · [Build from source](app/README.md) · [Privacy](docs/privacy.md)
-

@@ -1,6 +1,6 @@
 # Shambu
 
-A small, single-screen companion for checking your Ollama server. Built with Tauri 2, Rust, React, and TypeScript for Windows, macOS, and Android. Shambu is named after Shikari Shambu. Its R2-D2 taskbar artwork is credited in the [branding notes](../docs/branding.md).
+A small, single-screen companion for checking your Ollama server. Built with Tauri 2, Rust, React, and TypeScript for Windows, macOS, and Android. Shambu is named after Shikari Shambu.
 
 ## What it checks
 
@@ -16,7 +16,7 @@ All probes are read-only. Ollama requests are limited to GET `/api/version`, `/a
 
 **Idle is not a failure.** With no loaded model, the app cannot verify Ollama's GPU use. A visible NVIDIA device confirms driver visibility only. A loaded model with zero GPU allocation gets a CPU warning; a partial allocation gets a GPU + CPU warning. GPU memory allocation is not the same as current utilization.
 
-Connection state and age sit directly under the readiness heading, beside the refresh icon. **Just now** means the reading is less than two minutes old; later ages use whole minutes. Checks refresh every five minutes while the app is visible and Settings is closed. The refresh icon runs an immediate check. Readings become stale at 330 seconds, and a failed refresh also marks retained readings stale. Closing the app stops its checks.
+Connection state and age sit directly under the readiness heading, beside the refresh icon. **Just now** means the reading is less than two minutes old; later ages use whole minutes. Checks refresh every five minutes while the app is visible and Settings is closed. The refresh icon starts a check immediately and spins for at least two seconds before presenting the result. Readings become stale at 330 seconds, and a failed refresh also marks retained readings stale. Closing the app stops its checks.
 
 **Connected** is a combined readiness result: Ollama, Tailscale, forwarding, host evidence, and the model library must be verified and current. An idle GPU is healthy. **Connection issue** identifies a Tailscale or forwarding problem, **Needs attention** covers GPU or model warnings, and **Check needed** covers stale or unverified evidence. An unreachable Ollama service shows **Disconnected**. A reachable Ollama endpoint alone does not produce green Connected.
 
@@ -24,9 +24,9 @@ Connection state and age sit directly under the readiness heading, beside the re
 
 On the GPU PC, choose **Settings > This computer** and use `http://127.0.0.1:11434`. Local probes use this loopback address. The main screen shows and copies the Tailscale URL for your other devices once it detects a matching TCP forward. If that address is unavailable, the copy control is disabled.
 
-On another Windows PC, a Mac, or Android, choose **Remote server** and enter your GPU PC's Tailscale URL, such as `http://<gpu-pc-tailscale-ip>:11434`. Keep Tailscale connected on both devices. The app does not install or sign in to Tailscale.
+On another Windows PC, a Mac, or Android, choose **Remote server** and enter your GPU PC's Tailscale URL, such as `http://<gpu-pc-tailscale-ip>:11434`. Keep Tailscale connected on both devices. Missing local apps offer installation actions. Finish Tailscale sign-in in its own app.
 
-To see the GPU PC's own Tailscale and forwarding status remotely, [set up the host companion](../docs/host-agent.md) once. In Shambu on that PC, open **Settings > Copy code**. Paste the key into **Settings > Host pairing key** on each remote device. Without pairing, Ollama and GPU allocation checks still work; host-only checks remain explicitly unverified.
+To see the GPU PC's own Tailscale and forwarding status remotely, [set up the host companion](../docs/host-agent.md) once. In Shambu on that PC, open **Settings** and copy the visible eight-character code. Enter it under **Pairing code** on the remote device. A code works once and expires after five minutes; use **New code** for the next device. Without pairing, Ollama and GPU allocation checks still work; host-only checks remain explicitly unverified.
 
 The single-column dashboard centers in the window when it fits. Readiness leads the page, with an icon-only **Settings** action at the top right. Settings opens in place, with **Cancel** and **Save** at the bottom right. Cancel discards edits; Save stores them on this device and checks the server. Colored dots accompany status words, and **Model library** expands into real installed models and sizes.
 
@@ -44,7 +44,7 @@ Windows and macOS can open installed Ollama and Tailscale. Android offers Tailsc
 
 The **GPU usage** section follows the status rows. A GPU icon and heading lead into **Remote GPU: Nvidia Example GPU**, or **Remote GPU: Details not linked** when the device name is unavailable.
 
-The bar shows a rolling **24-hour** window, with one slender vertical bar per hourly bucket. Active hours are forest green, while Idle hours use a pale fill. Straight sides and gently rounded ends keep each bar distinct, with a small visible gap. Partial hours at either end produce 25 bars. **24h**, **12h**, and **Now** labels mark the range.
+The bar shows a rolling **48-hour** window, with one slender vertical bar per hourly bucket. Active hours are forest green, while Idle hours use a pale fill. Straight sides and gently rounded ends keep each bar distinct, with a small visible gap. Partial hours at either end produce 49 bars. **48h**, **24h**, and **Now** labels mark the range.
 
 Hover, tap, or focus a pill to inspect its hour in a custom tooltip, such as **9 AM · Idle**. Times use your device's local zone without displaying an abbreviation. Tab enters the strip at the latest or last inspected hour. Left and right arrows move between hours, Home and End move to the first and last, and Escape closes the tooltip. Empty and unmonitored hours display **Idle**.
 
@@ -54,7 +54,7 @@ Continuous activity fills every hour in which it is observed. Burst starts are a
 
 The companion stores 48 hours of activity privately on the GPU PC and keeps collecting when the app window is closed. Pair it to see the same history from another device. History recorded by older all-GPU collectors stays separate and is not relabeled as Ollama activity.
 
-The detected GPU name appears between the GPU usage heading and activity bar. CPU and partial GPU allocation warnings remain visible below the status rows when they need attention.
+The detected GPU name appears at the right of the GPU usage heading, wrapping below it on narrow screens. CPU and partial GPU allocation warnings remain visible below the status rows when they need attention.
 
 ## Build and run
 
@@ -94,11 +94,11 @@ npm run tauri -- android build --debug --apk --target aarch64
 
 The preparation step copies the exported launcher icons, enables the HTTP endpoints commonly used inside Tailscale, and disables Android cloud backup for the connection settings. Generated Android files stay out of Git; rerun preparation after regenerating the project.
 
-The resulting arm64 APK is a development preview for a physical Android phone. Debug builds use a development signing key. CI runs generate their own debug keys, so installing an APK from a later CI run may require uninstalling the earlier preview first, which removes saved settings. A stable production signing key is deliberately not included.
+That command produces a debug APK. The release workflow builds an unsigned release APK instead. The maintainer downloads it, signs it locally using a stable private project key, verifies the signature, and publishes only the signed APK. No private signing key is uploaded to GitHub. A debug preview must be uninstalled before switching to the release signature.
 
 ## Automated builds
 
-The [Build readiness app workflow](../.github/workflows/app.yml) checks the Rust core and interface and builds Windows x64, Apple Silicon Mac, Intel Mac, and Android arm64 artifacts. Download packages from a successful run in the repository's Actions tab.
+The [Build readiness app workflow](../.github/workflows/app.yml) checks the Rust core and interface and builds Windows x64, Windows ARM64, Apple Silicon Mac, and Android arm64 artifacts. The release workflow prepares a draft after checks pass. Android is signed locally before the draft is published. Download installable packages from [Releases](https://github.com/desigrit/shambu/releases/latest).
 
 Build success proves compilation and packaging. It does not replace running the app against your own server on each device.
 

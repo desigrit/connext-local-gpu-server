@@ -38,3 +38,9 @@ Ignore rules prevent accidental additions of common local files, but do not remo
 For an issue report, summarize the symptom, software versions, and relevant error. Redact paths, addresses, account identifiers, request content, and credentials from any excerpt. Avoid attaching the full runtime directory.
 
 If a credential has already been published, revoke or rotate it. Removing it from the current file does not remove previous Git history.
+
+## Pairing and release signing
+
+The eight-character pairing code is temporary and single-use. It expires after five minutes, with a budget of five attempts. Pair over Tailscale or trusted HTTPS. The host's full random credential stays out of the visible pairing field and is saved on a paired device; it authorizes status reads and creation of further pairing codes. Pair only trusted devices. The monitor has no endpoint to run a model or control the PC.
+
+Android release signing material stays in ignored, access-restricted local storage on the maintainer's PC. CI builds the unsigned APK. Only the signed APK and its public certificate go to the public release. Back up the local signing key and password securely to preserve future update compatibility.

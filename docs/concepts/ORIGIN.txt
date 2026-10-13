@@ -1,1 +1,3 @@
 Vine concepts generated with the OpenAI image tool using a synthetic Shambu screenshot as reference. Flat and softly shaded alternatives are visual proposals only, not shipped app screenshots. All addresses and readings are synthetic.
+
+01-dabba-eye.svg through 06-lotus.svg are original geometric SVG concepts authored for Shambu. icon-options.html and icon-options.png compare them at display and taskbar sizes. No external character art is used. These options are not applied to the app until selected.
