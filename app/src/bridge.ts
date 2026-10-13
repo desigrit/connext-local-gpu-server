@@ -1,6 +1,6 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { writeText } from '@tauri-apps/plugin-clipboard-manager';
-import type { Settings, Snapshot } from './types';
+import type { GpuMetrics, Settings, Snapshot } from './types';
 
 export const native = isTauri();
 export const android = /Android/i.test(navigator.userAgent);
@@ -89,6 +89,15 @@ export async function checkReadiness(settings: Settings): Promise<Snapshot> {
 }
 
 export type CompanionApp = 'tailscale' | 'ollama';
+
+export async function getGpuMetrics(settings: Settings): Promise<GpuMetrics | null> {
+  if (native) return invoke('get_gpu_metrics', { settings });
+  if (demo) {
+    const { demoSnapshot } = await import('./demo');
+    return demoSnapshot(settings, new URLSearchParams(location.search).get('demo') ?? 'healthy').gpuMetrics ?? null;
+  }
+  return null;
+}
 
 export async function openCompanionApp(target: CompanionApp): Promise<string> {
   if (demo) return `Opening ${target === 'ollama' ? 'Ollama' : 'Tailscale'}. Check the system tray.`;

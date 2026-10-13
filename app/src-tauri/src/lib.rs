@@ -14,6 +14,7 @@ use tokio::sync::Mutex;
 struct AppState {
     config_path: PathBuf,
     probe_lock: Mutex<()>,
+    gpu_lock: Mutex<()>,
 }
 
 #[tauri::command]
@@ -79,10 +80,36 @@ async fn check_readiness(
     let mut snapshot = readiness::inspect(settings).await?;
     if snapshot.mode == readiness::Mode::Host {
         if let Ok(key) = get_host_pairing_key(app) {
-            snapshot.gpu_history = readiness::local_gpu_history(&key).await;
+            if let Some(host) = readiness::local_host_snapshot(&key).await {
+                snapshot.gpu_history = host.gpu_history;
+                snapshot.gpu_metrics = host.gpu_metrics;
+            }
         }
     }
     Ok(snapshot)
+}
+
+#[tauri::command]
+async fn get_gpu_metrics(
+    app: tauri::AppHandle,
+    settings: Settings,
+    state: State<'_, AppState>,
+) -> Result<Option<readiness::GpuMetrics>, String> {
+    let _guard = state
+        .gpu_lock
+        .try_lock()
+        .map_err(|_| "GPU readings are being refreshed.")?;
+    readiness::validate_settings(&settings)?;
+    if settings.mode == readiness::Mode::Host {
+        Ok(match get_host_pairing_key(app) {
+            Ok(key) => readiness::local_host_snapshot(&key)
+                .await
+                .and_then(|snapshot| snapshot.gpu_metrics),
+            Err(_) => readiness::gpu_metrics().await,
+        })
+    } else {
+        readiness::remote_gpu_metrics(&settings).await
+    }
 }
 
 fn get_host_pairing_key(app: tauri::AppHandle) -> Result<String, String> {
@@ -191,6 +218,7 @@ pub fn run() {
             app.manage(AppState {
                 config_path,
                 probe_lock: Mutex::new(()),
+                gpu_lock: Mutex::new(()),
             });
             Ok(())
         })
@@ -198,6 +226,7 @@ pub fn run() {
             load_settings,
             save_settings,
             check_readiness,
+            get_gpu_metrics,
             get_pairing_code,
             open_companion_app,
             companion_availability,

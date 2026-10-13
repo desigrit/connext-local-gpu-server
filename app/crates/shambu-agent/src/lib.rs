@@ -10,7 +10,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use readiness::{GpuHistory, HealthEnvelope, Settings, Snapshot, PROTOCOL_VERSION};
+use readiness::{GpuHistory, GpuMetrics, HealthEnvelope, Settings, Snapshot, PROTOCOL_VERSION};
 use std::{sync::Arc, time::Duration};
 use subtle::ConstantTimeEq;
 use tokio::{sync::RwLock, time::Instant};
@@ -22,6 +22,12 @@ const MAX_AGE: Duration = Duration::from_secs(60);
 pub struct SnapshotCache {
     sample: Arc<RwLock<Option<Sample>>>,
     gpu_history: Arc<RwLock<Option<GpuHistory>>>,
+    gpu_metrics: Arc<RwLock<Option<GpuSample>>>,
+}
+
+struct GpuSample {
+    measured_at: Instant,
+    metrics: GpuMetrics,
 }
 
 struct Sample {
@@ -61,6 +67,13 @@ impl SnapshotCache {
         }
         let mut snapshot = sample.snapshot.clone();
         snapshot.gpu_history = self.gpu_history.read().await.clone();
+        snapshot.gpu_metrics = self.gpu_metrics.read().await.as_ref().and_then(|sample| {
+            let mut metrics = sample.metrics.clone();
+            metrics.sample_age_ms = metrics
+                .sample_age_ms
+                .saturating_add(sample.measured_at.elapsed().as_millis() as u64);
+            metrics.is_valid().then_some(metrics)
+        });
         Some(HealthEnvelope {
             protocol_version: PROTOCOL_VERSION,
             sample_age_ms: age.as_millis() as u64,
@@ -215,6 +228,7 @@ mod tests {
             host_details: HostDetails::Local,
             endpoint: "http://127.0.0.1:11434".into(),
             server_name: Some("Jungle PC".into()),
+            gpu_metrics: None,
             external_endpoint: None,
             gpu_name: None,
             mode: Mode::Host,
@@ -300,6 +314,32 @@ mod tests {
         let envelope: HealthEnvelope = serde_json::from_str(&body).unwrap();
         assert_eq!(envelope.protocol_version, 1);
         assert_eq!(envelope.snapshot.checks.len(), 5);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn gpu_cache_expires_independently_and_never_substitutes_zero_for_missing() {
+        let cache = SnapshotCache::default();
+        cache.update(Instant::now(), fixture()).await;
+        assert!(cache.read().await.unwrap().snapshot.gpu_metrics.is_none());
+        *cache.gpu_metrics.write().await = Some(GpuSample {
+            measured_at: Instant::now(),
+            metrics: GpuMetrics {
+                sample_age_ms: 0,
+                devices: vec![readiness::GpuReading {
+                    index: 0,
+                    load_percent: Some(0),
+                    memory_used_mib: Some(0),
+                    memory_total_mib: Some(49152),
+                }],
+            },
+        });
+        tokio::time::advance(Duration::from_secs(10)).await;
+        let metrics = cache.read().await.unwrap().snapshot.gpu_metrics.unwrap();
+        assert_eq!(metrics.sample_age_ms, 10_000);
+        assert_eq!(metrics.devices[0].load_percent, Some(0));
+        tokio::time::advance(Duration::from_secs(6)).await;
+        assert!(cache.read().await.unwrap().snapshot.gpu_metrics.is_none());
+        assert_eq!(cache.read().await.unwrap().snapshot.checks.len(), 5);
     }
 
     #[tokio::test(start_paused = true)]

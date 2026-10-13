@@ -23,7 +23,7 @@ If the PC is offline, the app can report that it cannot reach the services. It c
 
 ## Download the companion on Windows
 
-Download the companion for [Windows x64](https://github.com/desigrit/shambu/releases/download/host-v0.2.1/Shambu-Host-Windows-x64.zip) or [Windows ARM64](https://github.com/desigrit/shambu/releases/download/host-v0.2.1/Shambu-Host-Windows-ARM64.zip). Extract it, open Windows PowerShell as Administrator in that folder, and run:
+Download the companion for [Windows x64](https://github.com/desigrit/shambu/releases/download/host-v0.2.2/Shambu-Host-Windows-x64.zip) or [Windows ARM64](https://github.com/desigrit/shambu/releases/download/host-v0.2.2/Shambu-Host-Windows-ARM64.zip). Extract it, open Windows PowerShell as Administrator in that folder, and run:
 
 ~~~powershell
 .\Install-ShambuAgent.ps1 -AgentExe .\shambu-agent.exe
@@ -141,6 +141,14 @@ Burst timestamps survive companion restarts. The last 48 hours of burst starts a
 Inference estimates are stored separately in ollama-activity.json. An older history.json file containing all-GPU activity is preserved and never imported into the inference estimate. The authenticated response marks the new history with source set to ollama-gpu-estimate; clients ignore unmarked or differently marked history while retaining compatible host checks.
 
 The host app displays and copies the advertised Tailscale address and matching Serve TCP port when that configuration is available. Its readiness probes continue to use the configured loopback endpoint. GPU names come from the host's driver query. Installed model names and sizes come directly from the Ollama API on the device performing the check.
+
+## Live GPU readings
+
+Companion 0.2.2 adds whole-device GPU load and used / total VRAM to the authenticated status response. The existing five-second NVIDIA sample reads utilization and memory together. Each device keeps its own index and readings. These values include all GPU work, while the hourly bars continue to estimate Ollama activity.
+
+Visible clients fetch cached readings about every five seconds; this does not trigger an extra host GPU query or a model request. Hidden windows pause these fetches. Samples expire after 15 seconds, including transport time. Missing, unsupported, expired, or invalid readings display N/A, while measured zero remains zero. VRAM is reported by the driver in MiB and displayed in GiB. Older companions remain compatible and show N/A for these new readings.
+
+The optional snapshot.gpuMetrics object contains sampleAgeMs and a devices array. Each device has index, loadPercent, memoryUsedMib, and memoryTotalMib. Individual unsupported measurements are null. Live readings stay in memory and are not added to the history file.
 
 ## Protocol and storage
 

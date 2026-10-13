@@ -1,12 +1,14 @@
+mod gpu;
 mod local;
 mod pairing;
 mod remote;
 pub use pairing::{create_pairing_code, pair_host, valid_code, PairingCode};
 
-pub use local::gpu_active;
+pub use gpu::{GpuMetrics, GpuReading, GPU_METRICS_MAX_AGE_MS};
+pub use local::gpu_metrics;
 pub use remote::{
-    diagnostics_endpoint, local_gpu_history, valid_pairing_key, HealthEnvelope, HostDetails,
-    PROTOCOL_VERSION,
+    diagnostics_endpoint, local_host_snapshot, remote_gpu_metrics, valid_pairing_key,
+    HealthEnvelope, HostDetails, PROTOCOL_VERSION,
 };
 
 use reqwest::{redirect::Policy, Client};
@@ -167,6 +169,12 @@ impl GpuHistory {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Snapshot {
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "gpu::deserialize_metrics"
+    )]
+    pub gpu_metrics: Option<GpuMetrics>,
     pub checked_at_ms: u64,
     pub host_details: HostDetails,
     pub endpoint: String,
@@ -476,6 +484,10 @@ pub async fn inspect(settings: Settings) -> Result<Snapshot, String> {
             .and_then(|host| host.snapshot.as_ref())
             .and_then(|snapshot| snapshot.server_name.clone())
     };
+    let gpu_metrics = remote
+        .as_ref()
+        .and_then(|host| host.snapshot.as_ref())
+        .and_then(|snapshot| snapshot.gpu_metrics.clone());
     let gpu_history = remote
         .as_ref()
         .and_then(|host| host.snapshot.as_ref())
@@ -561,6 +573,7 @@ pub async fn inspect(settings: Settings) -> Result<Snapshot, String> {
         loaded_models: models.unwrap_or_default(),
         installed_models: installed_models.unwrap_or_default(),
         gpu_history,
+        gpu_metrics,
     })
 }
 

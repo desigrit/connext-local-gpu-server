@@ -1,4 +1,4 @@
-use crate::{Check, Client, GpuHistory, Mode, Settings, Snapshot, State};
+use crate::{Check, Client, GpuHistory, GpuMetrics, Mode, Settings, Snapshot, State};
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
 use url::Url;
@@ -110,17 +110,28 @@ fn valid_envelope(envelope: &HealthEnvelope, transport_age_ms: u64) -> bool {
         })
 }
 
-/// Reads history only from the fixed local companion using its private pairing key.
+/// Reads cached diagnostics from the fixed local companion using its private pairing key.
 /// Host inspection deliberately does not call this helper, preventing recursive health probes.
-pub async fn local_gpu_history(key: &str) -> Option<GpuHistory> {
+pub async fn local_host_snapshot(key: &str) -> Option<Snapshot> {
     if !valid_pairing_key(key) {
         return None;
     }
     let endpoint = Url::parse("http://127.0.0.1:11435/").ok()?;
     fetch(&crate::http_client().ok()?, &endpoint, key)
         .await
-        .snapshot?
-        .gpu_history
+        .snapshot
+}
+
+/// Refresh only cached GPU readings, without probing Ollama or running a client-side GPU query.
+pub async fn remote_gpu_metrics(settings: &Settings) -> Result<Option<GpuMetrics>, String> {
+    let base = crate::validate_settings(settings)?;
+    if settings.mode != Mode::Remote {
+        return Ok(None);
+    }
+    Ok(inspect(settings, &base, &crate::http_client()?)
+        .await
+        .snapshot
+        .and_then(|snapshot| snapshot.gpu_metrics))
 }
 
 pub(crate) async fn inspect(settings: &Settings, base: &Url, client: &Client) -> RemoteHost {
@@ -164,6 +175,14 @@ async fn fetch(client: &Client, endpoint: &Url, key: &str) -> RemoteHost {
         .ok()
         .and_then(|json| serde_json::from_value::<HealthEnvelope>(json).ok())
         .map(|mut envelope| {
+            if let Some(metrics) = &mut envelope.snapshot.gpu_metrics {
+                metrics.sample_age_ms = metrics
+                    .sample_age_ms
+                    .saturating_add(start.elapsed().as_millis() as u64);
+                if !metrics.is_valid() {
+                    envelope.snapshot.gpu_metrics = None;
+                }
+            }
             envelope.snapshot.server_name = envelope
                 .snapshot
                 .server_name
@@ -352,7 +371,38 @@ mod tests {
             assert_eq!(result.status, HostDetails::Linked);
             assert!(result.snapshot.unwrap().gpu_history.is_none());
         }
-        assert!(local_gpu_history("invalid").await.is_none());
+        assert!(local_host_snapshot("invalid").await.is_none());
+    }
+
+    #[tokio::test]
+    async fn gpu_metrics_are_optional_and_invalid_readings_do_not_erase_host_checks() {
+        let legacy = server_probe(200, fixture()).await;
+        assert_eq!(legacy.status, HostDetails::Linked);
+        assert!(legacy.snapshot.unwrap().gpu_metrics.is_none());
+        let mut body = fixture();
+        let valid = json!({"sampleAgeMs":500,"devices":[{"index":0,"loadPercent":0,"memoryUsedMib":1741,"memoryTotalMib":49152}]});
+        body["snapshot"]["gpuMetrics"] = valid.clone();
+        let metrics = server_probe(200, body.clone())
+            .await
+            .snapshot
+            .unwrap()
+            .gpu_metrics
+            .unwrap();
+        assert!(metrics.sample_age_ms >= 500);
+        assert_eq!(metrics.devices[0].load_percent, Some(0));
+        for invalid in [
+            json!({"sampleAgeMs":15001,"devices":valid["devices"]}),
+            json!({"sampleAgeMs":0,"devices":[]}),
+            json!({"sampleAgeMs":0,"devices":[{"index":0,"loadPercent":101}]}),
+            json!({"sampleAgeMs":0,"devices":[{"index":0,"loadPercent":-1}]}),
+            json!({"sampleAgeMs":0,"devices":[{"index":0,"memoryUsedMib":5,"memoryTotalMib":4}]}),
+            json!("invalid"),
+        ] {
+            body["snapshot"]["gpuMetrics"] = invalid;
+            let result = server_probe(200, body.clone()).await;
+            assert_eq!(result.status, HostDetails::Linked);
+            assert!(result.snapshot.unwrap().gpu_metrics.is_none());
+        }
     }
 
     #[tokio::test]

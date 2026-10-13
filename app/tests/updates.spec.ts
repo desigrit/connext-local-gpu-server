@@ -5,7 +5,7 @@ test('version is at the bottom and an up-to-date app stays quiet', async ({ page
   await page.setViewportSize({ width: 1120, height: 760 });
   await page.goto('/?demo=healthy');
   const footer = page.getByRole('contentinfo', { name: 'App version and updates' });
-  await expect(footer).toContainText('v1.0.2');
+  await expect(footer).toContainText('v1.0.3');
   await expect(footer.getByRole('button')).toHaveCount(0);
   const version = await page.locator('.app-version').boundingBox();
   expect(version!.x).toBeLessThan(30);
@@ -57,7 +57,7 @@ test('Android shows its version without update controls, even when a newer relea
   const page = await context.newPage();
   await page.goto('/?demo=healthy&update=available');
   const footer = page.getByRole('contentinfo', { name: 'App version and updates' });
-  await expect(footer).toContainText('v1.0.2');
+  await expect(footer).toContainText('v1.0.3');
   await expect(footer.getByRole('button')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const audit = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();

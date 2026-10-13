@@ -10,6 +10,7 @@ import { gpuBarVariant } from './gpuBarVariants';
 import { CHECK_INTERVAL_MS, STALE_AFTER_MS, checkedAge } from './timing';
 import { PreviewControls } from './PreviewControls';
 import { useWindowTheme } from './useWindowTheme';
+import { useGpuMetrics } from './useGpuMetrics';
 import { UpdateFooter } from './UpdateFooter';
 import type { Check, Mode, Settings, Snapshot } from './types';
 
@@ -20,6 +21,7 @@ const initialChecks: Check[] = [
 export default function App() {
   const theme = useWindowTheme(!android);
   const [settings, setSettings] = useState<Settings | null>(null);
+  const gpuMetrics = useGpuMetrics(settings);
   const [draft, setDraft] = useState<Settings>(defaultSettings);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [editing, setEditing] = useState(false);
@@ -210,7 +212,7 @@ export default function App() {
     </button>}
     {gpuCheck && ['warning', 'error'].includes(gpuCheck.state) && <div className={'gpu-warning state-' + gpuCheck.state}><strong>{gpuCheck.label}</strong><p>{gpuCheck.help || gpuCheck.detail}</p></div>}
     </div>
-    <GpuActivity history={snapshot?.gpuHistory} gpuName={snapshot?.gpuName} now={now} stale={stale} variant={demo ? gpuBarVariant(new URLSearchParams(location.search).get("bars")) : "slender"} />
+    <GpuActivity history={snapshot?.gpuHistory} gpuName={snapshot?.gpuName} metrics={gpuMetrics} now={now} stale={stale} variant={demo ? gpuBarVariant(new URLSearchParams(location.search).get("bars")) : "slender"} />
     </div>
 
 

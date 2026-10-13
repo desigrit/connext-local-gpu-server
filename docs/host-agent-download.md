@@ -1,6 +1,6 @@
-# Shambu host companion 0.2.1
+# Shambu host companion 0.2.2
 
-Run this on your Windows GPU PC to share its name, connection checks, and GPU history with your other devices.
+Run this on your Windows GPU PC to share its name, connection checks, GPU history, load, and VRAM usage with your other devices.
 
 Open Windows PowerShell as Administrator in this folder, using the same account as Shambu.
 

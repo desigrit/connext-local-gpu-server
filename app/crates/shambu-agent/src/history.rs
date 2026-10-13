@@ -1,4 +1,4 @@
-use crate::{config, SnapshotCache};
+use crate::{config, GpuSample, SnapshotCache};
 use readiness::{
     GpuHistory, GPU_HISTORY_HOUR_MS, GPU_HISTORY_SOURCE, GPU_HISTORY_WINDOW_MS,
     MAX_GPU_ACTIVE_HOURS, MAX_GPU_BURSTS,
@@ -219,9 +219,15 @@ pub(crate) async fn collect(cache: SnapshotCache) {
     interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
     loop {
         interval.tick().await;
+        let measured_at = tokio::time::Instant::now();
+        let metrics = readiness::gpu_metrics().await;
         let active = cache
-            .inference_activity(readiness::gpu_active().await)
+            .inference_activity(metrics.as_ref().and_then(readiness::GpuMetrics::activity))
             .await;
+        *cache.gpu_metrics.write().await = metrics.map(|metrics| GpuSample {
+            measured_at,
+            metrics,
+        });
         let previous = history.clone();
         history.observe(now_ms(), active);
         *cache.gpu_history.write().await = history.snapshot();

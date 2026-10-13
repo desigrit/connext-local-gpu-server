@@ -1,10 +1,12 @@
 import { useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
-import type { GpuHistory } from './types';
+import type { GpuHistory, GpuMetrics } from './types';
 import { Gpu } from 'lucide-react';
 import { STALE_AFTER_MS } from './timing';
 import { gpuBarVariants, type GpuBarVariant } from './gpuBarVariants';
 
 const HOUR = 60 * 60 * 1000;
+const gib = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 });
+const memory = (mib: number | null | undefined) => mib == null ? 'N/A' : gib.format(mib / 1024);
 const fullTime = (time: number) => new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' }).format(time);
 
 function tooltipTime(time: number) {
@@ -24,7 +26,7 @@ export function activityHours(history: GpuHistory | null | undefined, now: numbe
   });
 }
 
-export default function GpuActivity({ history, gpuName, now, stale, variant = 'slender', compact = false }: { history?: GpuHistory | null; gpuName?: string | null; now: number; stale: boolean; variant?: GpuBarVariant; compact?: boolean }) {
+export default function GpuActivity({ history, gpuName, metrics, now, stale, variant = 'slender', compact = false }: { history?: GpuHistory | null; gpuName?: string | null; metrics?: GpuMetrics | null; now: number; stale: boolean; variant?: GpuBarVariant; compact?: boolean }) {
   const marks = gpuBarVariants.find(item => item.id === variant)?.marks ?? 1;
   const id = useId().replaceAll(':', '');
   const [hovered, setHovered] = useState<number | null>(null);
@@ -42,7 +44,17 @@ export default function GpuActivity({ history, gpuName, now, stale, variant = 's
   }
   const deviceName = gpuName?.replace(/^NVIDIA\s+/i, 'Nvidia ').replace(/^(Quadro|GeForce|RTX|Tesla)\b/i, 'Nvidia $1');
   return <section className={'activity-strip bars-' + variant + (earlier ? ' activity-old' : '')} aria-label="GPU usage over the last 48 hours">
-    {!compact && <div className="status-line activity-heading"><Gpu className="row-icon" size={19} strokeWidth={1.65} aria-hidden="true" /><h2 className="row-title">GPU usage</h2><p className="gpu-name">{deviceName ? 'Remote GPU: ' + deviceName : 'Remote GPU: Details not linked'}</p></div>}
+    {!compact && <div className="status-line activity-heading">
+      <Gpu className="row-icon" size={19} strokeWidth={1.65} aria-hidden="true" /><h2 className="row-title">GPU usage</h2>
+      <div className="gpu-details">
+        <p className="gpu-name">{deviceName || 'Details not linked'}</p>
+        {(metrics?.devices ?? [null]).map(gpu => <p className="gpu-metrics" key={gpu?.index ?? 'unavailable'}>
+          {metrics && metrics.devices.length > 1 && <span>GPU {gpu?.index}</span>}
+          <span>GPU load <strong>{gpu?.loadPercent == null ? 'N/A' : gpu.loadPercent + '%'}</strong></span>
+          <span>VRAM <strong>{gpu?.memoryUsedMib == null && gpu?.memoryTotalMib == null ? 'N/A' : memory(gpu?.memoryUsedMib) + ' / ' + memory(gpu?.memoryTotalMib) + ' GiB'}</strong></span>
+        </p>)}
+      </div>
+    </div>}
     <div className="activity-body">
     <p className="sr-only" id={id + '-help'}>Observed GPU activity while an Ollama model was in GPU memory. Other GPU work can contribute. Empty and unmonitored hours are Idle. Use left and right arrows to inspect hours.{earlier ? ' These are earlier readings.' : ''}</p>
     <div className="hour-track" onPointerLeave={() => setHovered(null)}>

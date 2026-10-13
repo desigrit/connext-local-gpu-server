@@ -10,7 +10,7 @@ test('healthy screen exposes the external URL, GPU name, and installed models', 
   await expect(page.locator('.endpoint')).toHaveText('http://192.0.2.10:11434');
   await page.getByRole('button', { name: 'Copy server URL', exact: true }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('http://192.0.2.10:11434');
-  await expect(page.getByText('Remote GPU: Nvidia Quadro RTX 8000', { exact: true })).toBeVisible();
+  await expect(page.getByText('Nvidia Quadro RTX 8000', { exact: true })).toBeVisible();
   await expect(page.locator('.status-row summary')).toHaveCount(1);
   await page.locator('summary').filter({ hasText: 'Model library' }).click();
   await expect(page.getByRole('list', { name: 'Installed models' }).getByRole('listitem')).toHaveCount(3);
@@ -126,7 +126,7 @@ test('desktop and phone stay readable and accessible', async ({ page }) => {
 test('pairing validation identifies its field and a valid key links host details', async ({ page }) => {
   await page.goto('/?demo=remote');
   await expect(page.getByRole('button', { name: 'Refresh status', exact: true })).toBeEnabled();
-  await expect(page.getByText('Remote GPU: Details not linked', { exact: true })).toBeVisible();
+  await expect(page.getByText('Details not linked', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByLabel('Server name').fill('');
   await page.getByRole('button', { name: 'Save', exact: true }).click();

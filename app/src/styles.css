@@ -128,9 +128,13 @@ details[open] .row-chevron { transform: rotate(180deg); }
 
 
 .activity-strip { border-bottom: 1px solid var(--line); }
-.activity-heading { min-height: 56px; }
+.activity-heading { min-height: 56px; align-items: flex-start; padding-block: 16px 10px; }
 .activity-body { margin-left: 33px; padding-bottom: 16px; }
-.gpu-name { margin: 0 19px 0 auto; text-align: right; color: var(--muted); font-size: 12px; font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
+.gpu-details { margin: 0 19px 0 auto; min-width: 0; text-align: right; }
+.gpu-name { margin: 0; color: var(--muted); font-size: 12px; font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
+.gpu-metrics { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 2px 14px; margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.gpu-metrics span { white-space: nowrap; }
+.gpu-metrics strong { color: var(--ink); font-weight: 600; }
 .activity-strip { --bar-width: 4px; --bar-height: 30px; --bar-gap: 3px; --bar-radius: 1.5px; --bar-idle: #b7c5b0; --bar-edge: transparent; }
 .bars-slender { --bar-width: 6px; --bar-height: 30px; --bar-gap: 3px; --bar-radius: 2px; --bar-idle: #d5dfce; }
 .bars-tall { --bar-width: 4px; --bar-height: 38px; --bar-gap: 3px; --bar-idle: #c6d2be; }
@@ -239,7 +243,8 @@ details[open] .row-chevron { transform: rotate(180deg); }
 @media (max-width: 560px) {
   .activity-heading { flex-wrap: wrap; gap: 6px 9px; padding-block: 12px; }
   .activity-heading .row-title { flex: none; }
-  .activity-heading .gpu-name { width: calc(100% - 30px); margin: 0 0 4px 30px; text-align: left; font-size: 11px; }
+  .activity-heading .gpu-details { width: calc(100% - 30px); margin: 0 0 4px 30px; }
+  .activity-heading .gpu-name { font-size: 11px; }
   .activity-strip { --bar-gap: 2px; }
 }
 

@@ -1,4 +1,6 @@
-use crate::{get_json, Check, Mode, State};
+#[cfg(any(test, not(target_os = "android")))]
+use crate::GpuReading;
+use crate::{get_json, Check, GpuMetrics, Mode, State};
 use reqwest::Client;
 use serde_json::Value;
 use std::{path::PathBuf, time::Duration};
@@ -96,8 +98,8 @@ async fn gpu_name(mode: Mode) -> Option<String> {
     Some(name.lines().take(4).collect::<Vec<_>>().join(", "))
 }
 
-/// Returns whether any NVIDIA GPU is at least 5% busy, without requesting model work.
-pub async fn gpu_active() -> Option<bool> {
+/// Read whole-device load and framebuffer memory without requesting model work.
+pub async fn gpu_metrics() -> Option<GpuMetrics> {
     #[cfg(target_os = "android")]
     {
         None
@@ -110,7 +112,7 @@ pub async fn gpu_active() -> Option<bool> {
         let mut command = Command::new(nvidia_smi_path()?);
         command
             .args([
-                "--query-gpu=utilization.gpu",
+                "--query-gpu=index,utilization.gpu,memory.used,memory.total",
                 "--format=csv,noheader,nounits",
             ])
             .stdin(Stdio::null())
@@ -134,7 +136,7 @@ pub async fn gpu_active() -> Option<bool> {
             if bytes.len() > 4 * 1024 || !child.wait().await.ok()?.success() {
                 return None;
             }
-            parse_gpu_activity(std::str::from_utf8(&bytes).ok()?)
+            parse_gpu_metrics(std::str::from_utf8(&bytes).ok()?)
         })
         .await
         .ok()?
@@ -142,18 +144,31 @@ pub async fn gpu_active() -> Option<bool> {
 }
 
 #[cfg(any(test, not(target_os = "android")))]
-fn parse_gpu_activity(text: &str) -> Option<bool> {
-    let mut active = false;
-    let mut count = 0;
+fn parse_gpu_metrics(text: &str) -> Option<GpuMetrics> {
+    fn number<T: std::str::FromStr>(value: &str) -> Option<Option<T>> {
+        match value.trim() {
+            "N/A" | "[N/A]" | "[Not Supported]" => Some(None),
+            value => value.parse().ok().map(Some),
+        }
+    }
+    let mut devices = Vec::new();
     for line in text.lines() {
-        let utilization: u8 = line.trim().parse().ok()?;
-        count += 1;
-        if utilization > 100 || count > 64 {
+        let columns: Vec<_> = line.split(',').map(str::trim).collect();
+        if columns.len() != 4 || devices.len() >= 64 {
             return None;
         }
-        active |= utilization >= 5;
+        devices.push(GpuReading {
+            index: columns[0].parse().ok()?,
+            load_percent: number(columns[1])?,
+            memory_used_mib: number(columns[2])?,
+            memory_total_mib: number(columns[3])?,
+        });
     }
-    (count > 0).then_some(active)
+    let metrics = GpuMetrics {
+        sample_age_ms: 0,
+        devices,
+    };
+    metrics.is_valid().then_some(metrics)
 }
 
 fn status_check(json: &Value) -> Check {
@@ -328,14 +343,57 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn gpu_activity_requires_bounded_numeric_driver_evidence() {
-        assert_eq!(parse_gpu_activity("0\n4\n"), Some(false));
-        assert_eq!(parse_gpu_activity(" 5 \r\n0\r\n"), Some(true));
-        assert_eq!(parse_gpu_activity("100"), Some(true));
-        for invalid in ["", "N/A", "5%", "-1", "101", "5\nN/A", "\n"] {
-            assert_eq!(parse_gpu_activity(invalid), None);
+    fn gpu_readings_distinguish_real_zero_from_unsupported_fields() {
+        let zero = parse_gpu_metrics("0, 0, 0, 49152\r\n").unwrap();
+        assert_eq!(zero.activity(), Some(false));
+        assert_eq!(zero.devices[0].memory_used_mib, Some(0));
+        assert_eq!(zero.devices[0].memory_total_mib, Some(49152));
+        let busy = parse_gpu_metrics("0, 100, 4096, 49152\n1, 0, 0, 8192").unwrap();
+        assert_eq!(busy.activity(), Some(true));
+        assert_eq!(busy.devices[1].index, 1);
+        let unknown = parse_gpu_metrics("0, [N/A], N/A, 49152").unwrap();
+        assert_eq!(unknown.activity(), None);
+        assert_eq!(unknown.devices[0].memory_used_mib, None);
+        assert_eq!(
+            parse_gpu_metrics("0, 5, [Not Supported], N/A")
+                .unwrap()
+                .activity(),
+            Some(true)
+        );
+        assert_eq!(
+            parse_gpu_metrics("0, 4, 100, 8192\n1, N/A, N/A, N/A")
+                .unwrap()
+                .activity(),
+            None
+        );
+    }
+
+    #[test]
+    fn gpu_readings_reject_malformed_or_unbounded_driver_output() {
+        for invalid in [
+            "",
+            "N/A",
+            "0, 5%, 1, 2",
+            "0, -1, 1, 2",
+            "0, 101, 1, 2",
+            "0, 5, 3, 2",
+            "0, 0, 0, 0",
+            "0, 0, 1",
+            "0, 0, 1, 2, 3",
+            "0, 0, 1, 2\n0, 1, 1, 2",
+            "1024, 0, 1, 2",
+            "0, 0, 1, 16777217",
+        ] {
+            assert_eq!(parse_gpu_metrics(invalid), None, "{invalid}");
         }
-        assert_eq!(parse_gpu_activity(&"0\n".repeat(65)), None);
+        assert_eq!(
+            parse_gpu_metrics(
+                &(0..65)
+                    .map(|index| format!("{index}, 0, 1, 2\n"))
+                    .collect::<String>()
+            ),
+            None
+        );
     }
 
     #[test]
