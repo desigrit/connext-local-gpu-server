@@ -110,6 +110,10 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+        with:
+          # The action default includes the retired "tools" SDK package.
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
       - name: Install Android build tools
         run: |
           sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358'
