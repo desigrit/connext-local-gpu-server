@@ -224,7 +224,7 @@ components:
 
 Shambu is a quiet status instrument for a personal GPU server. A readiness sentence and connection age lead into an external address, four aligned readings, and thin hourly bars. Chalk surfaces, green ink, and fine rules keep the interface light.
 
-The native R2-D2 icon carries the product identity. Readiness and an icon-only Settings action lead the main viewport. App marks identify local launch links, and GPU usage closes the readings with slender hourly bars.
+The native Shambu pen-sketch icon carries the product identity. Readiness and an icon-only Settings action lead the main viewport. App marks identify local launch links, and GPU usage closes the readings with slender hourly bars.
 
 **Key Characteristics:**
 
@@ -232,7 +232,7 @@ The native R2-D2 icon carries the product identity. Readiness and an icon-only S
 - A readiness heading and connection freshness with icon-only Settings at the right.
 - Four continuous status rows with colored dots and visible recovery guidance.
 - App launch marks, real installed models, and a compact GPU usage section.
-- The existing R2-D2 artwork in the page identity and native app icon.
+- The approved pen-sketch Shambu artwork in the native app icon.
 
 This record follows `app/src/styles.css`, `app/src/App.tsx`, `app/src/StatusRow.tsx`, `app/src/GpuActivity.tsx`, `app/src/readiness.ts`, and `app/src/timing.ts`. The frontmatter owns reusable tokens. `.impeccable/design.json` adds component examples, motion, breakpoint metadata, and narrative. The surface brief owns this dashboard's composition. See the [UX state guide](docs/ux-states.md) for complete state coverage.
 
@@ -395,7 +395,7 @@ The browser development preview has a clearly labeled synthetic-state selector a
 
 ### Native Identity
 
-The product name remains Shambu. The larger R2-D2 foreground and original forest form the native icon and centered page identity. Use the same active artwork in both places, preserving its proportions and legibility. The approved artwork and source credits are maintained in the [branding notes](docs/branding.md); use the active derivatives rather than reconstructing the character or backdrop.
+The product name remains Shambu. The approved pen sketch forms the native icon. Preserve its proportions and legibility, and keep the main viewport free of a repeated mascot or product label. The approved artwork and source credits are maintained in the [branding notes](docs/branding.md); use the active derivatives rather than reconstructing the character or backdrop.
 
 ## Do's and Don'ts
 
@@ -407,7 +407,7 @@ The product name remains Shambu. The larger R2-D2 foreground and original forest
 - **Do** keep failure guidance and recovery actions visible.
 - **Do** show real model names and preserve the bundled app and Qwen marks.
 - **Do** preserve hour inspection, keyboard focus, and reduced-motion behavior.
-- **Do** keep the active R2-D2 artwork in the native icon.
+- **Do** keep the approved Shambu pen sketch in the native icon.
 - **Do** use generic examples and keep personal connection details out of public artifacts.
 
 ### Don't:
@@ -420,3 +420,7 @@ The product name remains Shambu. The larger R2-D2 foreground and original forest
 - **Don't** use color alone to communicate a reading.
 - **Don't** add shadows to persistent containers, glass, textures, or decorative data imagery.
 - **Don't** use em dashes in product copy or public documentation.
+
+## Desktop appearance
+
+Clean is the default. Ctrl + Shift + K toggles an optional frame of flat creepers while the window has focus. Remember the selection locally. Keep the vines behind the app, clear of the text and controls, and noninteractive. On wide windows, the decorated theme uses an 860px maximum shell to leave room for the foliage; the clean theme retains its 1000px shell. Respect reduced motion. Android stays clean. README screenshots use the clean appearance; the README mentions the shortcut without revealing the effect.

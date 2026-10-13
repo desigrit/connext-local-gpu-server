@@ -30,7 +30,9 @@ Ollama and Tailscale row links open the installed app on the device running Sham
 
 ## Brand Commitments
 
-A quiet, light, minimal interface with clear status rows and a little whimsy. No em dashes. The name is Shambu, inspired by Shikari Shambu. Use the active R2-D2 artwork and original forest in the native icon. The main viewport starts with readiness and contains no repeated product label or mascot. Preserve the artwork and source credits in the [branding notes](docs/branding.md).
+A quiet, light, minimal interface with clear status rows and a little whimsy. No em dashes. The name is Shambu, inspired by Shikari Shambu. Use the approved minimal pen-sketch icon. The main viewport starts with readiness and contains no repeated product label or mascot. Preserve the artwork and source credits in the [branding notes](docs/branding.md).
+
+The clean appearance is the default. On desktop, Ctrl + Shift + K toggles the vines theme while Shambu has focus, and remembers the selection on that device. Flat, dense creepers stay at the window edges, clear of the readings and controls. Android keeps the clean appearance. The public README uses clean screenshots and mentions the shortcut without revealing its effect.
 
 Desktop defaults to a centered 1120 by 760 window, fitted to the available display. Preserve the operating-system title bar and controls. Center the single-column dashboard when it fits, with balanced margins and normal scrolling for longer content. Settings is an icon-only action at the top right. Its panel explains which server this device checks and ends with right-aligned Cancel and Save actions.
 

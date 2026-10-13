@@ -1,0 +1,3 @@
+Shambu decorative creepers.
+
+The frame is an AI edit made with the built-in OpenAI image tool from the approved docs/concepts/vines-overgrown-v2.png concept. The edit removes the interface and white background, leaving the edge foliage on a transparent canvas. The production prompt is preserved beside this file as frame.prompt.txt. The original concept prompts are in docs/concepts/matchbox-and-creepers-prompts.txt.

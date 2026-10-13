@@ -86,9 +86,6 @@ jobs:
           key: ${{ matrix.target }}
       - run: npm ci
       - run: npm run tauri -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundle }} --ci
-      - name: Build Windows host companion
-        if: runner.os == 'Windows'
-        run: cargo build -p shambu-agent --release --target ${{ matrix.target }} --locked
       - name: Stage desktop downloads
         shell: pwsh
         run: |
@@ -97,11 +94,6 @@ jobs:
           $targetRoot = 'target/${{ matrix.target }}/release'
           if ($IsWindows) {
             Copy-Item -Path "$targetRoot/bundle/nsis/*.exe" -Destination "release-assets/Shambu-$platform-Setup.exe"
-            New-Item -ItemType Directory -Path host-package -Force | Out-Null
-            Copy-Item -Path "$targetRoot/shambu-agent.exe" -Destination host-package
-            Copy-Item -Path ../scripts/Install-ShambuAgent.ps1,../scripts/ShambuAgent.Common.ps1,../scripts/Uninstall-ShambuAgent.ps1 -Destination host-package
-            'Open PowerShell as Administrator in this folder. Run: .\Install-ShambuAgent.ps1 -AgentExe .\shambu-agent.exe. See https://github.com/desigrit/shambu/blob/main/docs/host-agent.md for private Tailscale forwarding and upgrades.' | Set-Content host-package/README.txt
-            Compress-Archive -Path host-package/* -DestinationPath "release-assets/Shambu-Host-$platform.zip"
           } else {
             Copy-Item -Path "$targetRoot/bundle/dmg/*.dmg" -Destination "release-assets/Shambu-$platform.dmg"
           }
@@ -173,6 +165,7 @@ jobs:
           set -euo pipefail
           version=$(node -p "require('./app/package.json').version")
           mkdir release-assets
-          find artifacts -type f \( -name '*-Setup.exe' -o -name '*.dmg' -o -name 'Shambu-Host-*.zip' \) -exec cp {} release-assets/ \;
+          find artifacts -type f \( -name '*-Setup.exe' -o -name '*.dmg' \) -exec cp {} release-assets/ \;
+          test "$(find release-assets -type f | wc -l)" -eq 3
           gh release create "v$version" --draft --title "Shambu $version" --target "$GITHUB_SHA" --notes-file "docs/releases/v$version.md" release-assets/*
           echo 'Draft created. Sign the Android artifact locally, verify every download, then publish.'

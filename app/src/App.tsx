@@ -9,6 +9,7 @@ import { getReadinessStatus } from './readiness';
 import { gpuBarVariant } from './gpuBarVariants';
 import { CHECK_INTERVAL_MS, STALE_AFTER_MS, checkedAge } from './timing';
 import { PreviewControls } from './PreviewControls';
+import { useWindowTheme } from './useWindowTheme';
 import type { Check, Mode, Settings, Snapshot } from './types';
 
 const initialChecks: Check[] = [
@@ -16,6 +17,7 @@ const initialChecks: Check[] = [
 ].map(([id, title]) => ({ id, title, state: 'unknown', label: 'Waiting', detail: 'Run a check to see this status.', help: null }));
 
 export default function App() {
+  const theme = useWindowTheme(!android);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [draft, setDraft] = useState<Settings>(defaultSettings);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
@@ -136,7 +138,9 @@ export default function App() {
     } catch { setError('Could not copy the URL. You can select and copy the address below.'); }
   }
 
-  return <main className="app-shell">
+  return <>
+    {theme === 'vines' && <div className="vine-frame" aria-hidden="true" />}
+    <main className="app-shell" data-theme={theme}>
     <header className="app-header">
       <div className="readiness-message">
         <h1 id="readiness-heading" aria-live="polite" aria-atomic="true">{headline}</h1>
@@ -207,5 +211,5 @@ export default function App() {
     </div>
 
 
-  </main>;
+  </main></>;
 }

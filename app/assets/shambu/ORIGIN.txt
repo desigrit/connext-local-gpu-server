@@ -1,0 +1,5 @@
+Shambu pen-sketch icon.
+
+The master shambu.png is the unmodified approved concept from docs/concepts/shambu-stick-sketch.png, generated with the built-in OpenAI image tool from the archived Shikari Shambu portrait. The full prompt is in docs/concepts/shambu-stick-sketch-prompt.txt. Platform icons are Tauri CLI exports of this master.
+
+Shikari Shambu was created by Luis Fernandes and Vasant Halbe for Tinkle, published by Amar Chitra Katha Pvt. Ltd. Source-art attribution and the original portrait checksum are preserved in app/assets/archive/shikari-shambu/README.md. The character and reference artwork remain the property of their respective rights holders. This project's software license does not grant rights to the character or reference artwork.

@@ -1,6 +1,6 @@
-# Retired Shikari Shambu artwork
+# Shikari Shambu source archive
 
-These assets are retained as source history. The current R2-D2 icon embeds the binoculars illustration unchanged and preserves the visible canopy outside the old subject footprint and the foreground leaves, as documented in [branding.md](../../../../docs/branding.md). The area previously occupied by the man and binoculars is repaired with a clipped background-only image edit so a smaller droid can stand inside the circle. The remaining archived images are references, not imported into the app interface.
+These assets preserve the character references and earlier artwork. The original portrait is the reference for the active minimal pen-sketch icon, documented in [branding.md](../../../../docs/branding.md). The jungle and binoculars images remain design history.
 
 Shikari Shambu was created by Luis Fernandes and Vasant Halbe for Tinkle. The publisher is Amar Chitra Katha Pvt. Ltd. The [publisher's 2021 press release](https://www.issuewire.com/tinkles-shikari-shambu-turns-38-1700939605829767) credits Savio Mascarenhas as the illustrator of Shambu's stories at that time, without a separate credit for each attached image.
 

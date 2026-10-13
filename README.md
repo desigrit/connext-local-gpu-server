@@ -1,3 +1,5 @@
+<img src="app/src/assets/shambu-icon.png" alt="Shambu" width="72" height="72">
+
 # Shambu
 
 Your GPU is at home. You are somewhere else. Shambu checks that the two of you are still on speaking terms.
@@ -26,5 +28,7 @@ One small window shows whether Ollama, Tailscale, and the private connection are
 ## Why Shambu?
 
 Named after Shikari Shambu, one of the comic-book characters I grew up with. This one also keeps an eye on things, preferably without leaving his chair.
+
+There’s an easter egg. Try **Ctrl + Shift + K** on a PC or Mac.
 
 [Releases](https://github.com/desigrit/shambu/releases) · [Troubleshooting](docs/operations.md) · [Build from source](app/README.md) · [Privacy](docs/privacy.md)

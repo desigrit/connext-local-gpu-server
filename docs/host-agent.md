@@ -23,7 +23,7 @@ If the PC is offline, the app can report that it cannot reach the services. It c
 
 ## Download the companion on Windows
 
-The [latest release](https://github.com/desigrit/shambu/releases/latest) includes a Shambu-Host-Windows package for x64 or ARM64. Extract it, open Windows PowerShell as Administrator in that folder, and run:
+Download the companion for [Windows x64](https://github.com/desigrit/shambu/releases/download/v0.2.0/Shambu-Host-Windows-x64.zip) or [Windows ARM64](https://github.com/desigrit/shambu/releases/download/v0.2.0/Shambu-Host-Windows-ARM64.zip). Extract it, open Windows PowerShell as Administrator in that folder, and run:
 
 ~~~powershell
 .\Install-ShambuAgent.ps1 -AgentExe .\shambu-agent.exe

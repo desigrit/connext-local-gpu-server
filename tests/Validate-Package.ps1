@@ -1,8 +1,17 @@
 # Offline checks only: no GPU requests, task changes, or network connections.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$files = @(Get-ChildItem -LiteralPath $root -Recurse -File -Force |
-    Where-Object { $_.FullName -notmatch '[\\/](\.git|\.local|node_modules|target|dist|gen|test-results|playwright-report|\.impeccable)[\\/]' -and $_.Name -ne 'config.local.json' })
+$excludedDirectories = @('.git', '.local', 'node_modules', 'target', 'dist', 'gen', 'test-results', 'playwright-report', '.impeccable')
+function Get-PackageFiles {
+    param([string]$Directory)
+    foreach ($entry in Get-ChildItem -LiteralPath $Directory -Force) {
+        if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) { continue }
+        if ($entry.PSIsContainer) {
+            if ($entry.Name -notin $excludedDirectories) { Get-PackageFiles -Directory $entry.FullName }
+        } elseif ($entry.Name -ne 'config.local.json') { $entry }
+    }
+}
+$files = @(Get-PackageFiles -Directory $root)
 foreach ($file in $files | Where-Object { $_.Extension -eq '.ps1' }) {
     $tokens = $null; $errors = $null
     $null = [System.Management.Automation.Language.Parser]::ParseFile($file.FullName,[ref]$tokens,[ref]$errors)
