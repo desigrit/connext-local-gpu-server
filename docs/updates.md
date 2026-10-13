@@ -1,6 +1,6 @@
 # App updates
 
-Shambu shows its installed version at the bottom left. A small **Update** pill appears when a newer release is available. Click it to download, then choose **Restart** on Windows or Mac. Android shows only its version number; its updates are handled by Google Play.
+Shambu shows its installed version at the bottom left. A small **Update** pill appears when a newer release is available. Click it to download, then choose **Restart** on Windows or Mac. Android shows only its version number.
 
 Checks run at launch and every six hours while the app is visible. A failed check retries after fifteen minutes, or when the device reconnects. Downloads start only when requested. Failed downloads offer **Retry**. Failed installations keep the verified download ready for another attempt. Quitting Shambu discards an uninstalled download; closing it to the tray keeps the download ready.
 
