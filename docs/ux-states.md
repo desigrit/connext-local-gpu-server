@@ -4,24 +4,28 @@
 
 For a live development preview, run the app's Vite development server and open its local URL with ?demo=healthy. The preview selector covers all the states below. **Simulate recovery** changes the sample result to healthy and runs a preview check. These controls never appear in the installed app.
 
+The page starts with the centered Shambu name and existing R2-D2 icon, with Settings at the right. The installed app retains its native title bar. Settings explains which GPU server this device checks.
+
+The combined summary uses green **Connected** only when current Ollama, Tailscale, forwarding, host evidence, GPU readiness, and model-library checks support it. GPU Idle is acceptable. Before the first result it reads **Checking** or **Not checked**. A fresh previous failure remains visible during refresh.
+
 | State | What Shambu shows | Recovery |
 | --- | --- | --- |
-| Ready | Green dots, Active checks, and Connected - Just now below the heading. | No action needed. Checks refresh every five minutes. |
+| Ready | Green Connected - Just now below the readiness heading, with verified connection and model checks. An idle GPU is healthy. | No action needed. Checks refresh every five minutes. |
 | Ollama offline | Red Unreachable, Disconnected, and visible guidance. Dependent checks remain unverified. | Open Ollama on the GPU PC, or use Edit address if the URL is wrong. Check again after fixing it. |
-| Tailscale disconnected | Amber Disconnected. Ollama may still be available locally while the private route is unverified. | Open Tailscale and connect or sign in. For a host-side failure, do this on the GPU PC. |
-| Forwarding missing | Amber Not configured. The server card has no invented private URL. | Restore the matching private TCP forward on the GPU PC using the [setup guide](../README.md), then check again. |
-| Pairing key rejected | The direct Ollama check can stay green, while host checks say Key not accepted. | Choose Update the host pairing key, copy a current key from Shambu on the GPU PC, and save it in Settings on this device. |
-| Host companion offline | Ollama can remain reachable while its host diagnostics are unverified. | Check the [host companion](host-agent.md), its private forward, and the host status URL in Settings. |
-| CPU fallback | The reachable server remains connected. A visible CPU detected warning explains the model's allocation. | Check the GPU driver and Ollama's loaded-model allocation on the GPU PC. Restart Ollama only after its active work finishes. |
-| No models | An amber Empty model library with a download instruction. | Open Ollama on the GPU PC, download a model, then check again. |
+| Tailscale disconnected | Amber Connection issue in the summary and Disconnected on the Tailscale row. Ollama may still be available locally. | Open Tailscale and connect or sign in. For a host-side failure, do this on the GPU PC. |
+| Forwarding missing | Amber Connection issue in the summary and Not configured on the forwarding row. The server strip has no invented private URL. | Restore the matching private TCP forward on the GPU PC using the [setup guide](../README.md), then check again. |
+| Pairing key rejected | Amber Check needed in the summary. The direct Ollama row can stay green while host checks say Key not accepted. | Choose Update the host pairing key, copy a current key from Shambu on the GPU PC, and save it in Settings on this device. |
+| Host companion offline | Amber Check needed in the summary. Ollama can remain reachable while its host diagnostics are unverified. | Check the [host companion](host-agent.md), its private forward, and the host status URL in Settings. |
+| CPU fallback | Amber Needs attention in the summary. The reachable server has a visible CPU detected warning about model allocation. | Check the GPU driver and Ollama's loaded-model allocation on the GPU PC. Restart Ollama only after its active work finishes. |
+| No models | Amber Needs attention in the summary and an Empty model library with a download instruction. | Open Ollama on the GPU PC, download a model, then check again. |
 | Stale readings | Muted old statuses, Check needed, the reading age, and Refresh now. | Refresh once the app and connection are available. Stale data is never presented as a fresh all-clear. |
-| Host not linked | Ollama can be connected, but host checks say Not linked. Unobserved GPU hours stay Idle. | Use Link host details and the optional pairing key to inspect the GPU PC's own checks. |
+| Host not linked | Amber Check needed in the summary, with Not linked host checks. The Ollama row can remain Active. Unobserved GPU hours stay Idle. | Use Link host details and the optional pairing key to inspect the GPU PC's own checks. |
 
 Launch links open the installed app on **this device**. See [native app links](native-launchers.md) for platform behavior. Opening another app does not mark a check healthy; only a new readiness result does that.
 
-The last check reads **Just now** for less than two minutes, then **2 minutes ago**, **3 minutes ago**, and so on. Automatic checks run every five minutes while the app is visible and Settings is closed. A failed probe or a reading older than five minutes and thirty seconds marks existing evidence stale.
+The last check reads **Just now** for less than two minutes, then **2 minutes ago**, **3 minutes ago**, and so on. Automatic checks run every five minutes while the app is visible and Settings is closed. A failed refresh or a reading at least five minutes and thirty seconds old marks existing evidence stale.
 
-Hourly dots are filled only where qualifying GPU activity was observed. Hover, tap, or use the arrow keys for a tooltip such as **9 AM · Idle**. Hours use the device's local time zone, including daylight saving, without displaying the zone name. Minute offsets are retained where a local zone is offset by a fraction of an hour.
+The **GPU usage** section shares the status-row icon and heading style. It identifies the device with **Remote GPU: Nvidia Example GPU**, or **Remote GPU: Details not linked**. Its 25 vertical hourly pills cover the rolling 24-hour window, including the partial ends, with **24h**, **12h**, and **Now** labels below. Pills are filled only where qualifying GPU activity was observed. Hover, tap, or use the arrow keys for a tooltip such as **9 AM · Idle**. Hours use the device's local time zone, including daylight saving, without displaying the zone name. Minute offsets are retained where a local zone is offset by a fraction of an hour.
 
 ## Ollama offline
 

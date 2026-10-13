@@ -18,6 +18,8 @@ All probes are read-only. Ollama requests are limited to GET `/api/version`, `/a
 
 Connection state and age sit directly under the readiness heading, beside the refresh icon. **Just now** means the reading is less than two minutes old; later ages use whole minutes. Checks refresh every five minutes while the app is visible and Settings is closed. The refresh icon runs an immediate check. Readings become stale at 330 seconds, and a failed refresh also marks retained readings stale. Closing the app stops its checks.
 
+**Connected** is a combined readiness result: Ollama, Tailscale, forwarding, host evidence, and the model library must be verified and current. An idle GPU is healthy. **Connection issue** identifies a Tailscale or forwarding problem, **Needs attention** covers GPU or model warnings, and **Check needed** covers stale or unverified evidence. An unreachable Ollama service shows **Disconnected**. A reachable Ollama endpoint alone does not produce green Connected.
+
 ## Use it
 
 On the GPU PC, choose **Settings > This computer** and use `http://127.0.0.1:11434`. Local probes use this loopback address. The main screen shows and copies the Tailscale URL for your other devices once it detects a matching TCP forward. If that address is unavailable, the copy control is disabled.
@@ -26,7 +28,7 @@ On another Windows PC, a Mac, or Android, choose **Remote server** and enter you
 
 To see the GPU PC's own Tailscale and forwarding status remotely, [set up the host companion](../docs/host-agent.md) once. In Shambu on that PC, open **Settings > Copy pairing key**. Paste the key into **Settings > Host pairing key** on each remote device. Without pairing, Ollama and GPU allocation checks still work; host-only checks remain explicitly unverified.
 
-The single-column dashboard centers in the window when it fits. **Settings** stays beside the heading. Colored dots accompany the status words, and **Model library** expands into real installed model names and sizes, with a Qwen mark for Qwen models.
+The single-column dashboard centers in the window when it fits. A page header centers the existing R2-D2 icon and **Shambu**, with **Settings** at the right. The operating-system title bar remains intact. Settings explains which GPU server this device checks. Colored dots accompany the status words, and **Model library** expands into real installed model names and sizes, with a Qwen mark for Qwen models.
 
 Failed checks show their evidence, recovery advice, and **Check again** directly. Ollama failures also offer **Edit address**. Stale readings offer **Refresh now**; an app-wide check error offers **Try again**. See the [UX state guide](../docs/ux-states.md) for each state and recovery path.
 
@@ -34,15 +36,17 @@ A successful check on the host does not prove access from every peer or from mob
 
 ## Open companion apps
 
-Select the Ollama or Tailscale row name to open that app **on this device**. The outward arrow and hover or focus hint identify the action. Selecting it while checking a remote GPU PC still opens the app on the device running Shambu, not on the remote PC.
+Select the Ollama or Tailscale row name to open that app **on this device**. The outward arrow and hover or focus hint identify the action. Ollama uses its bundled mark; Tailscale uses the supplied nine-dot image. Selecting it while checking a remote GPU PC still opens the app on the device running Shambu, not on the remote PC.
 
 Windows and macOS can open installed Ollama and Tailscale. Android offers Tailscale only; Ollama must be opened on the GPU PC. A successful launch request can reveal a tray or menu-bar app instead of a window. Missing or unsupported apps show a useful message. Browser previews cannot launch native apps. See the [native launcher guide](../docs/native-launchers.md) for platform and installation limits.
 
 ## GPU history
 
-A slim line of hourly dots sits below Model Library. It shows a rolling **24-hour** window, with one dot per hourly bucket. A filled dot means activity was observed in that hour; an outlined dot is Idle. The window includes partial hours at either end, so it displays 25 dots.
+The **GPU usage** section follows the status rows. A GPU icon and heading lead into **Remote GPU: Nvidia Example GPU**, or **Remote GPU: Details not linked** when the device name is unavailable.
 
-Hover, tap, or focus a dot to inspect its hour in a custom tooltip, such as **9 AM · Idle**. Times use your device's local zone without displaying an abbreviation. Tab enters the strip at the latest or last inspected hour. Left and right arrows move between hours, Home and End move to the first and last, and Escape closes the tooltip. Empty and unmonitored hours display **Idle**.
+The bar shows a rolling **24-hour** window, with one vertical pill per hourly bucket. A filled pill means activity was observed in that hour; an outlined pill is Idle. The window includes partial hours at either end, so it displays 25 pills. **24h**, **12h**, and **Now** labels mark the range.
+
+Hover, tap, or focus a pill to inspect its hour in a custom tooltip, such as **9 AM · Idle**. Times use your device's local zone without displaying an abbreviation. Tab enters the strip at the latest or last inspected hour. Left and right arrows move between hours, Home and End move to the first and last, and Escape closes the tooltip. Empty and unmonitored hours display **Idle**.
 
 The host companion samples NVIDIA GPU utilization every five seconds and correlates activity of at least 5% with fresh evidence that Ollama has a model in GPU memory. This estimates Ollama-related activity; other GPU work can contribute while a model stays loaded, and very short activity may be missed. This is an activity estimate, not a measurement of exact Ollama request counts.
 
@@ -50,7 +54,7 @@ Continuous activity fills every hour in which it is observed. Burst starts are a
 
 The companion stores 48 hours of activity privately on the GPU PC and keeps collecting when the app window is closed. Pair it to see the same history from another device. History recorded by older all-GPU collectors stays separate and is not relabeled as Ollama activity.
 
-The detected GPU name appears above the activity strip. CPU and partial GPU allocation warnings remain visible below the status rows when they need attention.
+The detected GPU name appears between the GPU usage heading and activity bar. CPU and partial GPU allocation warnings remain visible below the status rows when they need attention.
 
 ## Build and run
 

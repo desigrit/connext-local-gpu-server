@@ -1,6 +1,6 @@
 # Shambu
 
-Shambu is a small app that keeps an eye on your private GPU server. One page shows Ollama, Tailscale, forwarding, installed models, and a rolling 24-hour line of observed Ollama GPU activity dots on Windows, macOS, and Android.
+Shambu is a small app that keeps an eye on your private GPU server. One page shows Ollama, Tailscale, forwarding, installed models, and a rolling 24-hour bar of observed Ollama GPU activity on Windows, macOS, and Android.
 
 This repository also includes the Windows setup guide and startup scripts for running Ollama on a GPU PC and reaching it privately through Tailscale. Use the same endpoint from a laptop at home, a phone on mobile data, or a computer while traveling.
 
@@ -10,7 +10,9 @@ The PC runs the model. Your other devices send requests and receive results. App
 
 A single-screen app for Windows, Mac, and Android checks Ollama, Tailscale, forwarding, GPU allocation, and installed models. Windows and the other native backends use Rust through Tauri. Checks never load a model.
 
-The centered dashboard shows connection age and refresh under its readiness heading, with **Settings** beside it. Colored state dots and visible recovery actions help identify the next step. Checks refresh every five minutes while the app is visible and Settings is closed. The hourly GPU dots show Active or Idle on hover, touch, or keyboard focus.
+The centered dashboard begins with the R2-D2 icon and **Shambu**, with **Settings** at the right and the native title bar preserved. Combined connection status, age, and refresh sit under the readiness heading. Green **Connected** requires verified current evidence across the connection and readiness checks; idle GPU use is healthy. Colored row dots and visible recovery actions help identify the next step.
+
+Checks refresh every five minutes while the app is visible and Settings is closed. **GPU usage** identifies the server GPU and shows 25 hourly pills across the rolling 24-hour window, with Active or Idle details on hover, touch, or keyboard focus.
 
 Ollama and Tailscale row links open those apps on the device running Shambu, even when checking a remote GPU PC. Android offers the Tailscale link only. See the [native launcher guide](docs/native-launchers.md) for platform limits and the [UX state guide](docs/ux-states.md) for recovery paths and synthetic development previews.
 

@@ -59,7 +59,7 @@ typography:
   gpu-name:
     fontFamily: "Manrope Variable, Segoe UI, sans-serif"
     fontSize: "12px"
-    fontWeight: 650
+    fontWeight: 500
     lineHeight: 1.5
   tooltip:
     fontFamily: "Manrope Variable, Segoe UI, sans-serif"
@@ -70,6 +70,16 @@ typography:
     fontFamily: "Manrope Variable, Segoe UI, sans-serif"
     fontSize: "11px"
     fontWeight: 500
+  brand:
+    fontFamily: "Manrope Variable, Segoe UI, sans-serif"
+    fontSize: "18px"
+    fontWeight: 750
+    letterSpacing: "-0.3px"
+  activity-times:
+    fontFamily: "Manrope Variable, Segoe UI, sans-serif"
+    fontSize: "10px"
+    fontWeight: 400
+    lineHeight: 1.5
 rounded:
   disclosure: "6px"
   field: "7px"
@@ -78,6 +88,8 @@ rounded:
   dot: "50%"
   app-link: "4px"
   text-action: "3px"
+  hour: "4px"
+  pill: "999px"
 spacing:
   "2": "2px"
   "4": "4px"
@@ -90,7 +102,6 @@ spacing:
   "24": "24px"
   "28": "28px"
   "36": "36px"
-  "48": "48px"
   "56": "56px"
 components:
   button-primary:
@@ -165,23 +176,9 @@ components:
     padding: "9px 12px"
   hour-button:
     backgroundColor: "transparent"
-    rounded: "{rounded.disclosure}"
-    height: "32px"
-    padding: "0"
-  hour-dot:
-    backgroundColor: "{colors.surface}"
-    rounded: "{rounded.dot}"
-    size: "11px"
-  hour-dot-active:
-    backgroundColor: "{colors.activity-active}"
-  hour-dot-selected:
-    backgroundColor: "{colors.activity-selected}"
-  hour-dot-active-selected:
-    backgroundColor: "{colors.activity-active-selected}"
-  hour-dot-stale-active:
-    backgroundColor: "{colors.activity-stale}"
-  hour-dot-compact:
-    size: "8px"
+    rounded: "{rounded.hour}"
+    height: "36px"
+    padding: "3px 0"
   state-dot:
     backgroundColor: "currentColor"
     rounded: "{rounded.dot}"
@@ -205,6 +202,33 @@ components:
     rounded: "{rounded.text-action}"
     height: "36px"
     padding: "0"
+  hour-pill:
+    backgroundColor: "{colors.surface}"
+    rounded: "{rounded.pill}"
+    height: "30px"
+    width: "100%"
+  hour-pill-active:
+    backgroundColor: "{colors.activity-active}"
+  hour-pill-selected:
+    backgroundColor: "{colors.activity-selected}"
+  hour-pill-active-selected:
+    backgroundColor: "{colors.activity-active-selected}"
+  hour-pill-stale-active:
+    backgroundColor: "{colors.activity-stale}"
+  activity-times:
+    textColor: "{colors.muted}"
+    typography: "{typography.activity-times}"
+    width: "min(100%, 600px)"
+  brand-header:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
+  brand-identity:
+    textColor: "{colors.ink}"
+    typography: "{typography.brand}"
+  brand-icon:
+    size: "48px"
+  brand-icon-compact:
+    size: "42px"
 ---
 
 # Design System: Shambu
@@ -213,27 +237,27 @@ components:
 
 **Creative North Star: "The Pocket Companion"**
 
-Shambu is a quiet status instrument for a personal GPU server. A readiness sentence and its connection age lead into an external address and four aligned readings. Chalk surfaces, green ink, fine rules, and outlined hourly dots keep the interface light.
+Shambu is a quiet status instrument for a personal GPU server. A centered brand header leads into a readiness sentence, its combined connection status, an external address, and four aligned readings. Chalk surfaces, green ink, and fine rules keep the interface light.
 
-The dashboard forms one centered column with Settings beside the heading. Official app marks identify launch links, and a narrow GPU history strip closes the reading sequence. The native R2-D2 icon carries the product's character.
+The existing R2-D2 artwork and Shambu name identify the page, with Settings at the right. App marks identify local launch links. A GPU usage section follows the readings with a detected-device label and compact hourly pills.
 
 **Key Characteristics:**
 
 - A light interface centered horizontally and vertically when space allows.
-- A readiness heading with connection freshness directly beneath it.
+- A centered Shambu identity above readiness and connection freshness.
 - Four continuous status rows with colored dots and visible recovery guidance.
-- Official app launch marks, real installed models, and compact hourly GPU dots.
-- Native identity without a repeated dashboard wordmark or portrait.
+- App launch marks, real installed models, and a compact GPU usage section.
+- The existing R2-D2 artwork in the page identity and native app icon.
 
-This record follows `app/src/styles.css`, `app/src/App.tsx`, `app/src/StatusRow.tsx`, `app/src/GpuActivity.tsx`, and `app/src/timing.ts`. The frontmatter owns reusable tokens. `.impeccable/design.json` adds component examples, motion, breakpoint metadata, and narrative. The surface brief owns this dashboard's composition. See the [UX state guide](docs/ux-states.md) for complete state coverage.
+This record follows `app/src/styles.css`, `app/src/App.tsx`, `app/src/StatusRow.tsx`, `app/src/GpuActivity.tsx`, `app/src/readiness.ts`, and `app/src/timing.ts`. The frontmatter owns reusable tokens. `.impeccable/design.json` adds component examples, motion, breakpoint metadata, and narrative. The surface brief owns this dashboard's composition. See the [UX state guide](docs/ux-states.md) for complete state coverage.
 
 ## Colors
 
-Chalk, green ink, and sage support the readings. GPU history uses outlined and filled dots on the same light canvas.
+Chalk, green ink, and sage support the readings. GPU history uses outlined and filled pills on the same light canvas.
 
 ### Primary
 
-- **Forest green** (`green`): healthy readings, connected status, links, carets, keyboard focus, and the inspected idle-dot edge.
+- **Forest green** (`green`): healthy readings, connected status, links, carets, keyboard focus, and the inspected idle-pill edge.
 - **Lichen** (`accent`): text selection.
 - **Action green** (`action-hover`): hover on the primary settings action.
 
@@ -244,15 +268,15 @@ Chalk, green ink, and sage support the readings. GPU history uses outlined and f
 
 ### Tertiary
 
-- **Hour dot edge** (`activity-border`): the outlined Idle hour.
+- **Hour pill edge** (`activity-border`): the outlined Idle hour pill.
 - **Active hour** (`activity-active`): a qualifying observed hour, with matching fill and edge.
-- **Inspected idle hour** (`activity-selected`): the hovered or focused idle dot.
-- **Inspected active hour** (`activity-active-selected`): the hovered or focused active dot, with matching fill and edge.
-- **Earlier active hour** (`activity-stale`): active dots from earlier readings.
+- **Inspected idle hour** (`activity-selected`): the hovered or focused idle pill.
+- **Inspected active hour** (`activity-active-selected`): the hovered or focused active pill, with matching fill and edge.
+- **Earlier active hour** (`activity-stale`): active pills from earlier readings.
 
 ### Neutral
 
-- **Chalk** (`surface`): the main canvas, supported native title-bar background, fields, idle dots, and tooltip text.
+- **Chalk** (`surface`): the main canvas, supported native title-bar background, fields, idle pills, and tooltip text.
 - **Green ink** (`ink`): primary text, filled settings actions, launch hints, and the hour tooltip.
 - **Sage grey** (`muted`): supporting information, GPU name, idle checks, and stale readings.
 - **Fine rule** (`line`): endpoint outlines and row dividers.
@@ -263,7 +287,9 @@ Chalk, green ink, and sage support the readings. GPU history uses outlined and f
 
 **The Evidence Color Rule.** Use green for confirmed positive readiness, amber for attention or unverified checks, and rust for an error. Idle and stale readings use the muted neutral. Pair each state dot with a clear word.
 
-**The Binary Hour Rule.** An hour dot has two data states, Active or Idle. A filled dot represents qualifying observed GPU activity while an Ollama model was in GPU memory. Empty and unmonitored hours display Idle.
+**The Binary Hour Rule.** An hourly pill has two data states, Active or Idle. A filled pill represents qualifying observed GPU activity while an Ollama model was in GPU memory. Empty and unmonitored hours display Idle.
+
+**The Whole Path Rule.** Reserve green Connected for fresh, verified connection and readiness evidence. Ollama, Tailscale, forwarding, host details, and the model library must be healthy; the GPU may be healthy or idle. Other results use their combined warning, error, or unverified state.
 
 ## Typography
 
@@ -280,7 +306,9 @@ The readiness sentence carries the page. Other text stays compact, with distinct
 - **Status:** `status` emphasizes readings such as Active or Not linked and the text recovery actions.
 - **Field:** `field` defines editable values.
 - **Controls and metadata:** `control` belongs to the primary form action; `metadata` supports labels and guidance. Quiet actions use larger text (12px); compact Settings uses smaller text (11px). Form labels use stronger weight (700).
-- **GPU name:** `gpu-name` places a small semibold device name above the dots.
+- **Brand:** `brand` sets the Shambu name beside its icon, reducing to a compact size (16px) on phones.
+- **GPU name:** `gpu-name` identifies the detected server GPU beneath the section heading.
+- **Activity times:** `activity-times` labels the history at 24h, 12h, and Now.
 - **Hour tooltip:** `tooltip` uses tabular figures for the local hour, with a stronger state word (750).
 - **App hint:** `app-hint` identifies the device-local launch action on hover or focus.
 
@@ -292,37 +320,43 @@ The endpoint and connection age use readable small text (12px) with tabular figu
 
 The centered frame supports a minimum CSS viewport width (320px). The root fills the viewport and uses a flex column; automatic margins center the dashboard along both axes when it fits. Longer recovery or settings content grows naturally and scrolls. Below desktop the frame has a maximum outer width (680px), horizontal padding (28px), and safe-area-aware top and bottom padding (36px minimum).
 
-The native desktop window defaults to a centered landscape size (1120px by 760px), adjusted to the screen's usable area and scale. At the desktop breakpoint (800px), the frame expands (1000px maximum width), with equal top and bottom padding (48px) and horizontal padding (56px). The page and supported native title-bar surface share chalk. See the [native launcher and window guide](docs/native-launchers.md) for platform differences.
+The native desktop window defaults to a centered landscape size (1120px by 760px), adjusted to the screen's usable area and scale. At the desktop breakpoint (800px), the frame expands (1000px maximum width), with equal top and bottom padding (36px) and horizontal padding (56px). The page and supported native title-bar surface share chalk. See the [native launcher and window guide](docs/native-launchers.md) for platform differences.
 
-The dashboard keeps one column at every width. The heading, freshness line, and Settings form the header. The full-width status list follows the endpoint with a top margin (20px). The GPU history follows the list and any recovery or host-link guidance with a top margin (24px). Its device name sits above the dots with a bottom margin (12px).
+The dashboard keeps one column at every width. A three-track brand header centers the identity and places Settings at the right. Its bottom margin and the readiness section's bottom margin match (20px normally, 24px compact). The operating-system title bar and window controls remain intact above the page.
+
+The full-width status list follows the endpoint with a top margin (20px). GPU usage continues the row structure beneath any recovery or host-link guidance. Its body aligns with the row text (33px left inset, 30px compact), ends with bottom padding (16px), and limits the history and time labels to a shared width (600px maximum). The device name has a bottom margin (12px).
 
 At the compact breakpoint (480px), side padding becomes (22px), the header gap tightens (12px), and Settings retains its visible label. At the narrow breakpoint (359px), side padding reduces again (14px).
 
-Status rows have a minimum height (62px) normally, (56px) on desktop, and (60px) on compact screens. Main buttons, inputs, and icon controls have a minimum target (44px); server-location choices have a minimum height (40px). Text recovery actions use a compact target height (36px). Hour buttons are equal-width cells with a fixed height (32px) and one shared keyboard entry point.
+Status rows have a minimum height (62px) normally, (56px) on desktop, and (60px) on compact screens. Main buttons, inputs, and icon controls have a minimum target (44px); server-location choices have a minimum height (40px). Text recovery actions use a compact target height (36px). Hour buttons are equal-width cells with a fixed height (36px) and one shared keyboard entry point.
 
 ## Elevation & Depth
 
 Borders define the endpoint, fields, and row divisions. Pale sage groups editable settings. GPU history sits directly on the main canvas.
 
-The temporary hour tooltip uses green ink with chalk text and a small shadow (`0 4px 12px rgb(24 45 31 / .14)`). It floats above the inspected dot and stays within the strip through a clamped horizontal position. App launch hints use the same ink and chalk contrast without a shadow.
+The temporary hour tooltip uses green ink with chalk text and a small shadow (`0 4px 12px rgb(24 45 31 / .14)`). It floats above the inspected pill and stays within the strip through a clamped horizontal position. App launch hints use the same ink and chalk contrast without a shadow.
 
 **The Flat Surface Rule.** Separate persistent surfaces with spacing, a fine border, or a tonal fill. Reserve the small soft shadow for the temporary hour tooltip.
 
 ## Shapes
 
-Gently rounded corners distinguish fields, controls, and containers. Status dots are circles (6px). Hour dots are larger circles (11px normally, 8px compact) with a thin edge (1px). Each hour sits inside a transparent rounded button (6px radius). The hour tooltip uses the field radius (7px).
+Gently rounded corners distinguish fields, controls, and containers. Status dots are circles (6px). Hour pills are vertical marks (30px height) with fully rounded ends (999px radius) and a thin edge (1px). Each pill sits inside a transparent rounded button (4px radius). The hour tooltip uses the field radius (7px).
 
 State words remain unboxed. App launch links have a small corner radius (4px), and text recovery actions use a smaller radius (3px).
 
-Most operational symbols use Lucide SVG linework. Refresh uses Fluent `ArrowClockwise20Regular`. Ollama and Tailscale use their bundled official brand marks, while matching Qwen model names use the bundled Qwen mark. Preserve source artwork and its proportions.
+Most operational symbols use Lucide SVG linework. Refresh uses Fluent `ArrowClockwise20Regular`. Ollama uses its bundled official mark. Tailscale uses the user's supplied nine-dot PNG, with its original pixels preserved and its white background blended into the page. Matching Qwen model names use the bundled Qwen mark. Preserve source artwork and its proportions.
 
 ## Components
 
-### Header, Settings, and Freshness
+### Brand Header, Settings, and Freshness
 
-The readiness sentence remains a heading with polite live status announcements. Settings opens in the document flow; closing it returns focus to the action. The selected action uses quiet sage. Keep its icon and visible label at every width.
+The centered page identity combines the existing R2-D2 image (48px square normally, 42px compact) with Shambu. Settings sits at the right and retains its icon and visible label. The native title bar remains above this page header.
 
-Directly below the heading, show a colored connection dot and state, a hyphen, relative check time, and the icon-only Fluent refresh action. The compact line reads **Connected - Just now** when current and connected. Preserve the refresh target (44px) around its smaller icon (20px).
+The readiness sentence remains a heading with polite live status announcements. Settings opens in the document flow and explains its purpose: **Choose which GPU server this device checks.** Closing it returns focus to the action. The selected action uses quiet sage.
+
+Directly below the heading, show a colored connection dot and state, a hyphen, relative check time, and the icon-only Fluent refresh action. The compact line reads **Connected - Just now** only when the full readiness result is current and verified. An idle GPU is a healthy resting state.
+
+Use **Disconnected** for unreachable Ollama, **Connection issue** for Tailscale or forwarding failures, **Needs attention** for GPU or model-library warnings, and **Check needed** for stale or unverified evidence. Before a result, show **Checking** or **Not checked**. Preserve a fresh previous failure while another check runs. Preserve the refresh target (44px) around its smaller icon (20px).
 
 A reading younger than two minutes displays **Just now**. Older readings show whole minutes, such as **2 minutes ago**. Refresh runs automatically every five minutes while the app is visible and settings are closed. Stale evidence begins at the implemented threshold (330 seconds); a failed refresh also marks retained readings stale. Show the visible stale notice and **Refresh now** action.
 
@@ -356,17 +390,19 @@ Only Model library opens a disclosure when actual installed models are available
 
 Hover affects the summary, and opening it rotates the chevron (180 degrees over 160ms, ease-out). The sidecar preview uses illustrative generic models and their storage marks.
 
-### GPU History Dots
+### GPU Usage
 
-The detected GPU name is the only visible label above the strip. When unavailable, show **GPU details not linked**. The strip spans the same width as the readings.
+The section begins with the GPU icon and **GPU usage**, using the same title style and alignment as the status rows. Beneath it, show **Remote GPU: Nvidia Example GPU** for recognized NVIDIA devices, or **Remote GPU: Details not linked** when unavailable. The section ends with the same fine divider as the readings.
 
-Twenty-five equal-width button cells cover the rolling 24-hour window, including partial hours at both ends. Each contains one outlined or filled circle. A filled dot means GPU use of at least 5% was observed while Ollama had a model in GPU memory. This is an estimate: other GPU work can contribute, and sampling can miss short activity. Empty and unmonitored hours display **Idle**.
+Twenty-five equal-width cells cover the rolling 24-hour window, including partial hours at both ends. The grid has a small gap (2px) and maximum width (600px). Each cell contains a vertical pill (30px high) within a button (36px high). The aligned **24h**, **12h**, and **Now** labels sit below the bar.
+
+A filled pill means GPU use of at least 5% was observed while Ollama had a model in GPU memory. This is an estimate: other GPU work can contribute, and sampling can miss short activity. Empty and unmonitored hours display **Idle**.
 
 Hovering or focusing an hour reveals a custom tooltip such as **9 AM · Idle**. Time follows the device's local zone without printing a zone abbreviation. Each hour also exposes a fuller time and state through its accessible name. Screen-reader guidance explains the estimate, Idle behavior, and keyboard navigation.
 
-The strip has one tab stop, initially the most recent hour. Left and right arrows move between hours; Home and End move to the first and last hour. Escape dismisses the tooltip while keeping focus. Inspection changes the dot's fill and edge and scales it (1.25 times) over a short transition (140ms, ease-out).
+The strip has one tab stop, initially the most recent hour. Left and right arrows move between hours; Home and End move to the first and last hour. Escape dismisses the tooltip while keeping focus. Inspection changes the pill's fill and edge and stretches its height (1.12 times) over a short transition (140ms, ease-out).
 
-Earlier readings use the muted active-dot fill and add an accessible reading-age explanation. The component preview illustrates an inspected hour with sample data; live time formatting and keyboard navigation belong to the application.
+Earlier readings use the muted active-pill fill and add an accessible reading-age explanation. The component preview illustrates an inspected hour with sample data; live time formatting and keyboard navigation belong to the application.
 
 ### Development State Preview
 
@@ -374,7 +410,7 @@ The browser development preview has a clearly labeled synthetic-state selector a
 
 ### Native Identity
 
-The product name remains Shambu. The larger R2-D2 foreground and original forest form the native app identity. Keep the icon legible at taskbar sizes. The approved artwork and source credits are maintained in the [branding notes](docs/branding.md); use the active derivatives rather than reconstructing the character or backdrop.
+The product name remains Shambu. The larger R2-D2 foreground and original forest form the native icon and centered page identity. Use the same active artwork in both places, preserving its proportions and legibility. The approved artwork and source credits are maintained in the [branding notes](docs/branding.md); use the active derivatives rather than reconstructing the character or backdrop.
 
 ## Do's and Don'ts
 
@@ -386,12 +422,12 @@ The product name remains Shambu. The larger R2-D2 foreground and original forest
 - **Do** keep failure guidance and recovery actions visible.
 - **Do** show real model names and preserve the bundled app and Qwen marks.
 - **Do** preserve hour inspection, keyboard focus, and reduced-motion behavior.
-- **Do** keep character artwork in the native app identity.
+- **Do** reuse the active R2-D2 artwork in the centered Shambu header and native icon.
 - **Do** use generic examples and keep personal connection details out of public artifacts.
 
 ### Don't:
 
-- **Don't** add a duplicate wordmark, portrait, or decorative hero above the dashboard.
+- **Don't** add decorative hero artwork around the centered Shambu identity.
 - **Don't** give ordinary status rows empty disclosures or hide recovery guidance behind a click.
 - **Don't** turn the readiness list into a grid of separate cards.
 - **Don't** describe the binary history as request counts or exact inference attribution.

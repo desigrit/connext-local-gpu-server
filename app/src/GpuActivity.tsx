@@ -1,5 +1,6 @@
 import { useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import type { GpuHistory } from './types';
+import { Gpu } from 'lucide-react';
 import { STALE_AFTER_MS } from './timing';
 
 const HOUR = 60 * 60 * 1000;
@@ -37,8 +38,11 @@ export default function GpuActivity({ history, gpuName, now, stale }: { history?
     if (target !== null) { event.preventDefault(); setHovered(null); buttons.current[target]?.focus(); }
     if (event.key === 'Escape') { setHovered(null); setFocused(null); }
   }
+  const deviceName = gpuName?.replace(/^NVIDIA\s+/i, 'Nvidia ').replace(/^(Quadro|GeForce|RTX|Tesla)\b/i, 'Nvidia $1');
   return <section className={'activity-strip' + (earlier ? ' activity-old' : '')} aria-label="GPU usage over the last 24 hours">
-    <p className="gpu-name">{gpuName || 'GPU details not linked'}</p>
+    <div className="status-line activity-heading"><Gpu className="row-icon" size={19} strokeWidth={1.65} aria-hidden="true" /><h2 className="row-title">GPU usage</h2></div>
+    <div className="activity-body">
+    <p className="gpu-name">{deviceName ? 'Remote GPU: ' + deviceName : 'Remote GPU: Details not linked'}</p>
     <p className="sr-only" id={id + '-help'}>Observed GPU activity while an Ollama model was in GPU memory. Other GPU work can contribute. Empty and unmonitored hours are Idle. Use left and right arrows to inspect hours.{earlier ? ' These are earlier readings.' : ''}</p>
     <div className="hour-track" onPointerLeave={() => setHovered(null)}>
       <div className="hour-columns" role="group" aria-label="Hourly GPU activity" aria-describedby={id + '-help'}>
@@ -55,6 +59,8 @@ export default function GpuActivity({ history, gpuName, now, stale }: { history?
       {chosen && <div className="hour-tooltip" id={id + '-tooltip'} role="tooltip" style={{ '--position': ((selected! + .5) / hours.length * 100) + '%' } as CSSProperties}>
         {tooltipTime(chosen.start)} · <strong>{chosen.active ? 'Active' : 'Idle'}</strong>
       </div>}
+    </div>
+    <div className="activity-times" aria-hidden="true"><span>24h</span><span>12h</span><span>Now</span></div>
     </div>
   </section>;
 }

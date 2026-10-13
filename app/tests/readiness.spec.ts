@@ -10,7 +10,7 @@ test('healthy screen exposes the external URL, GPU name, and installed models', 
   await expect(page.locator('.endpoint')).toHaveText('http://192.0.2.10:11434');
   await page.getByRole('button', { name: 'Copy server URL', exact: true }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('http://192.0.2.10:11434');
-  await expect(page.getByText('NVIDIA Quadro RTX 8000', { exact: true })).toBeVisible();
+  await expect(page.getByText('Remote GPU: Nvidia Quadro RTX 8000', { exact: true })).toBeVisible();
   await expect(page.locator('.status-row summary')).toHaveCount(1);
   await page.locator('summary').filter({ hasText: 'Model library' }).click();
   await expect(page.getByRole('list', { name: 'Installed models' }).getByRole('listitem')).toHaveCount(3);
@@ -18,7 +18,8 @@ test('healthy screen exposes the external URL, GPU name, and installed models', 
   await expect(page.getByText('4.9 GB', { exact: true })).toBeVisible();
   await expect(page.locator('.status-label').filter({ hasText: /^Active$/ })).toHaveCount(3);
   await expect(page.getByRole('checkbox')).toHaveCount(0);
-  await expect(page.locator('.mascot, .wordmark, .sign-off')).toHaveCount(0);
+  await expect(page.locator('.app-identity')).toHaveText('Shambu');
+  await expect(page.getByRole('heading', { name: 'GPU usage', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Refresh status', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Checking server' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Refresh status', exact: true })).toBeEnabled();
@@ -87,7 +88,7 @@ test('desktop and phone stay readable and accessible', async ({ page }) => {
     await page.setViewportSize({ width, height });
     await page.goto('/?demo=' + scenario);
     await expect(page.getByRole('button', { name: 'Refresh status', exact: true })).toBeEnabled();
-    await expect(page.getByRole('heading', { name: scenario === 'offline' ? 'Something is out of reach.' : 'Your server is within reach.' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: scenario === 'offline' ? 'Something is out of reach.' : scenario === 'remote' ? 'A little attention needed.' : 'Your server is within reach.' })).toBeVisible();
     await expect(page.getByRole('region', { name: 'Server readiness checks' })).toHaveAttribute('aria-busy', 'false');
     await page.evaluate(() => document.fonts.ready);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -106,7 +107,7 @@ test('desktop and phone stay readable and accessible', async ({ page }) => {
 test('pairing validation identifies its field and a valid key links host details', async ({ page }) => {
   await page.goto('/?demo=remote');
   await expect(page.getByRole('button', { name: 'Refresh status', exact: true })).toBeEnabled();
-  await expect(page.getByText('GPU details not linked', { exact: true })).toBeVisible();
+  await expect(page.getByText('Remote GPU: Details not linked', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByLabel('Server name').fill('');
   await page.getByRole('button', { name: 'Save & check' }).click();
@@ -138,7 +139,8 @@ test('a slim 24-hour strip exposes custom hover and keyboard hour readings', asy
   await expect(page.locator('.hour-column')).toHaveCount(25);
   expect(await page.locator('.hour-active').count()).toBeGreaterThan(0);
   await expect(page.getByRole('button', { name: /^(24h|48h)$/ })).toHaveCount(0);
-  await expect(page.locator('.activity-axis, .activity-key, .activity-explainer')).toHaveCount(0);
+  await expect(page.locator('.activity-key, .activity-explainer')).toHaveCount(0);
+  await expect(page.locator('.activity-times')).toHaveText('24h12hNow');
   await expect(page.getByRole('slider')).toHaveCount(0);
   const last = page.locator('.hour-column').last();
   await last.hover();
@@ -157,7 +159,7 @@ test('a slim 24-hour strip exposes custom hover and keyboard hour readings', asy
   await page.keyboard.press('Escape');
   await expect(page.getByRole('tooltip')).toHaveCount(0);
   await page.goto('/?demo=remote');
-  await expect(page.getByRole('heading', { name: 'Your server is within reach.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A little attention needed.' })).toBeVisible();
   await expect(page.locator('.hour-active')).toHaveCount(0);
   await expect(page.locator('.hour-column[aria-label$=": Idle"]')).toHaveCount(25);
 });
@@ -187,6 +189,8 @@ test('brand launch links are explicit and recovery previews return to healthy', 
   await page.goto('/?demo=tailscale');
   await expect(page.getByRole('heading', { name: 'A little attention needed.' })).toBeVisible();
   await expect(page.locator('.state-warning .state-dot')).toHaveCount(1);
+  await expect(page.locator('.connection-status')).toHaveText('Connection issue');
+  await expect(page.locator('.connection-status')).not.toHaveClass(/is-connected/);
   await expect(page.getByRole('button', { name: 'Open Tailscale on this device' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Open Ollama on this device' })).toBeVisible();
   expect(await page.locator<HTMLImageElement>('.brand-icon').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true);

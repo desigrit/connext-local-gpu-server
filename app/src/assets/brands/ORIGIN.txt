@@ -1,7 +1,8 @@
 Brand marks identify the software or model family shown in Shambu.
 Ollama: https://github.com/ollama/ollama/blob/main/docs/ollama-logo.svg
-Tailscale: https://tailscale.com/favicon.svg (official brand: https://tailscale.com/press)
+Tailscale: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlG53PrFuWK7-AZMgn5wpCXwKlEX_9Gc4sgRSimoCv-w&s=10
+The Tailscale nine-dot mark was supplied by the user and downloaded on 2026-10-12. The original image bytes are preserved. The page blends its white background into the app surface.
 Qwen: https://qwenlm.github.io/favicon.png
-Downloaded from the respective official sources on 2026-10-12, with artwork unmodified. Provenance metadata may be added.
+Ollama and Qwen were downloaded from their official sources on 2026-10-12, with artwork unmodified. Provenance metadata may be added.
 These marks remain the property of their respective owners. No affiliation or endorsement is implied.
 Ollama repository license is included in LICENSE-Ollama.txt.

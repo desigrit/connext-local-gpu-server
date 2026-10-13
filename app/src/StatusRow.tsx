@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowDownUp, ArrowUpRight, ChevronDown, CircleHelp, HardDrive } from 'lucide-react';
 import { android, openCompanionApp } from './bridge';
 import ollamaIcon from './assets/brands/ollama.svg';
-import tailscaleIcon from './assets/brands/tailscale.svg';
+import tailscaleIcon from './assets/brands/tailscale.png';
 import qwenIcon from './assets/brands/qwen.png';
 import type { Check, InstalledModel, Mode } from './types';
 

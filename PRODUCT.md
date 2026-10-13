@@ -16,7 +16,7 @@ People with an Ollama GPU server at home who want to check its readiness from th
 
 ## Product Purpose
 
-One screen answers whether the server can be reached and which part of the connection needs attention. Compact hourly dots show observed Ollama GPU activity over a rolling 24-hour window. Launch, inspect, recover, close.
+One screen answers whether the server can be reached and which part of the connection needs attention. Compact hourly pills show observed Ollama GPU activity over a rolling 24-hour window. Launch, inspect, recover, close.
 
 ## Operating Context
 
@@ -30,15 +30,17 @@ Ollama and Tailscale row links open the installed app on the device running Sham
 
 ## Brand Commitments
 
-A quiet, light, minimal interface with clear status rows and a little whimsy. No em dashes. The name is Shambu, inspired by Shikari Shambu. The native icon places a larger R2-D2 in front of the original forest artwork. Preserve the existing forest and foreground bushes rather than redrawing them. Keep the icon legible at taskbar sizes and credit its source artwork and modifications. The dashboard begins with readiness, without a repeated wordmark or portrait. Current assets are recorded in the [branding notes](docs/branding.md).
+A quiet, light, minimal interface with clear status rows and a little whimsy. No em dashes. The name is Shambu, inspired by Shikari Shambu. Reuse the active R2-D2 artwork and its original forest in the native icon and the centered in-page Shambu header. Preserve the existing forest and foreground bushes, keep the artwork legible, and retain its source credits. Current assets are recorded in the [branding notes](docs/branding.md).
 
-Desktop defaults to a centered 1120 by 760 window, adjusted to fit the available display. The supported title bar and page share the same light background. Center the single-column dashboard horizontally and vertically when it fits, with balanced margins and normal scrolling for longer content. Settings remains visibly labeled.
+Desktop defaults to a centered 1120 by 760 window, adjusted to fit the available display. Preserve the operating-system title bar and window controls. Its supported background and the page share the same light color. Center the single-column dashboard when it fits, with balanced margins and normal scrolling for longer content. The page header uses the R2-D2 image at 48px normally and 42px on compact screens, the Shambu name in the center, and Settings at the right. Settings explains: Choose which GPU server this device checks.
 
-Place connection state, a hyphen, relative check age, and the Fluent refresh icon directly under the heading. Show Just now for readings younger than two minutes, then whole minutes. Refresh automatically every five minutes while visible and outside Settings. Readings become stale after 330 seconds; show a clear recovery action.
+Place combined connection status, a hyphen, relative check age, and the Fluent refresh icon directly under the readiness heading. Green Connected requires fresh, verified Ollama, Tailscale, forwarding, host details, and model readiness. An idle GPU is healthy. Connection failures, missing evidence, and GPU or model warnings keep the combined status out of green even when Ollama responds. Use Disconnected, Connection issue, Needs attention, or Check needed as appropriate.
 
-Four aligned rows use colored state dots beside their words. Healthy service checks use Active. Ollama and Tailscale use their official marks and local app links. Only the installed model library expands; its real model names and sizes include the Qwen mark when appropriate. Keep failure guidance visible with Check again, Edit address, and relevant app-launch actions. Private host pairing remains in Settings.
+Show Just now for readings younger than two minutes, then whole minutes. Refresh automatically every five minutes while visible and outside Settings. Readings become stale after 330 seconds; show a clear recovery action.
 
-The main server strip shows the Tailscale URL other devices use. Below the readings, show only the GPU name and a narrow line of 25 hourly dots spanning the rolling 24-hour window, including partial hours at both ends. A filled dot means observed GPU activity correlated with an Ollama model loaded in GPU memory. This is an estimate, not an inference request count. Empty and unmonitored hours display Idle. Hover, touch, and keyboard inspection show local time and state, such as 9 AM · Idle, with the device time zone implicit.
+Four aligned rows use colored state dots beside their words. Ollama uses its bundled mark; Tailscale uses the user's supplied nine-dot PNG with original pixels preserved and its white background blended into the page. Their links open local apps. Only the installed model library expands; its real model names and sizes include the Qwen mark when appropriate. Keep failure guidance visible with Check again, Edit address, and relevant app-launch actions. Private host pairing remains in Settings.
+
+The main server strip shows the Tailscale URL other devices use. GPU usage follows the readings as a section styled like a status row, with a GPU icon and Remote GPU device label. Show 25 vertical hourly pills across a rolling 24-hour window, including partial hours at both ends. The bar is at most 600px wide, its pills are 30px high, and 24h, 12h, and Now labels mark the range. A filled pill means observed GPU activity correlated with an Ollama model loaded in GPU memory. This is an estimate, not an inference request count. Empty and unmonitored hours display Idle. Inspection shows local time and state, such as 9 AM · Idle.
 
 Browser development previews provide a clearly labeled synthetic-state selector and simulated recovery. Production builds omit the selector. The [UX state guide](docs/ux-states.md) covers healthy, failure, unverified, stale, and recovery paths.
 

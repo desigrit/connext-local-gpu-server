@@ -4,6 +4,8 @@ import { ArrowClockwise20Regular } from '@fluentui/react-icons';
 import { android, checkReadiness, copyHostKey, copyText, defaultSettings, demo, loadSettings, native, saveSettings, validateSettings, type ConnectionIssue } from './bridge';
 import GpuActivity from './GpuActivity';
 import StatusRow from './StatusRow';
+import shambuIcon from './assets/shambu-icon.png';
+import { getReadinessStatus } from './readiness';
 import { CHECK_INTERVAL_MS, STALE_AFTER_MS, checkedAge } from './timing';
 import { PreviewControls } from './PreviewControls';
 import type { Check, Mode, Settings, Snapshot } from './types';
@@ -85,10 +87,9 @@ export default function App() {
   const gpuCheck = snapshot?.checks.find(check => check.id === 'gpu');
   const stale = Boolean(snapshot && (now - snapshot.checkedAtMs >= STALE_AFTER_MS || error));
   const disconnected = snapshot?.checks.find(check => check.id === 'ollama')?.state === 'error';
-  const warnings = checks.filter(check => check.state === 'error' || check.state === 'warning');
-  const headline = !native && !demo ? 'A window into your server.' : !settings?.endpoint ? 'Meet your server.' : !snapshot ? (busy ? 'Taking a little look.' : 'Let’s check in.') : stale ? 'Time for a fresh look.' : disconnected ? 'Something is out of reach.' : (warnings.length || snapshot?.hostDetails === 'unauthorized' || snapshot?.hostDetails === 'unreachable') ? 'A little attention needed.' : 'Your server is within reach.';
+  const readiness = getReadinessStatus(snapshot, { stale, checking: busy });
+  const headline = !native && !demo ? 'A window into your server.' : !settings?.endpoint ? 'Meet your server.' : !snapshot ? (busy ? 'Taking a little look.' : 'Let’s check in.') : stale ? 'Time for a fresh look.' : disconnected ? 'Something is out of reach.' : (readiness.tone !== 'ok') ? 'A little attention needed.' : 'Your server is within reach.';
   const checkedLabel = busy ? 'Checking' : !snapshot ? 'Not checked' : checkedAge(snapshot.checkedAtMs, now);
-  const connected = Boolean(snapshot && !stale && checks.find(check => check.id === 'ollama')?.state === 'ok');
   const externalEndpoint = settings?.mode === 'remote' ? settings.endpoint : snapshot?.externalEndpoint;
 
 
@@ -134,24 +135,28 @@ export default function App() {
   }
 
   return <main className="app-shell">
-    <header className="app-header">
-      <div className="readiness-message">
-        <h1 id="readiness-heading" aria-live="polite" aria-atomic="true">{headline}</h1>
-        <div className="freshness">
-          <span className={'connection-status' + (connected ? ' is-connected' : disconnected ? ' is-disconnected' : ' is-pending')}><span className="freshness-dot" aria-hidden="true" />{connected ? 'Connected' : disconnected ? 'Disconnected' : stale ? 'Check needed' : 'Connecting'}</span>
-          <span aria-hidden="true">-</span><span aria-live="off">{checkedLabel}</span>
-          {(!native && !demo) ? (import.meta.env.DEV && <a href="?demo=healthy">Preview</a>) : <button className="icon-button refresh-button" onClick={() => settings && void runCheck(settings)} disabled={busy || !settings?.endpoint || saving} aria-label={busy ? 'Checking server' : 'Refresh status'}><ArrowClockwise20Regular className={busy ? 'spin' : ''} aria-hidden="true" /></button>}
-        </div>
-      </div>
+    <header className="brand-header">
+      <div className="app-identity"><img src={shambuIcon} width="48" height="48" alt="" /><span>Shambu</span></div>
       <button ref={settingsButton} className={`quiet-button connection-button ${editing ? 'selected' : ''}`} onClick={() => { setDraft(settings ?? defaultSettings); setEditing(value => !value); setFormError(null); }} aria-label="Settings" aria-expanded={editing} aria-controls="connection-settings">
         <Settings2 size={16} aria-hidden="true" /><span>Settings</span>
       </button>
     </header>
+    <section className="app-header" aria-labelledby="readiness-heading">
+      <div className="readiness-message">
+        <h1 id="readiness-heading" aria-live="polite" aria-atomic="true">{headline}</h1>
+        <div className="freshness">
+          <span className={'connection-status ' + (readiness.tone === 'ok' ? 'is-connected' : readiness.tone === 'error' ? 'is-disconnected' : 'is-pending')}><span className="freshness-dot" aria-hidden="true" />{readiness.label}</span>
+          <span aria-hidden="true">-</span><span aria-live="off">{checkedLabel}</span>
+          {(!native && !demo) ? (import.meta.env.DEV && <a href="?demo=healthy">Preview</a>) : <button className="icon-button refresh-button" onClick={() => settings && void runCheck(settings)} disabled={busy || !settings?.endpoint || saving} aria-label={busy ? 'Checking server' : 'Refresh status'}><ArrowClockwise20Regular className={busy ? 'spin' : ''} aria-hidden="true" /></button>}
+        </div>
+      </div>
+    </section>
 
     {demo && <PreviewControls onRecover={() => settings && void runCheck(settings)} busy={busy} />}
 
     {editing && <section id="connection-settings" className="connection-panel" aria-labelledby="connection-heading">
       <div className="panel-heading"><h2 id="connection-heading">Settings</h2><button className="icon-button" onClick={closeSettings} aria-label="Close settings"><X size={18} /></button></div>
+      <p className="settings-purpose">Choose which GPU server this device checks.</p>
       <form onSubmit={submit} noValidate>
         <fieldset className="mode-control"><legend className="sr-only">Server location</legend>
           {!android && <button type="button" aria-pressed={draft.mode === 'host'} onClick={() => chooseMode('host')}><Monitor size={16} />This computer</button>}
