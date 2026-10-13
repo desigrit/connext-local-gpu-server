@@ -16,7 +16,7 @@ export async function loadSettings(): Promise<Settings> {
   if (demo) {
     const saved = sessionStorage.getItem('shambu-demo-settings');
     if (saved) return { ...defaultSettings, ...JSON.parse(saved) } as Settings;
-    if (new URLSearchParams(location.search).get('demo') === 'remote') {
+    if (['remote', 'pairing', 'companion'].includes(new URLSearchParams(location.search).get('demo') ?? '')) {
       return { ...defaultSettings, mode: 'remote', endpoint: 'http://192.0.2.10:11434', name: 'Home server' };
     }
   }
@@ -79,4 +79,15 @@ export async function checkReadiness(settings: Settings): Promise<Snapshot> {
     return demoSnapshot(settings, new URLSearchParams(location.search).get('demo') ?? 'healthy');
   }
   throw new Error('Open the installed app to check your server.');
+}
+
+export type CompanionApp = 'tailscale' | 'ollama';
+
+export async function openCompanionApp(target: CompanionApp): Promise<string> {
+  if (!native) throw new Error('Open the installed Shambu app to launch apps on this device.');
+  try {
+    return await invoke<string>('open_companion_app', { target });
+  } catch (error) {
+    throw new Error(typeof error === 'string' ? error : 'Could not open the app. Try your device\'s app launcher.');
+  }
 }

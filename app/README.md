@@ -9,28 +9,40 @@ A small, single-screen companion for checking your Ollama server. Built with Tau
 | Ollama | Local version endpoint and response time | Configured server endpoint and response time |
 | Tailscale | Local CLI connection status | The GPU PC's status through its paired host companion |
 | Forwarding | Matching TCP forward plus a request through the host's Tailscale IPv4 | The GPU PC's forwarding check through its paired host companion |
-| GPU Usage | Hourly observed activity and GPU name from the host companion | The same history and GPU name through the paired host companion |
+| GPU history | Hourly observed activity and GPU name from the host companion | The same history and GPU name through the paired host companion |
 | Model library | Installed model names and sizes | Installed model names and sizes |
 
-All probes are read-only. Ollama requests are limited to GET `/api/version`, `/api/tags`, and `/api/ps`. Paired remote clients also read GET `/health` from the host companion. There are no prompts, model loads, downloads, restart buttons, or changes to your server.
+All probes are read-only. Ollama requests are limited to GET `/api/version`, `/api/tags`, and `/api/ps`. Paired remote clients also read GET `/health` from the host companion. Checks send no prompts and do not load models, download files, or restart the server. The separate app links can open installed Ollama or Tailscale on the device running Shambu.
 
 **Idle is not a failure.** With no loaded model, the app cannot verify Ollama's GPU use. A visible NVIDIA device confirms driver visibility only. A loaded model with zero GPU allocation gets a CPU warning; a partial allocation gets a GPU + CPU warning. GPU memory allocation is not the same as current utilization.
 
-Checks refresh every two minutes while the app is visible and connection settings are closed. The refresh icon runs an immediate check. Readings older than 150 seconds become stale. Closing the app stops its checks.
+Connection state and age sit directly under the readiness heading, beside the refresh icon. **Just now** means the reading is less than two minutes old; later ages use whole minutes. Checks refresh every five minutes while the app is visible and Settings is closed. The refresh icon runs an immediate check. Readings become stale at 330 seconds, and a failed refresh also marks retained readings stale. Closing the app stops its checks.
 
 ## Use it
 
-On the GPU PC, choose **Connection > This computer** and use `http://127.0.0.1:11434`. Local probes use this loopback address. The main screen shows and copies the Tailscale URL for your other devices once it detects a matching TCP forward. If that address is unavailable, the copy control is disabled.
+On the GPU PC, choose **Settings > This computer** and use `http://127.0.0.1:11434`. Local probes use this loopback address. The main screen shows and copies the Tailscale URL for your other devices once it detects a matching TCP forward. If that address is unavailable, the copy control is disabled.
 
 On another Windows PC, a Mac, or Android, choose **Remote server** and enter your GPU PC's Tailscale URL, such as `http://<gpu-pc-tailscale-ip>:11434`. Keep Tailscale connected on both devices. The app does not install or sign in to Tailscale.
 
-To see the GPU PC's own Tailscale and forwarding status remotely, [set up the host companion](../docs/host-agent.md) once. In Shambu on that PC, open **Connection > Copy pairing key**. Paste the key into **Connection > Host pairing key** on each remote device. Without pairing, Ollama and GPU allocation checks still work; host-only checks remain explicitly unverified.
+To see the GPU PC's own Tailscale and forwarding status remotely, [set up the host companion](../docs/host-agent.md) once. In Shambu on that PC, open **Settings > Copy pairing key**. Paste the key into **Settings > Host pairing key** on each remote device. Without pairing, Ollama and GPU allocation checks still work; host-only checks remain explicitly unverified.
 
-Expand **Model library** to see the installed models and their sizes. Failed checks show their evidence and recovery advice directly. A successful check on the host does not prove access from every peer or from mobile data. Check from the device you intend to use while traveling.
+The single-column dashboard centers in the window when it fits. **Settings** stays beside the heading. Colored dots accompany the status words, and **Model library** expands into real installed model names and sizes, with a Qwen mark for Qwen models.
 
-## GPU Usage
+Failed checks show their evidence, recovery advice, and **Check again** directly. Ollama failures also offer **Edit address**. Stale readings offer **Refresh now**; an app-wide check error offers **Try again**. See the [UX state guide](../docs/ux-states.md) for each state and recovery path.
 
-A slim activity strip sits directly below Model Library in the single-column layout. It shows a rolling **24-hour** window, with one column per hourly bucket. A filled column means activity was observed in that hour. The window includes partial hours at either end, so it displays 25 columns. Hover, tap, or use the arrow keys to inspect an hour in a custom tooltip, such as **9am PDT: Idle**. Times use your device's time zone. Empty and unmonitored hours display **Idle**.
+A successful check on the host does not prove access from every peer or from mobile data. Check from the device you intend to use while traveling.
+
+## Open companion apps
+
+Select the Ollama or Tailscale row name to open that app **on this device**. The outward arrow and hover or focus hint identify the action. Selecting it while checking a remote GPU PC still opens the app on the device running Shambu, not on the remote PC.
+
+Windows and macOS can open installed Ollama and Tailscale. Android offers Tailscale only; Ollama must be opened on the GPU PC. A successful launch request can reveal a tray or menu-bar app instead of a window. Missing or unsupported apps show a useful message. Browser previews cannot launch native apps. See the [native launcher guide](../docs/native-launchers.md) for platform and installation limits.
+
+## GPU history
+
+A slim line of hourly dots sits below Model Library. It shows a rolling **24-hour** window, with one dot per hourly bucket. A filled dot means activity was observed in that hour; an outlined dot is Idle. The window includes partial hours at either end, so it displays 25 dots.
+
+Hover, tap, or focus a dot to inspect its hour in a custom tooltip, such as **9 AM · Idle**. Times use your device's local zone without displaying an abbreviation. Tab enters the strip at the latest or last inspected hour. Left and right arrows move between hours, Home and End move to the first and last, and Escape closes the tooltip. Empty and unmonitored hours display **Idle**.
 
 The host companion samples NVIDIA GPU utilization every five seconds and correlates activity of at least 5% with fresh evidence that Ollama has a model in GPU memory. This estimates Ollama-related activity; other GPU work can contribute while a model stays loaded, and very short activity may be missed. This is an activity estimate, not a measurement of exact Ollama request counts.
 
@@ -96,7 +108,7 @@ npx playwright install chromium
 npm test
 ```
 
-The Rust tests cover endpoint safety, GPU allocation distinctions, Tailscale evidence, forwarding targets, invalid API responses, and redirect rejection. Interface tests cover healthy, unreachable, CPU, remote, stale, settings, accessibility, and narrow layouts using labeled synthetic data.
+The Rust tests cover endpoint safety, GPU allocation distinctions, Tailscale evidence, forwarding targets, invalid API responses, redirect rejection, and native app-launch targets. Interface tests exercise labeled synthetic readiness and recovery states, settings, accessibility, and narrow layouts.
 
 For a read-only live host check that prints status labels without addresses or model names:
 
@@ -104,7 +116,9 @@ For a read-only live host check that prints status labels without addresses or m
 cargo run -p readiness --example check
 ```
 
-`npm run dev` opens a browser development server. Its `?demo=healthy`, `?demo=offline`, `?demo=cpu`, and `?demo=remote` previews use sample data, clearly labeled. A browser preview cannot inspect local processes. The installed Tauri app always uses the Rust backend.
+`npm run dev` opens a browser development server. Add `?demo=healthy` to enter the clearly labeled **Design preview**. Its selector includes All ready, Ollama offline, Tailscale disconnected, Forwarding missing, Pairing key rejected, Host companion offline, CPU fallback, No models, Stale readings, and Host not linked. The corresponding query values are `healthy`, `offline`, `tailscale`, `forwarding`, `pairing`, `companion`, `cpu`, `empty`, `stale`, and `remote`.
+
+Choose **Simulate recovery** to replace a failure scenario with healthy sample readings. Preview settings are limited to the browser session and do not retain pairing keys. Browser previews cannot inspect local processes or launch native apps. Production builds omit the synthetic selector, and the installed Tauri app uses the Rust backend. See the [UX state guide](../docs/ux-states.md) for the review sequence.
 
 ## Privacy and limits
 

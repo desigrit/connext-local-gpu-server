@@ -14,7 +14,7 @@ test('healthy screen exposes the external URL, GPU name, and installed models', 
   await expect(page.locator('.status-row summary')).toHaveCount(1);
   await page.locator('summary').filter({ hasText: 'Model library' }).click();
   await expect(page.getByRole('list', { name: 'Installed models' }).getByRole('listitem')).toHaveCount(3);
-  await expect(page.getByText('example-chat:8b', { exact: true })).toBeVisible();
+  await expect(page.getByText('qwen3:8b', { exact: true })).toBeVisible();
   await expect(page.getByText('4.9 GB', { exact: true })).toBeVisible();
   await expect(page.locator('.status-label').filter({ hasText: /^Active$/ })).toHaveCount(3);
   await expect(page.getByRole('checkbox')).toHaveCount(0);
@@ -40,7 +40,7 @@ test('CPU allocation gets attention without changing the server', async ({ page 
 test('remote settings reject localhost and persist a valid address', async ({ page }) => {
   await page.goto('/?demo=healthy');
   await expect(page.getByRole('button', { name: 'Refresh status', exact: true })).toBeEnabled();
-  await page.getByRole('button', { name: 'Connection', exact: true }).click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByRole('button', { name: 'Remote server', exact: true }).click();
   await page.getByLabel('Ollama URL').fill('http://localhost:11434');
   await page.getByRole('button', { name: 'Save & check' }).click();
@@ -55,20 +55,25 @@ test('remote settings reject localhost and persist a valid address', async ({ pa
   await expect(page.getByText('Not linked', { exact: true })).toHaveCount(2);
 });
 
-test('refresh runs every two minutes and stale readings never stay green', async ({ page }) => {
+test('refresh runs every five minutes and stale readings never stay green', async ({ page }) => {
   await page.clock.install();
   await page.goto('/?demo=healthy');
   await page.clock.runFor(1000);
   await expect(page.getByRole('heading', { name: 'Your server is within reach.' })).toBeVisible();
-  await page.clock.runFor(70000);
-  await expect(page.locator('.freshness')).toContainText('1m ago');
-  await page.clock.runFor(50000);
+  await page.clock.runFor(110000);
   await expect(page.locator('.freshness')).toContainText('Just now');
-  await page.getByRole('button', { name: 'Connection', exact: true }).click();
-  await page.clock.runFor(160000);
+  await page.clock.runFor(20000);
+  await expect(page.locator('.freshness')).toContainText('2 minutes ago');
+  await page.clock.runFor(60000);
+  await expect(page.locator('.freshness')).toContainText('3 minutes ago');
+  await page.clock.runFor(110000);
+  await expect(page.locator('.freshness')).toContainText('Just now');
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.clock.runFor(340000);
   await expect(page.getByRole('heading', { name: 'Time for a fresh look.' })).toBeVisible();
   await expect(page.locator('.connection-status')).not.toHaveClass(/is-connected/);
-  await page.getByRole('button', { name: 'Close connection settings' }).click();
+  await expect(page.getByText('These readings are out of date.')).toBeVisible();
+  await page.getByRole('button', { name: 'Close settings' }).click();
   await page.clock.runFor(1000);
   await expect(page.locator('.freshness')).toContainText('Just now');
   await expect(page.locator('.connection-status')).toHaveClass(/is-connected/);
@@ -77,7 +82,7 @@ test('refresh runs every two minutes and stale readings never stay green', async
 test('desktop and phone stay readable and accessible', async ({ page }) => {
   await mkdir('../.impeccable/review', { recursive: true });
   for (const [name, width, height, scenario] of [
-    ['desktop', 1040, 728, 'healthy'], ['mobile', 390, 844, 'remote'], ['mobile-error', 390, 844, 'offline'],
+    ['desktop', 1120, 728, 'healthy'], ['mobile', 390, 844, 'remote'], ['mobile-error', 390, 844, 'offline'],
   ] as const) {
     await page.setViewportSize({ width, height });
     await page.goto('/?demo=' + scenario);
@@ -91,7 +96,7 @@ test('desktop and phone stay readable and accessible', async ({ page }) => {
     await page.screenshot({ path: '../.impeccable/review/' + name + '.png', fullPage: true });
   }
   await page.setViewportSize({ width: 320, height: 740 });
-  await page.getByRole('button', { name: 'Connection', exact: true }).click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(page.getByLabel('Ollama URL')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: '../.impeccable/review/settings.png', fullPage: true });
@@ -102,7 +107,7 @@ test('pairing validation identifies its field and a valid key links host details
   await page.goto('/?demo=remote');
   await expect(page.getByRole('button', { name: 'Refresh status', exact: true })).toBeEnabled();
   await expect(page.getByText('GPU details not linked', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Connection', exact: true }).click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByLabel('Server name').fill('');
   await page.getByRole('button', { name: 'Save & check' }).click();
   await expect(page.getByLabel('Server name')).toHaveAttribute('aria-invalid', 'true');
@@ -137,7 +142,7 @@ test('a slim 24-hour strip exposes custom hover and keyboard hour readings', asy
   await expect(page.getByRole('slider')).toHaveCount(0);
   const last = page.locator('.hour-column').last();
   await last.hover();
-  await expect(page.getByRole('tooltip')).toHaveText(/\d+(?::\d+)?(?:am|pm) .+: Idle$/);
+  await expect(page.getByRole('tooltip')).toHaveText(/^\d+(?::\d+)? (?:AM|PM) · Idle$/);
   await expect(last).toHaveClass(/hour-selected/);
   await expect(last).not.toHaveAttribute('title');
   const hoveredReading = await page.getByRole('tooltip').textContent();
@@ -175,4 +180,31 @@ test('activity buckets cover boundary hours without using legacy or future data'
     };
   });
   expect(result).toEqual({ shortActive: 2, firstActive: true, lastActive: true, legacyActive: false });
+});
+
+
+test('brand launch links are explicit and recovery previews return to healthy', async ({ page }) => {
+  await page.goto('/?demo=tailscale');
+  await expect(page.getByRole('heading', { name: 'A little attention needed.' })).toBeVisible();
+  await expect(page.locator('.state-warning .state-dot')).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Open Tailscale on this device' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Open Ollama on this device' })).toBeVisible();
+  expect(await page.locator<HTMLImageElement>('.brand-icon').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true);
+  await page.getByRole('button', { name: 'Simulate recovery' }).click();
+  await expect(page.getByRole('heading', { name: 'Your server is within reach.' })).toBeVisible();
+  await expect(page.locator('.status-label').filter({ hasText: /^Active$/ })).toHaveCount(3);
+  await expect(page.locator('.freshness')).toContainText('Just now');
+  await page.locator('summary').filter({ hasText: 'Model library' }).click();
+  await expect(page.getByRole('img', { name: 'Qwen', exact: true })).toHaveCount(2);
+});
+
+test('hour tooltips use the device timezone without displaying its name', async ({ browser }) => {
+  const context = await browser.newContext({ timezoneId: 'Asia/Kolkata' });
+  const page = await context.newPage();
+  await page.clock.install({ time: new Date('2026-10-13T04:30:00Z') });
+  await page.goto('/?demo=healthy');
+  await page.clock.runFor(1000);
+  await page.locator('.hour-column').last().hover();
+  await expect(page.getByRole('tooltip')).toHaveText('9:30 AM · Idle');
+  await context.close();
 });

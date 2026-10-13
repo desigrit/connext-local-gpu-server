@@ -13,12 +13,13 @@
     "windows": [
       {
         "title": "Shambu",
-        "width": 1040,
+        "width": 1120,
         "height": 760,
         "minWidth": 360,
         "minHeight": 580,
         "resizable": true,
         "backgroundColor": "#F7F8F5",
+        "theme": "Light",
         "center": true
       }
     ],
@@ -47,7 +48,9 @@
       "signingIdentity": "-"
     },
     "resources": {
-      "../assets/r2d2/ORIGIN.txt": "licenses/Shambu-artwork.txt"
+      "../assets/r2d2/ORIGIN.txt": "licenses/Shambu-artwork.txt",
+      "../src/assets/brands/ORIGIN.txt": "licenses/Companion-brand-marks.txt",
+      "../src/assets/brands/LICENSE-Ollama.txt": "licenses/Ollama.txt"
     }
   }
 }

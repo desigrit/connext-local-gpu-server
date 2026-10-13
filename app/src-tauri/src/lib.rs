@@ -1,3 +1,7 @@
+mod launcher;
+#[cfg(desktop)]
+mod native_window;
+
 use readiness::{Settings, Snapshot};
 use std::{fs, path::PathBuf};
 use tauri::{Manager, State};
@@ -100,11 +104,29 @@ fn get_host_pairing_key(app: tauri::AppHandle) -> Result<String, String> {
     Ok(key.to_owned())
 }
 
+#[tauri::command]
+async fn open_companion_app(
+    app: tauri::AppHandle,
+    target: launcher::CompanionApp,
+) -> Result<String, String> {
+    launcher::open(&app, target).await
+}
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    #[cfg(target_os = "android")]
+    let builder = builder.plugin(
+        tauri_plugin_opener::Builder::new()
+            .open_js_links_on_click(false)
+            .build(),
+    );
+    #[cfg(desktop)]
+    let builder = builder.on_window_event(native_window::on_window_event);
+    builder
         .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
+            #[cfg(desktop)]
+            native_window::configure(app.handle());
             let config_path = app.path().app_config_dir()?.join("connection.json");
             app.manage(AppState {
                 config_path,
@@ -116,7 +138,8 @@ pub fn run() {
             load_settings,
             save_settings,
             check_readiness,
-            get_host_pairing_key
+            get_host_pairing_key,
+            open_companion_app
         ])
         .run(tauri::generate_context!())
         .expect("Could not start Shambu");

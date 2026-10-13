@@ -1,14 +1,15 @@
 import { useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import type { GpuHistory } from './types';
+import { STALE_AFTER_MS } from './timing';
 
 const HOUR = 60 * 60 * 1000;
-const fullTime = (time: number) => new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(time);
+const fullTime = (time: number) => new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' }).format(time);
 
 function tooltipTime(time: number) {
-  const parts = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: new Date(time).getMinutes() ? '2-digit' : undefined, hour12: true, timeZoneName: 'short' }).formatToParts(time);
+  const parts = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: new Date(time).getMinutes() ? '2-digit' : undefined, hour12: true }).formatToParts(time);
   const part = (type: Intl.DateTimeFormatPartTypes) => parts.find(item => item.type === type)?.value ?? '';
   const minutes = part('minute');
-  return part('hour') + (minutes ? ':' + minutes : '') + part('dayPeriod').toLowerCase() + ' ' + part('timeZoneName');
+  return part('hour') + (minutes ? ':' + minutes : '') + ' ' + part('dayPeriod');
 }
 
 export function activityHours(history: GpuHistory | null | undefined, now: number) {
@@ -30,7 +31,7 @@ export default function GpuActivity({ history, gpuName, now, stale }: { history?
   const hours = useMemo(() => activityHours(history, now), [history, now]);
   const selected = hovered ?? focused;
   const chosen = selected === null ? null : hours[selected];
-  const earlier = stale || Boolean(history && now - history.sampledAtMs > 150000);
+  const earlier = stale || Boolean(history && now - history.sampledAtMs > STALE_AFTER_MS);
   function navigate(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const target = event.key === 'ArrowRight' ? Math.min(24, index + 1) : event.key === 'ArrowLeft' ? Math.max(0, index - 1) : event.key === 'Home' ? 0 : event.key === 'End' ? 24 : null;
     if (target !== null) { event.preventDefault(); setHovered(null); buttons.current[target]?.focus(); }
@@ -52,7 +53,7 @@ export default function GpuActivity({ history, gpuName, now, stale }: { history?
           onKeyDown={event => navigate(event, index)} />)}
       </div>
       {chosen && <div className="hour-tooltip" id={id + '-tooltip'} role="tooltip" style={{ '--position': ((selected! + .5) / hours.length * 100) + '%' } as CSSProperties}>
-        {tooltipTime(chosen.start)}: <strong>{chosen.active ? 'Active' : 'Idle'}</strong>
+        {tooltipTime(chosen.start)} · <strong>{chosen.active ? 'Active' : 'Idle'}</strong>
       </div>}
     </div>
   </section>;

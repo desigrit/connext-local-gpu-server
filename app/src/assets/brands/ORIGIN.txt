@@ -1,0 +1,7 @@
+Brand marks identify the software or model family shown in Shambu.
+Ollama: https://github.com/ollama/ollama/blob/main/docs/ollama-logo.svg
+Tailscale: https://tailscale.com/favicon.svg (official brand: https://tailscale.com/press)
+Qwen: https://qwenlm.github.io/favicon.png
+Downloaded from the respective official sources on 2026-10-12, with artwork unmodified. Provenance metadata may be added.
+These marks remain the property of their respective owners. No affiliation or endorsement is implied.
+Ollama repository license is included in LICENSE-Ollama.txt.
