@@ -117,26 +117,48 @@ pub struct LoadedModel {
     pub size_vram: Option<u64>,
 }
 
-pub const GPU_HISTORY_WINDOW_MS: u64 = 24 * 60 * 60 * 1_000;
-pub const MAX_GPU_BURSTS: usize = 1_500;
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct InstalledModel {
+    pub name: String,
+    pub size: u64,
+}
+
+pub const GPU_HISTORY_SOURCE: &str = "ollama-gpu-estimate";
+pub const GPU_HISTORY_HOUR_MS: u64 = 60 * 60 * 1_000;
+pub const GPU_HISTORY_WINDOW_MS: u64 = 48 * GPU_HISTORY_HOUR_MS;
+pub const MAX_GPU_BURSTS: usize = 3_000;
+pub const MAX_GPU_ACTIVE_HOURS: usize = 49;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct GpuHistory {
+    #[serde(default)]
+    pub source: String,
     pub sampled_at_ms: u64,
     pub bursts: Vec<u64>,
+    #[serde(default)]
+    pub active_hours: Vec<u64>,
 }
 
 impl GpuHistory {
     pub(crate) fn is_valid(&self) -> bool {
         let cutoff = self.sampled_at_ms.saturating_sub(GPU_HISTORY_WINDOW_MS);
-        self.sampled_at_ms > 0
+        let first_hour = cutoff / GPU_HISTORY_HOUR_MS * GPU_HISTORY_HOUR_MS;
+        let last_hour = self.sampled_at_ms / GPU_HISTORY_HOUR_MS * GPU_HISTORY_HOUR_MS;
+        self.source == GPU_HISTORY_SOURCE
+            && self.sampled_at_ms > 0
             && self.bursts.len() <= MAX_GPU_BURSTS
             && self
                 .bursts
                 .iter()
                 .all(|time| *time >= cutoff && *time <= self.sampled_at_ms)
             && self.bursts.windows(2).all(|pair| pair[0] < pair[1])
+            && self.active_hours.len() <= MAX_GPU_ACTIVE_HOURS
+            && self.active_hours.iter().all(|hour| {
+                *hour >= first_hour && *hour <= last_hour && *hour % GPU_HISTORY_HOUR_MS == 0
+            })
+            && self.active_hours.windows(2).all(|pair| pair[0] < pair[1])
     }
 }
 
@@ -146,12 +168,18 @@ pub struct Snapshot {
     pub checked_at_ms: u64,
     pub host_details: HostDetails,
     pub endpoint: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_endpoint: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gpu_name: Option<String>,
     pub mode: Mode,
     pub checks: Vec<Check>,
     pub version: Option<String>,
     pub latency_ms: Option<u64>,
     pub model_count: Option<usize>,
     pub loaded_models: Vec<LoadedModel>,
+    #[serde(default)]
+    pub installed_models: Vec<InstalledModel>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gpu_history: Option<GpuHistory>,
 }
@@ -273,6 +301,30 @@ fn parse_models(result: Result<Value, String>) -> Result<Vec<LoadedModel>, Strin
         .collect()
 }
 
+fn parse_installed_models(result: Result<Value, String>) -> Result<Vec<InstalledModel>, String> {
+    let value = result?;
+    let items = value
+        .get("models")
+        .and_then(Value::as_array)
+        .ok_or_else(|| "Ollama did not return an installed-model list.".to_string())?;
+    items
+        .iter()
+        .map(|item| {
+            let name = item
+                .get("name")
+                .and_then(Value::as_str)
+                .filter(|name| !name.is_empty())
+                .ok_or_else(|| {
+                    "Ollama returned an incomplete installed-model entry.".to_string()
+                })?;
+            Ok(InstalledModel {
+                name: name.into(),
+                size: item.get("size").and_then(Value::as_u64).unwrap_or(0),
+            })
+        })
+        .collect()
+}
+
 fn gpu_from_models(models: &[LoadedModel]) -> Check {
     if models.is_empty() {
         return Check::new(
@@ -365,12 +417,8 @@ pub async fn inspect(settings: Settings) -> Result<Snapshot, String> {
                 "Check the server address, then open Tailscale on both devices. The server PC must be awake."
             }),
     };
-    let model_count = tags
-        .as_ref()
-        .ok()
-        .and_then(|json| json.get("models"))
-        .and_then(Value::as_array)
-        .map(Vec::len);
+    let installed_models = parse_installed_models(tags);
+    let model_count = installed_models.as_ref().ok().map(Vec::len);
     let library = match model_count {
         Some(0) => Check::new(
             "models",
@@ -392,7 +440,10 @@ pub async fn inspect(settings: Settings) -> Result<Snapshot, String> {
             "Model library",
             State::Unknown,
             "Unverified",
-            tags.err()
+            installed_models
+                .as_ref()
+                .err()
+                .cloned()
                 .unwrap_or_else(|| "The response did not include a model list.".into()),
         ),
     };
@@ -411,6 +462,20 @@ pub async fn inspect(settings: Settings) -> Result<Snapshot, String> {
         .as_ref()
         .and_then(|host| host.snapshot.as_ref())
         .and_then(|snapshot| snapshot.gpu_history.clone());
+    let gpu_name = desktop
+        .as_ref()
+        .and_then(|local| local.gpu.clone())
+        .or_else(|| {
+            remote
+                .as_ref()
+                .and_then(|host| host.snapshot.as_ref())
+                .and_then(|snapshot| snapshot.gpu_name.clone())
+        });
+    let external_endpoint = if let Some(desktop) = &desktop {
+        local::external_endpoint(desktop, &base)
+    } else {
+        Some(base.as_str().trim_end_matches('/').to_owned())
+    };
     let (tailscale, forwarding, host_details) = if let Some(desktop) = &desktop {
         if let Some(device) = &desktop.gpu {
             if models.as_ref().is_ok_and(|items| items.is_empty()) {
@@ -441,6 +506,9 @@ pub async fn inspect(settings: Settings) -> Result<Snapshot, String> {
                 .expect("Companion schema was checked")
                 .clone();
             tailscale.title = "Tailscale on server".into();
+            if tailscale.state == State::Ok {
+                tailscale.label = "Active".into();
+            }
             let mut forwarding = host
                 .checks
                 .iter()
@@ -464,12 +532,15 @@ pub async fn inspect(settings: Settings) -> Result<Snapshot, String> {
             .as_millis() as u64,
         host_details,
         endpoint: base.as_str().trim_end_matches('/').into(),
+        external_endpoint,
+        gpu_name,
         mode: settings.mode,
         checks: vec![ollama, tailscale, forwarding, gpu, library],
         version: version.ok(),
         latency_ms: if api_ok { Some(elapsed) } else { None },
         model_count,
         loaded_models: models.unwrap_or_default(),
+        installed_models: installed_models.unwrap_or_default(),
         gpu_history,
     })
 }
@@ -506,6 +577,33 @@ mod tests {
         assert!(validate_settings(&settings("http://[::1]:11434", Mode::Remote)).is_err());
         assert!(validate_settings(&settings("http://192.0.2.10:11434", Mode::Host)).is_err());
         assert!(validate_settings(&settings("http://192.0.2.10:11434/", Mode::Remote)).is_ok());
+    }
+
+    #[test]
+    fn installed_models_come_from_the_direct_tags_response() {
+        let models = parse_installed_models(Ok(serde_json::json!({"models":[
+            {"name":"fixture-small:latest","size":123},
+            {"name":"fixture-large:latest","size":456}
+        ]})))
+        .unwrap();
+        assert_eq!(
+            models,
+            vec![
+                InstalledModel {
+                    name: "fixture-small:latest".into(),
+                    size: 123
+                },
+                InstalledModel {
+                    name: "fixture-large:latest".into(),
+                    size: 456
+                },
+            ]
+        );
+        assert!(parse_installed_models(Ok(serde_json::json!({"models":[]})))
+            .unwrap()
+            .is_empty());
+        assert!(parse_installed_models(Ok(serde_json::json!({"models":[{"size":10}]}))).is_err());
+        assert!(parse_installed_models(Err("Unavailable".into())).is_err());
     }
 
     #[test]

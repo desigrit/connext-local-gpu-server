@@ -36,6 +36,21 @@ impl SnapshotCache {
         });
     }
 
+    async fn inference_activity(&self, gpu_activity: Option<bool>) -> Option<bool> {
+        let busy = gpu_activity?;
+        let guard = self.sample.read().await;
+        let fresh_gpu_model = guard.as_ref().is_some_and(|sample| {
+            sample.measured_at.elapsed() <= Duration::from_secs(15)
+                && sample.snapshot.mode == readiness::Mode::Host
+                && sample
+                    .snapshot
+                    .loaded_models
+                    .iter()
+                    .any(|model| model.size_vram.is_some_and(|size| size > 0))
+        });
+        Some(busy && fresh_gpu_model)
+    }
+
     async fn read(&self) -> Option<HealthEnvelope> {
         let guard = self.sample.read().await;
         let sample = guard.as_ref()?;
@@ -183,6 +198,8 @@ mod tests {
             checked_at_ms: 1,
             host_details: HostDetails::Local,
             endpoint: "http://127.0.0.1:11434".into(),
+            external_endpoint: None,
+            gpu_name: None,
             mode: Mode::Host,
             checks: ["ollama", "tailscale", "forwarding", "gpu", "models"]
                 .map(|id| Check {
@@ -198,6 +215,7 @@ mod tests {
             latency_ms: Some(1),
             model_count: Some(1),
             loaded_models: vec![],
+            installed_models: vec![],
             gpu_history: None,
         }
     }
@@ -296,14 +314,48 @@ mod tests {
         );
     }
 
+    #[tokio::test(start_paused = true)]
+    async fn estimated_inference_requires_gpu_activity_and_recent_ollama_gpu_allocation() {
+        let cache = SnapshotCache::default();
+        assert_eq!(cache.inference_activity(Some(true)).await, Some(false));
+        let mut snapshot = fixture();
+        cache.update(Instant::now(), snapshot.clone()).await;
+        assert_eq!(cache.inference_activity(Some(true)).await, Some(false));
+        snapshot.loaded_models = vec![readiness::LoadedModel {
+            name: "fixture".into(),
+            size: 100,
+            size_vram: Some(0),
+        }];
+        cache.update(Instant::now(), snapshot.clone()).await;
+        assert_eq!(cache.inference_activity(Some(true)).await, Some(false));
+        snapshot.loaded_models[0].size_vram = Some(100);
+        cache.update(Instant::now(), snapshot.clone()).await;
+        assert_eq!(cache.inference_activity(Some(false)).await, Some(false));
+        assert_eq!(cache.inference_activity(None).await, None);
+        assert_eq!(cache.inference_activity(Some(true)).await, Some(true));
+        tokio::time::advance(Duration::from_secs(15)).await;
+        assert_eq!(cache.inference_activity(Some(true)).await, Some(true));
+        tokio::time::advance(Duration::from_millis(1)).await;
+        assert_eq!(cache.inference_activity(Some(true)).await, Some(false));
+        snapshot.loaded_models[0].size_vram = None;
+        cache.update(Instant::now(), snapshot.clone()).await;
+        assert_eq!(cache.inference_activity(Some(true)).await, Some(false));
+        // A failed running-model probe yields an empty list and cannot reuse old GPU evidence.
+        snapshot.loaded_models.clear();
+        cache.update(Instant::now(), snapshot).await;
+        assert_eq!(cache.inference_activity(Some(true)).await, Some(false));
+    }
+
     #[tokio::test]
     async fn cached_health_includes_independently_updated_gpu_history() {
         let key = "d".repeat(64);
         let cache = SnapshotCache::default();
         cache.update(Instant::now(), fixture()).await;
         *cache.gpu_history.write().await = Some(GpuHistory {
+            source: readiness::GPU_HISTORY_SOURCE.into(),
             sampled_at_ms: 3_601_000,
             bursts: vec![3_599_000],
+            active_hours: vec![0, 3_600_000],
         });
         let app = router(cache.clone(), &key).unwrap();
         assert_eq!(
@@ -319,8 +371,10 @@ mod tests {
             vec![3_599_000]
         );
         *cache.gpu_history.write().await = Some(GpuHistory {
+            source: readiness::GPU_HISTORY_SOURCE.into(),
             sampled_at_ms: 3_666_000,
             bursts: vec![3_599_000, 3_666_000],
+            active_hours: vec![0, 3_600_000],
         });
         assert_eq!(
             cache

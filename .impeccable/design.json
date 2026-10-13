@@ -1,0 +1,499 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-13T04:39:59.079Z",
+  "title": "Design System: Shambu",
+  "extensions": {
+    "colorMeta": {
+      "green": {
+        "role": "primary",
+        "displayName": "Forest green",
+        "tonalRamp": [
+          "oklch(15.00% 0.06541 151.97)",
+          "oklch(26.43% 0.06541 151.97)",
+          "oklch(37.86% 0.06541 151.97)",
+          "oklch(49.29% 0.06541 151.97)",
+          "oklch(60.71% 0.06541 151.97)",
+          "oklch(72.14% 0.06541 151.97)",
+          "oklch(83.57% 0.06541 151.97)",
+          "oklch(95.00% 0.06541 151.97)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Lichen",
+        "tonalRamp": [
+          "oklch(15.00% 0.06467 120.00)",
+          "oklch(26.43% 0.06467 120.00)",
+          "oklch(37.86% 0.06467 120.00)",
+          "oklch(49.29% 0.06467 120.00)",
+          "oklch(60.71% 0.06467 120.00)",
+          "oklch(72.14% 0.06467 120.00)",
+          "oklch(83.57% 0.06467 120.00)",
+          "oklch(95.00% 0.06467 120.00)"
+        ]
+      },
+      "action-hover": {
+        "role": "primary",
+        "displayName": "Action green",
+        "tonalRamp": [
+          "oklch(15.00% 0.05106 153.19)",
+          "oklch(26.43% 0.05106 153.19)",
+          "oklch(37.86% 0.05106 153.19)",
+          "oklch(49.29% 0.05106 153.19)",
+          "oklch(60.71% 0.05106 153.19)",
+          "oklch(72.14% 0.05106 153.19)",
+          "oklch(83.57% 0.05106 153.19)",
+          "oklch(95.00% 0.05106 153.19)"
+        ]
+      },
+      "warning": {
+        "role": "secondary",
+        "displayName": "Amber",
+        "tonalRamp": [
+          "oklch(15.00% 0.10128 67.71)",
+          "oklch(26.43% 0.10128 67.71)",
+          "oklch(37.86% 0.10128 67.71)",
+          "oklch(49.29% 0.10128 67.71)",
+          "oklch(60.71% 0.10128 67.71)",
+          "oklch(72.14% 0.10128 67.71)",
+          "oklch(83.57% 0.10128 67.71)",
+          "oklch(95.00% 0.10128 67.71)"
+        ]
+      },
+      "danger": {
+        "role": "secondary",
+        "displayName": "Rust",
+        "tonalRamp": [
+          "oklch(15.00% 0.13242 29.44)",
+          "oklch(26.43% 0.13242 29.44)",
+          "oklch(37.86% 0.13242 29.44)",
+          "oklch(49.29% 0.13242 29.44)",
+          "oklch(60.71% 0.13242 29.44)",
+          "oklch(72.14% 0.13242 29.44)",
+          "oklch(83.57% 0.13242 29.44)",
+          "oklch(95.00% 0.13242 29.44)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Chalk",
+        "tonalRamp": [
+          "oklch(15.00% 0.00409 121.56)",
+          "oklch(26.43% 0.00409 121.56)",
+          "oklch(37.86% 0.00409 121.56)",
+          "oklch(49.29% 0.00409 121.56)",
+          "oklch(60.71% 0.00409 121.56)",
+          "oklch(72.14% 0.00409 121.56)",
+          "oklch(83.57% 0.00409 121.56)",
+          "oklch(95.00% 0.00409 121.56)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Green ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.02740 161.26)",
+          "oklch(26.43% 0.02740 161.26)",
+          "oklch(37.86% 0.02740 161.26)",
+          "oklch(49.29% 0.02740 161.26)",
+          "oklch(60.71% 0.02740 161.26)",
+          "oklch(72.14% 0.02740 161.26)",
+          "oklch(83.57% 0.02740 161.26)",
+          "oklch(95.00% 0.02740 161.26)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Sage grey",
+        "tonalRamp": [
+          "oklch(15.00% 0.01713 157.88)",
+          "oklch(26.43% 0.01713 157.88)",
+          "oklch(37.86% 0.01713 157.88)",
+          "oklch(49.29% 0.01713 157.88)",
+          "oklch(60.71% 0.01713 157.88)",
+          "oklch(72.14% 0.01713 157.88)",
+          "oklch(83.57% 0.01713 157.88)",
+          "oklch(95.00% 0.01713 157.88)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Fine rule",
+        "tonalRamp": [
+          "oklch(15.00% 0.01079 136.56)",
+          "oklch(26.43% 0.01079 136.56)",
+          "oklch(37.86% 0.01079 136.56)",
+          "oklch(49.29% 0.01079 136.56)",
+          "oklch(60.71% 0.01079 136.56)",
+          "oklch(72.14% 0.01079 136.56)",
+          "oklch(83.57% 0.01079 136.56)",
+          "oklch(95.00% 0.01079 136.56)"
+        ]
+      },
+      "quiet-fill": {
+        "role": "neutral",
+        "displayName": "Quiet sage",
+        "tonalRamp": [
+          "oklch(15.00% 0.01713 128.66)",
+          "oklch(26.43% 0.01713 128.66)",
+          "oklch(37.86% 0.01713 128.66)",
+          "oklch(49.29% 0.01713 128.66)",
+          "oklch(60.71% 0.01713 128.66)",
+          "oklch(72.14% 0.01713 128.66)",
+          "oklch(83.57% 0.01713 128.66)",
+          "oklch(95.00% 0.01713 128.66)"
+        ]
+      },
+      "panel-fill": {
+        "role": "neutral",
+        "displayName": "Panel sage",
+        "tonalRamp": [
+          "oklch(15.00% 0.01141 128.59)",
+          "oklch(26.43% 0.01141 128.59)",
+          "oklch(37.86% 0.01141 128.59)",
+          "oklch(49.29% 0.01141 128.59)",
+          "oklch(60.71% 0.01141 128.59)",
+          "oklch(72.14% 0.01141 128.59)",
+          "oklch(83.57% 0.01141 128.59)",
+          "oklch(95.00% 0.01141 128.59)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field edge",
+        "tonalRamp": [
+          "oklch(15.00% 0.02454 139.44)",
+          "oklch(26.43% 0.02454 139.44)",
+          "oklch(37.86% 0.02454 139.44)",
+          "oklch(49.29% 0.02454 139.44)",
+          "oklch(60.71% 0.02454 139.44)",
+          "oklch(72.14% 0.02454 139.44)",
+          "oklch(83.57% 0.02454 139.44)",
+          "oklch(95.00% 0.02454 139.44)"
+        ]
+      },
+      "mode-track": {
+        "role": "neutral",
+        "displayName": "Mode track",
+        "tonalRamp": [
+          "oklch(15.00% 0.01770 131.88)",
+          "oklch(26.43% 0.01770 131.88)",
+          "oklch(37.86% 0.01770 131.88)",
+          "oklch(49.29% 0.01770 131.88)",
+          "oklch(60.71% 0.01770 131.88)",
+          "oklch(72.14% 0.01770 131.88)",
+          "oklch(83.57% 0.01770 131.88)",
+          "oklch(95.00% 0.01770 131.88)"
+        ]
+      },
+      "activity-idle": {
+        "role": "tertiary",
+        "displayName": "Idle hour",
+        "tonalRamp": [
+          "oklch(15.00% 0.01309 130.78)",
+          "oklch(26.43% 0.01309 130.78)",
+          "oklch(37.86% 0.01309 130.78)",
+          "oklch(49.29% 0.01309 130.78)",
+          "oklch(60.71% 0.01309 130.78)",
+          "oklch(72.14% 0.01309 130.78)",
+          "oklch(83.57% 0.01309 130.78)",
+          "oklch(95.00% 0.01309 130.78)"
+        ]
+      },
+      "activity-border": {
+        "role": "tertiary",
+        "displayName": "Hour edge",
+        "tonalRamp": [
+          "oklch(15.00% 0.04495 138.50)",
+          "oklch(26.43% 0.04495 138.50)",
+          "oklch(37.86% 0.04495 138.50)",
+          "oklch(49.29% 0.04495 138.50)",
+          "oklch(60.71% 0.04495 138.50)",
+          "oklch(72.14% 0.04495 138.50)",
+          "oklch(83.57% 0.04495 138.50)",
+          "oklch(95.00% 0.04495 138.50)"
+        ]
+      },
+      "activity-active": {
+        "role": "tertiary",
+        "displayName": "Active hour",
+        "tonalRamp": [
+          "oklch(15.00% 0.06258 151.81)",
+          "oklch(26.43% 0.06258 151.81)",
+          "oklch(37.86% 0.06258 151.81)",
+          "oklch(49.29% 0.06258 151.81)",
+          "oklch(60.71% 0.06258 151.81)",
+          "oklch(72.14% 0.06258 151.81)",
+          "oklch(83.57% 0.06258 151.81)",
+          "oklch(95.00% 0.06258 151.81)"
+        ]
+      },
+      "activity-selected": {
+        "role": "tertiary",
+        "displayName": "Inspected idle hour",
+        "tonalRamp": [
+          "oklch(15.00% 0.04009 127.58)",
+          "oklch(26.43% 0.04009 127.58)",
+          "oklch(37.86% 0.04009 127.58)",
+          "oklch(49.29% 0.04009 127.58)",
+          "oklch(60.71% 0.04009 127.58)",
+          "oklch(72.14% 0.04009 127.58)",
+          "oklch(83.57% 0.04009 127.58)",
+          "oklch(95.00% 0.04009 127.58)"
+        ]
+      },
+      "activity-active-selected": {
+        "role": "tertiary",
+        "displayName": "Inspected active hour",
+        "tonalRamp": [
+          "oklch(15.00% 0.06013 154.73)",
+          "oklch(26.43% 0.06013 154.73)",
+          "oklch(37.86% 0.06013 154.73)",
+          "oklch(49.29% 0.06013 154.73)",
+          "oklch(60.71% 0.06013 154.73)",
+          "oklch(72.14% 0.06013 154.73)",
+          "oklch(83.57% 0.06013 154.73)",
+          "oklch(95.00% 0.06013 154.73)"
+        ]
+      },
+      "activity-stale": {
+        "role": "tertiary",
+        "displayName": "Earlier active hour",
+        "tonalRamp": [
+          "oklch(15.00% 0.04445 137.30)",
+          "oklch(26.43% 0.04445 137.30)",
+          "oklch(37.86% 0.04445 137.30)",
+          "oklch(49.29% 0.04445 137.30)",
+          "oklch(60.71% 0.04445 137.30)",
+          "oklch(72.14% 0.04445 137.30)",
+          "oklch(83.57% 0.04445 137.30)",
+          "oklch(95.00% 0.04445 137.30)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The readiness sentence, 29px on desktop and 24px on compact screens."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "The in-place connection-settings heading."
+      },
+      "row-title": {
+        "displayName": "Row Title",
+        "purpose": "Readiness labels, reduced to 13px on compact screens."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Visible recovery guidance and explanations."
+      },
+      "status": {
+        "displayName": "Status",
+        "purpose": "State words paired with drawn marks."
+      },
+      "field": {
+        "displayName": "Field",
+        "purpose": "Editable connection values."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "The primary settings-form action."
+      },
+      "metadata": {
+        "displayName": "Metadata",
+        "purpose": "Supporting labels and field guidance."
+      },
+      "gpu-name": {
+        "displayName": "GPU Name",
+        "purpose": "The detected GPU name above the rolling history strip."
+      },
+      "tooltip": {
+        "displayName": "Hour Tooltip",
+        "purpose": "Local hour, time zone, and state for the inspected hour."
+      }
+    },
+    "shadows": [
+      {
+        "name": "hour-tooltip",
+        "value": "0 4px 12px rgb(24 45 31 / .14)",
+        "purpose": "Lift the temporary hour tooltip above the strip."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-color",
+        "value": "background-color 140ms ease-out",
+        "purpose": "Primary-action, model-summary, and hourly-column feedback."
+      },
+      {
+        "name": "hour-edge",
+        "value": "border-color 140ms ease-out",
+        "purpose": "Change the inspected hour edge alongside its fill."
+      },
+      {
+        "name": "model-chevron",
+        "value": "transform 160ms ease-out",
+        "purpose": "Rotate the installed-model disclosure chevron through 180 degrees."
+      },
+      {
+        "name": "checking-refresh",
+        "value": "0.9s linear infinite",
+        "purpose": "Rotate the Fluent refresh icon while a check is active."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Disable animation, transitions, and smooth scrolling."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "desktop",
+        "value": "800px"
+      },
+      {
+        "name": "compact",
+        "value": "480px"
+      },
+      {
+        "name": "narrow",
+        "value": "359px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The primary action that saves connection settings and immediately checks.",
+      "html": "<button class=\"ds-primary\" type=\"button\">Save &amp; check<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/></svg></button>",
+      "css": ".ds-primary{font-family:'Manrope Variable','Segoe UI',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:0;border-radius:9px;background:var(--ink, #27382f);color:var(--surface, #f7f8f5);font-size:11px;font-weight:650;cursor:pointer;transition:background-color 140ms ease-out;}.ds-primary svg{flex-shrink:0;}.ds-primary:hover:not(:disabled){background:#42614b;}.ds-primary:focus-visible{outline:2px solid var(--green, #3d6548);outline-offset:4px;}.ds-primary:disabled{cursor:default;opacity:.5;}@media(prefers-reduced-motion:reduce){.ds-primary{animation:none;transition:none;}}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Connection, with a selected state and an icon-only compact form.",
+      "html": "<button class=\"ds-quiet\" type=\"button\" aria-label=\"Connection\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 17H5\"/><path d=\"M19 7h-9\"/><circle cx=\"17\" cy=\"17\" r=\"3\"/><circle cx=\"7\" cy=\"7\" r=\"3\"/></svg><span>Connection</span></button>",
+      "css": ".ds-quiet{font-family:'Manrope Variable','Segoe UI',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 10px;border:0;border-radius:9px;background:transparent;color:var(--muted, #657069);font-size:12px;font-weight:650;cursor:pointer;}.ds-quiet:hover,.ds-quiet[aria-expanded=\"true\"]{background:#eaf0e4;color:var(--ink, #27382f);}.ds-quiet svg{flex-shrink:0;}.ds-quiet:focus-visible{outline:2px solid var(--green, #3d6548);outline-offset:4px;}.ds-quiet:disabled{cursor:default;opacity:.5;}@media(max-width:480px){.ds-quiet{min-width:44px;padding:0;}.ds-quiet span{display:none;}}"
+    },
+    {
+      "name": "Outlined Pairing Action",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "The quiet action with a field-edge border used for a host pairing key.",
+      "html": "<button class=\"ds-outline\" type=\"button\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/><path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/></svg>Copy pairing key</button>",
+      "css": ".ds-outline{font-family:'Manrope Variable','Segoe UI',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 10px;border:1px solid #b9c5b6;border-radius:9px;background:transparent;color:var(--ink, #27382f);font-size:12px;font-weight:650;cursor:pointer;}.ds-outline:hover{background:#eaf0e4;}.ds-outline svg{flex-shrink:0;}.ds-outline:focus-visible{outline:2px solid var(--green, #3d6548);outline-offset:4px;}.ds-outline:disabled{cursor:default;opacity:.5;}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "field-text",
+      "description": "A labeled chalk field with the shared green keyboard-focus outline.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-server-name\">Server name</label><input class=\"ds-field\" id=\"ds-server-name\" value=\"My GPU server\" autocomplete=\"off\">",
+      "css": ".ds-field-label{font-family:'Manrope Variable','Segoe UI',sans-serif;display:block;margin:14px 0 6px;color:var(--ink, #27382f);font-size:11px;font-weight:700;}.ds-field{font-family:'Manrope Variable','Segoe UI',sans-serif;width:100%;max-width:100%;background:var(--surface, #f7f8f5);color:var(--ink, #27382f);border:1px solid #b9c5b6;min-height:44px;border-radius:7px;padding:10px 12px;font-size:13px;caret-color:var(--green, #3d6548);}.ds-field:focus-visible{outline:2px solid var(--green, #3d6548);outline-offset:4px;}.ds-field::placeholder{color:#626e65;}"
+    },
+    {
+      "name": "Server Location Choice",
+      "kind": "nav",
+      "refersTo": "mode-navigation",
+      "description": "An in-place two-choice control with a chalk selected state.",
+      "html": "<div class=\"ds-mode\" role=\"group\" aria-label=\"Server location\"><button type=\"button\" aria-pressed=\"true\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\"/><line x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\"/><line x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\"/></svg>This computer</button><button type=\"button\" aria-pressed=\"false\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/></svg>Remote server</button></div>",
+      "css": ".ds-mode{display:flex;gap:4px;padding:3px;background:#dfe6da;border-radius:9px;}.ds-mode button{font-family:'Manrope Variable','Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;flex:1;min-height:40px;border:0;border-radius:6px;background:transparent;color:#4d5d50;font-size:11px;font-weight:700;cursor:pointer;}.ds-mode button[aria-pressed=\"true\"]{background:var(--surface, #f7f8f5);color:var(--ink, #27382f);}.ds-mode svg{flex-shrink:0;}.ds-mode button:focus-visible{outline:2px solid var(--green, #3d6548);outline-offset:4px;}.ds-mode button:disabled{cursor:default;opacity:.5;}"
+    },
+    {
+      "name": "Status Labels",
+      "kind": "chip",
+      "refersTo": "status-label",
+      "description": "Unboxed Active, unverified, warning, and error words with drawn state marks.",
+      "html": "<div class=\"ds-states\"><span class=\"ds-status\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>Active</span><span class=\"ds-status ds-status-unknown\"><span class=\"ds-dot\"></span>Not linked</span><span class=\"ds-status ds-status-warning\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg>Not responding</span><span class=\"ds-status ds-status-error\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg>Unreachable</span></div>",
+      "css": ".ds-states{display:flex;flex-wrap:wrap;gap:12px 16px;}.ds-status{font-family:'Manrope Variable','Segoe UI',sans-serif;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--green, #3d6548);white-space:nowrap;}.ds-status-unknown,.ds-status-idle,.ds-status-stale{color:var(--muted, #657069);}.ds-status-warning{color:var(--warning, #946122);}.ds-status-error{color:var(--danger, #a44236);}.ds-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;}"
+    },
+    {
+      "name": "Selected Server Strip",
+      "kind": "card",
+      "refersTo": "server-strip",
+      "description": "The external endpoint, server name, and copy action, using a reserved documentation address.",
+      "html": "<section class=\"ds-server\" aria-label=\"Selected server\"><div class=\"ds-server-identity\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\"/><line x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\"/><line x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\"/></svg><div><h2>My GPU server</h2><p>http://192.0.2.10:11434</p></div></div><button type=\"button\" aria-label=\"Copy server URL\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/><path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/></svg></button></section>",
+      "css": ".ds-server{font-family:'Manrope Variable','Segoe UI',sans-serif;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 11px 12px 18px;border:1px solid var(--line, #e0e5de);border-radius:12px;background:var(--surface, #f7f8f5);color:var(--ink, #27382f);}.ds-server-identity{display:flex;align-items:center;gap:12px;min-width:0;}.ds-server-identity>svg{flex-shrink:0;color:var(--muted, #657069);}.ds-server-identity>div{min-width:0;}.ds-server h2{font-size:13px;font-weight:750;margin:0 0 4px;overflow-wrap:anywhere;}.ds-server p{font-size:12px;margin:0;color:var(--muted, #657069);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;user-select:text;}.ds-server button{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;border:0;border-radius:9px;background:transparent;color:var(--muted, #657069);cursor:pointer;}.ds-server button:hover{background:#eaf0e4;color:var(--ink, #27382f);}.ds-server button:focus-visible{outline:2px solid var(--green, #3d6548);outline-offset:4px;}.ds-server button:disabled{cursor:default;opacity:.5;}"
+    },
+    {
+      "name": "Installed Model Library",
+      "kind": "custom",
+      "refersTo": "status-line",
+      "description": "The only expandable readiness row, with clearly illustrative model names and sizes.",
+      "html": "<details class=\"ds-model-row\"><summary><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10 16h.01\"/><path d=\"M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\"/><path d=\"M21.946 12.013H2.054\"/><path d=\"M6 16h.01\"/></svg><span class=\"ds-model-title\">Model library</span><span class=\"ds-model-status\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>2 available</span><span class=\"ds-model-chevron\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></span></summary><ul class=\"ds-model-list\" aria-label=\"Example installed models\"><li><span>example-model:latest</span><span>4.0 GB</span></li><li><span>example-embedding:latest</span><span>274 MB</span></li></ul></details>",
+      "css": ".ds-model-row{font-family:'Manrope Variable','Segoe UI',sans-serif;color:var(--ink, #27382f);border-bottom:1px solid var(--line, #e0e5de);}.ds-model-row summary{list-style:none;display:flex;align-items:center;min-height:62px;gap:12px;border-radius:6px;padding:0 2px;cursor:pointer;transition:background-color 140ms ease-out;}.ds-model-row summary::-webkit-details-marker{display:none;}.ds-model-row summary:hover{background:#edf1e9;}.ds-model-row summary:focus-visible{outline:2px solid var(--green, #3d6548);outline-offset:4px;}.ds-model-row summary>svg{flex-shrink:0;color:#778174;}.ds-model-title{flex:1;font-size:14px;font-weight:650;}.ds-model-status{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;white-space:nowrap;color:var(--green, #3d6548);}.ds-model-chevron{display:inline-flex;width:14px;margin-left:3px;color:#778174;flex-shrink:0;transition:transform 160ms ease-out;}.ds-model-row[open] .ds-model-chevron{transform:rotate(180deg);}.ds-model-list{list-style:none;margin:0;padding:0 18px 12px 33px;}.ds-model-list li{display:flex;justify-content:space-between;gap:12px;font-size:12px;line-height:1.7;padding:6px 0;}.ds-model-list li span:first-child{min-width:0;overflow-wrap:anywhere;}.ds-model-list li span:last-child{color:var(--muted, #657069);white-space:nowrap;font-variant-numeric:tabular-nums;}@media(min-width:800px){.ds-model-row summary{min-height:56px;}}@media(max-width:480px){.ds-model-row summary{min-height:60px;gap:9px;}.ds-model-title{font-size:13px;}.ds-model-chevron{margin-left:0;}}@media(max-width:359px){.ds-model-row summary{gap:7px;}.ds-model-row summary>svg{width:16px;}}@media(prefers-reduced-motion:reduce){.ds-model-row summary,.ds-model-chevron{transition:none;}}"
+    },
+    {
+      "name": "GPU History Strip",
+      "kind": "custom",
+      "refersTo": "gpu-history",
+      "description": "A static illustrative 24-hour strip with 25 buckets and the current hour inspected. The example time zone is illustrative; the app uses the device time zone and roving keyboard focus.",
+      "html": "<section class=\"ds-activity-strip\" aria-label=\"GPU usage over the last 24 hours\"><p class=\"ds-gpu-name\">Example GPU</p><p class=\"ds-sr-only\" id=\"ds-hour-help\">Illustrative observed GPU activity while an Ollama model was in GPU memory. Other GPU work can contribute. Empty and unmonitored hours are Idle.</p><div class=\"ds-hour-track\"><div class=\"ds-hour-columns\" role=\"group\" aria-label=\"Hourly GPU activity\" aria-describedby=\"ds-hour-help\"><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 1: Idle\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 2: Idle\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 3: Idle\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 4: Idle\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 5: Active\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 6: Active\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 7: Idle\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 8: Idle\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 9: Active\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 10: Active\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 11: Active\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 12: Idle\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 13: Idle\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 14: Active\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 15: Idle\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 16: Active\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 17: Active\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 18: Active\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 19: Idle\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 20: Idle\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 21: Active\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 22: Active\"></button><button type=\"button\" class=\"ds-hour ds-hour-active\" tabindex=\"-1\" aria-label=\"Illustrative hour 23: Active\"></button><button type=\"button\" class=\"ds-hour\" tabindex=\"-1\" aria-label=\"Illustrative hour 24: Idle\"></button><button type=\"button\" class=\"ds-hour ds-hour-selected\" tabindex=\"0\" aria-label=\"Illustrative hour 25: Idle\" aria-describedby=\"ds-hour-tooltip\"></button></div><div class=\"ds-hour-tooltip\" id=\"ds-hour-tooltip\" role=\"tooltip\" style=\"--position:98%\">9am PST: <strong>Idle</strong></div></div></section>",
+      "css": ".ds-activity-strip{font-family:'Manrope Variable','Segoe UI',sans-serif;margin-top:24px;min-width:0;color:var(--ink, #27382f);background:transparent;}.ds-gpu-name{margin:0 0 12px;color:var(--muted, #657069);font-size:12px;font-weight:650;line-height:1.5;overflow-wrap:anywhere;}.ds-hour-track{position:relative;}.ds-hour-columns{display:grid;grid-template-columns:repeat(25,minmax(0,1fr));gap:5px;}.ds-hour{box-sizing:border-box;display:block;min-width:0;height:32px;padding:0;border-radius:4px;background:#e8ede4;border:1px solid #75896f;cursor:pointer;transition:background-color 140ms ease-out,border-color 140ms ease-out;}.ds-hour-active{background:#42684c;border-color:#42684c;}.ds-hour-selected,.ds-hour:hover,.ds-hour:focus-visible{background:#d2dfc3;border-color:var(--green, #3d6548);}.ds-hour-active.ds-hour-selected,.ds-hour-active:hover,.ds-hour-active:focus-visible{background:#284e36;border-color:#284e36;}.ds-hour:focus-visible{outline:2px solid var(--green, #3d6548);outline-offset:3px;}.ds-activity-old .ds-hour{background:#e8ede4;}.ds-activity-old .ds-hour-active{background:#74876d;border-color:#74876d;}.ds-hour-tooltip{position:absolute;bottom:calc(100% + 10px);left:clamp(76px,var(--position),calc(100% - 76px));transform:translateX(-50%);z-index:2;padding:9px 12px;border-radius:7px;background:var(--ink, #27382f);color:var(--surface, #f7f8f5);box-shadow:0 4px 12px rgb(24 45 31 / .14);font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none;}.ds-hour-tooltip strong{font-weight:750;}.ds-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}@media(max-width:480px){.ds-hour-columns{gap:3px;}.ds-hour{height:30px;border-radius:3px;}}@media(prefers-reduced-motion:reduce){.ds-hour{transition:none;}}"
+    },
+    {
+      "name": "Connection Freshness and Refresh",
+      "kind": "custom",
+      "refersTo": "button-icon",
+      "description": "Connection state, relative check time, and the Fluent refresh control in one line.",
+      "html": "<div class=\"ds-freshness\"><span class=\"ds-connected\"><span class=\"ds-freshness-dot\"></span>Connected</span><span aria-hidden=\"true\">·</span><span>Just now</span><button class=\"ds-refresh\" type=\"button\" aria-label=\"Refresh status\" title=\"Refresh status\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M4 10a6 6 0 0 1 10.47-4H12.5a.5.5 0 0 0 0 1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-1 0v1.6a7 7 0 1 0 1.98 4.36.5.5 0 1 0-1 .08L16 10a6 6 0 0 1-12 0\"/></svg></button></div>",
+      "css": ".ds-freshness{font-family:'Manrope Variable','Segoe UI',sans-serif;display:flex;gap:9px;align-items:center;font-size:12px;color:var(--muted, #657069);font-variant-numeric:tabular-nums;min-height:44px;}.ds-connected{display:inline-flex;align-items:center;gap:7px;color:var(--green, #3d6548);}.ds-freshness-dot{width:6px;height:6px;background:currentColor;border-radius:50%;}.ds-refresh{display:inline-flex;justify-content:center;align-items:center;min-width:44px;min-height:44px;margin-left:-4px;border:0;border-radius:9px;background:transparent;color:var(--muted, #657069);cursor:pointer;}.ds-refresh svg{width:20px;height:20px;flex-shrink:0;}.ds-refresh:hover{background:#eaf0e4;color:var(--ink, #27382f);}.ds-refresh:focus-visible{outline:2px solid var(--green, #3d6548);outline-offset:4px;}.ds-refresh:disabled{cursor:default;opacity:.5;}.ds-refresh .ds-spin{animation:ds-refresh-spin .9s linear infinite;}@keyframes ds-refresh-spin{to{transform:rotate(360deg);}}@media(prefers-reduced-motion:reduce){.ds-refresh .ds-spin{animation:none;}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Pocket Companion",
+    "overview": "Shambu is a quiet status instrument for a personal GPU server. The readiness sentence, external connection address, and four aligned readings establish the hierarchy. Chalk surfaces, green ink, and fine rules keep the interface light. A narrow GPU history strip follows the readings at the same width.\n\nThe native R2-D2 app icon carries the character of the product. The dashboard begins directly with the readiness message and Connection control. Its personality comes from concise language, careful spacing, and the simple rhythm of hourly activity columns.",
+    "keyCharacteristics": [
+      "A light interface with one continuous column.",
+      "A readiness header, external endpoint strip, and four aligned status rows.",
+      "Visible recovery guidance and a model-library disclosure grounded in actual data.",
+      "A narrow rolling 24-hour GPU strip with local-time hover and focus details.",
+      "Native identity without a repeated dashboard wordmark or portrait."
+    ],
+    "rules": [
+      {
+        "name": "The Evidence Color Rule",
+        "body": "Use green for a confirmed positive readiness state, amber for attention, and rust for an error. Unknown, idle, and stale readiness states use the muted neutral. Pair each reading with words and a drawn state mark.",
+        "section": "colors"
+      },
+      {
+        "name": "The Binary Hour Rule",
+        "body": "An activity column has two visual states, Active or Idle. A filled hour represents a qualifying observed GPU sample while an Ollama model was in GPU memory. Empty and unmonitored hours display Idle.",
+        "section": "colors"
+      },
+      {
+        "name": "The Single Typeface Rule",
+        "body": "Use Manrope throughout the interface. Distinguish readings, controls, and explanations through size and weight, with tabular figures for times and model sizes.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Surface Rule",
+        "body": "Separate persistent surfaces with spacing, a fine border, or a tonal fill. Reserve the small soft shadow for the temporary hour tooltip.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use the implemented palette and self-hosted Manrope.",
+      "Do lead with the readiness sentence and external connection address.",
+      "Do use Active consistently for healthy service checks.",
+      "Do keep failure details visible and reserve model expansion for actual installed models.",
+      "Do place the GPU name above a full-width 24-hour strip with accessible hour descriptions and hover or focus details.",
+      "Do preserve keyboard focus, accessible control names, and reduced-motion behavior.",
+      "Do keep character artwork in the native app identity.",
+      "Do use generic examples and keep personal connection details out of public artifacts."
+    ],
+    "donts": [
+      "Don't add a duplicate wordmark, portrait, or decorative hero above the dashboard.",
+      "Don't give ordinary status rows empty disclosures or hide recovery guidance behind a click.",
+      "Don't turn the readiness list into a grid of separate cards.",
+      "Don't describe the binary history as request counts or exact inference attribution.",
+      "Don't use color alone to communicate a reading.",
+      "Don't add shadows to persistent containers, glass, textures, or decorative data imagery.",
+      "Don't use em dashes in product copy or public documentation."
+    ]
+  }
+}

@@ -162,7 +162,19 @@ async fn fetch(client: &Client, endpoint: &Url, key: &str) -> RemoteHost {
     let envelope = crate::read_json_response(response)
         .await
         .ok()
-        .and_then(|json| serde_json::from_value::<HealthEnvelope>(json).ok());
+        .and_then(|json| serde_json::from_value::<HealthEnvelope>(json).ok())
+        .map(|mut envelope| {
+            // Older agents measured all GPU work. Keep their host checks without relabeling it.
+            if envelope
+                .snapshot
+                .gpu_history
+                .as_ref()
+                .is_some_and(|history| history.source != crate::GPU_HISTORY_SOURCE)
+            {
+                envelope.snapshot.gpu_history = None;
+            }
+            envelope
+        });
     match envelope {
         Some(envelope) if valid_envelope(&envelope, start.elapsed().as_millis() as u64) => RemoteHost {
             status: HostDetails::Linked,
@@ -277,27 +289,40 @@ mod tests {
         assert_eq!(legacy.status, HostDetails::Linked);
         assert!(legacy.snapshot.unwrap().gpu_history.is_none());
         let mut body = fixture();
-        body["snapshot"]["gpuHistory"] =
-            json!({"sampledAtMs":3_720_000,"bursts":[3_595_000,3_720_000]});
+        body["snapshot"]["gpuHistory"] = json!({"source":crate::GPU_HISTORY_SOURCE,"sampledAtMs":3_720_000,"bursts":[3_595_000,3_720_000],"activeHours":[0,3_600_000]});
         let result = server_probe(200, body.clone()).await;
         assert_eq!(result.status, HostDetails::Linked);
-        assert_eq!(
-            result.snapshot.unwrap().gpu_history.unwrap().bursts,
-            vec![3_595_000, 3_720_000]
-        );
-        for invalid in [
+        let history = result.snapshot.unwrap().gpu_history.unwrap();
+        assert_eq!(history.bursts, vec![3_595_000, 3_720_000]);
+        assert_eq!(history.active_hours, vec![0, 3_600_000]);
+        for mut invalid in [
             json!({"sampledAtMs":0,"bursts":[]}),
             json!({"sampledAtMs":10,"bursts":[11]}),
             json!({"sampledAtMs":10,"bursts":[9,8]}),
             json!({"sampledAtMs":10,"bursts":[9,9]}),
             json!({"sampledAtMs":crate::GPU_HISTORY_WINDOW_MS+2,"bursts":[1]}),
             json!({"sampledAtMs":10_000,"bursts":(1..=crate::MAX_GPU_BURSTS as u64+1).collect::<Vec<_>>()}),
+            json!({"sampledAtMs":3_600_000,"bursts":[],"activeHours":[1]}),
+            json!({"sampledAtMs":3_600_000,"bursts":[],"activeHours":[7_200_000]}),
+            json!({"sampledAtMs":3_600_000,"bursts":[],"activeHours":[0,0]}),
+            json!({"sampledAtMs":3_600_000,"bursts":[],"activeHours":[3_600_000,0]}),
+            json!({"sampledAtMs":crate::GPU_HISTORY_WINDOW_MS+crate::GPU_HISTORY_HOUR_MS,"bursts":[],"activeHours":[0]}),
         ] {
+            invalid["source"] = json!(crate::GPU_HISTORY_SOURCE);
             body["snapshot"]["gpuHistory"] = invalid;
             assert_eq!(
                 server_probe(200, body.clone()).await.status,
                 HostDetails::Unreachable
             );
+        }
+        for legacy in [
+            json!({"sampledAtMs":3_720_000,"bursts":[3_595_000]}),
+            json!({"source":"all-gpu","sampledAtMs":3_720_000,"bursts":[3_595_000]}),
+        ] {
+            body["snapshot"]["gpuHistory"] = legacy;
+            let result = server_probe(200, body.clone()).await;
+            assert_eq!(result.status, HostDetails::Linked);
+            assert!(result.snapshot.unwrap().gpu_history.is_none());
         }
         assert!(local_gpu_history("invalid").await.is_none());
     }

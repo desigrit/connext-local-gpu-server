@@ -1,6 +1,6 @@
 # Shambu
 
-Shambu is a small app that keeps an eye on your private GPU server. One page shows Ollama, Tailscale, forwarding, installed models, and a firefly chart of hourly GPU activity on Windows, macOS, and Android.
+Shambu is a small app that keeps an eye on your private GPU server. One page shows Ollama, Tailscale, forwarding, installed models, and a rolling 24-hour strip of observed Ollama GPU activity on Windows, macOS, and Android.
 
 This repository also includes the Windows setup guide and startup scripts for running Ollama on a GPU PC and reaching it privately through Tailscale. Use the same endpoint from a laptop at home, a phone on mobile data, or a computer while traveling.
 
@@ -12,7 +12,7 @@ A single-screen app for Windows, Mac, and Android checks Ollama, Tailscale, forw
 
 See the [app guide](app/README.md) for setup and the [host companion guide](docs/host-agent.md) for pairing remote devices. Download platform packages from a successful [build workflow run](https://github.com/desigrit/shambu/actions/workflows/app.yml). The current packages are development builds.
 
-Named after Shikari Shambu, with original character artwork credited in the [branding notes](docs/branding.md).
+Named after Shikari Shambu, with its R2-D2 icon artwork credited in the [branding notes](docs/branding.md).
 
 ## What is included
 

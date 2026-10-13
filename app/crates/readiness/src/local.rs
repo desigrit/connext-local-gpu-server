@@ -163,7 +163,7 @@ fn status_check(json: &Value) -> Check {
         .unwrap_or("Unknown");
     let online = json.pointer("/Self/Online").and_then(Value::as_bool);
     if state == "Running" && online == Some(true) {
-        Check::new("tailscale", "Tailscale", State::Ok, "Connected",
+        Check::new("tailscale", "Tailscale", State::Ok, "Active",
             "Tailscale reports the server online. Peer access still depends on your tailnet policy.")
     } else if state == "Running" && online.is_none() {
         Check::new(
@@ -253,6 +253,31 @@ fn forward_matches(target: &str, base: &Url) -> bool {
     target_local && target.port() == base.port_or_known_default()
 }
 
+fn matching_forward_port(serve: &Value, base: &Url) -> Option<u16> {
+    serve
+        .get("TCP")?
+        .as_object()?
+        .iter()
+        .find_map(|(port, config)| {
+            let target = config.get("TCPForward")?.as_str()?;
+            forward_matches(target, base)
+                .then(|| port.parse::<u16>().ok().filter(|port| *port > 0))
+                .flatten()
+        })
+}
+
+pub(crate) fn external_endpoint(local: &Local, base: &Url) -> Option<String> {
+    let port = matching_forward_port(local.serve.as_ref()?, base)?;
+    let address = local
+        .addresses
+        .iter()
+        .find_map(|address| address.parse::<std::net::Ipv4Addr>().ok())?;
+    let mut external = base.clone();
+    external.set_host(Some(&address.to_string())).ok()?;
+    external.set_port(Some(port)).ok()?;
+    Some(external.as_str().trim_end_matches('/').to_owned())
+}
+
 pub(crate) async fn check_forwarding(local: &Local, base: &Url, client: &Client) -> Check {
     let Some(serve) = &local.serve else {
         return Check::new(
@@ -263,17 +288,7 @@ pub(crate) async fn check_forwarding(local: &Local, base: &Url, client: &Client)
             "The host's Tailscale forwarding configuration could not be read.",
         );
     };
-    let ports = serve.get("TCP").and_then(Value::as_object);
-    let found = ports.and_then(|ports| {
-        ports.iter().find_map(|(port, config)| {
-            let target = config.get("TCPForward").and_then(Value::as_str)?;
-            if forward_matches(target, base) {
-                port.parse::<u16>().ok()
-            } else {
-                None
-            }
-        })
-    });
+    let found = matching_forward_port(serve, base);
     let Some(port) = found else {
         return Check::new(
             "forwarding",
@@ -341,6 +356,35 @@ mod tests {
             status_check(&json!({"BackendState":"NeedsLogin"})).label,
             "Disconnected"
         );
+    }
+
+    #[test]
+    fn external_url_uses_the_advertised_address_and_matching_serve_port() {
+        let base = Url::parse("http://127.0.0.1:11434").unwrap();
+        let mut local = Local {
+            tailscale: status_check(&json!({"BackendState":"Running","Self":{"Online":true}})),
+            addresses: vec!["192.0.2.10".into()],
+            serve: Some(json!({"TCP":{
+                "21434":{"TCPForward":"127.0.0.1:11434"},
+                "11435":{"TCPForward":"127.0.0.1:11435"}
+            }})),
+            gpu: None,
+        };
+        assert_eq!(
+            external_endpoint(&local, &base).as_deref(),
+            Some("http://192.0.2.10:21434")
+        );
+        assert_eq!(local.tailscale.label, "Active");
+        assert_eq!(base.as_str(), "http://127.0.0.1:11434/");
+        local.serve = Some(json!({"TCP":{"11435":{"TCPForward":"127.0.0.1:11435"}}}));
+        assert!(external_endpoint(&local, &base).is_none());
+        local.serve = None;
+        assert!(external_endpoint(&local, &base).is_none());
+        local.serve = Some(json!({"TCP":{"0":{"TCPForward":"127.0.0.1:11434"}}}));
+        assert!(external_endpoint(&local, &base).is_none());
+        local.serve = Some(json!({"TCP":{"11434":{"TCPForward":"127.0.0.1:11434"}}}));
+        local.addresses.clear();
+        assert!(external_endpoint(&local, &base).is_none());
     }
 
     #[test]

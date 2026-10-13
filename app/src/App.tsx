@@ -1,30 +1,39 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowDownUp, ArrowUpRight, Check as CheckIcon, ChevronDown, CircleHelp, Copy, Cpu, HardDrive, LoaderCircle, Monitor, Network, RefreshCw, Server, Settings2, ShieldCheck, TriangleAlert, X } from 'lucide-react';
+import { ArrowDownUp, ArrowUpRight, Check as CheckIcon, ChevronDown, CircleHelp, Copy, Cpu, HardDrive, Monitor, Network, Server, Settings2, TriangleAlert, X } from 'lucide-react';
+import { ArrowClockwise20Regular } from '@fluentui/react-icons';
 import { android, checkReadiness, copyHostKey, copyText, defaultSettings, demo, loadSettings, native, saveSettings, validateSettings, type ConnectionIssue } from './bridge';
-import { BRAND } from './brand';
 import GpuActivity from './GpuActivity';
-import type { Check, Mode, Settings, Snapshot } from './types';
+import type { Check, InstalledModel, Mode, Settings, Snapshot } from './types';
 
 const icons = { ollama: Server, tailscale: Network, forwarding: ArrowDownUp, gpu: Cpu, models: HardDrive };
 const initialChecks: Check[] = [
   ['ollama', 'Ollama local URL'], ['tailscale', 'Tailscale'], ['forwarding', 'Forwarding'], ['gpu', 'GPU inference'], ['models', 'Model library'],
 ].map(([id, title]) => ({ id, title, state: 'unknown', label: 'Waiting', detail: 'Run a check to see this status.', help: null }));
 
-function Mascot({ checking }: { checking: boolean; worried: boolean }) {
-  return <img className={`mascot ${checking ? 'looking' : ''}`} src={BRAND.iconSrc} alt="Shikari Shambu" width="76" height="76" />;
+const CHECK_INTERVAL = 120_000;
+
+function modelSize(bytes: number) {
+  return bytes >= 1e9 ? (bytes / 1e9).toFixed(1) + ' GB' : Math.round(bytes / 1e6) + ' MB';
 }
-function StatusRow({ check, stale }: { check: Check; stale: boolean }) {
+
+function StatusRow({ check, stale, models }: { check: Check; stale: boolean; models: InstalledModel[] }) {
   const Icon = icons[check.id as keyof typeof icons] ?? CircleHelp;
-  const statusIcon = check.state === 'ok' ? <CheckIcon size={13} /> : ['error', 'warning'].includes(check.state) ? <TriangleAlert size={13} /> : <span className="state-dot" />;
-  return <details className={`status-row state-${check.state} ${stale ? 'stale' : ''}`}>
-    <summary>
-      <Icon className="row-icon" size={19} strokeWidth={1.65} aria-hidden="true" />
-      <span className="row-title">{check.title}</span>
-      <span className="status-label">{statusIcon}{check.label}</span>
-      <ChevronDown className="row-chevron" size={14} aria-hidden="true" />
-    </summary>
-    <div className="row-detail"><p>{check.detail}</p>{check.help && <p className="row-help">{check.help}</p>}</div>
+  const statusIcon = check.state === 'ok' ? <CheckIcon size={13} aria-hidden="true" /> : ['error', 'warning'].includes(check.state) ? <TriangleAlert size={13} aria-hidden="true" /> : <span className="state-dot" />;
+  const content = <>
+    <Icon className="row-icon" size={19} strokeWidth={1.65} aria-hidden="true" />
+    <span className="row-title">{check.title}</span>
+    <span className="status-label">{statusIcon}{check.label === 'Connected' ? 'Active' : check.label}</span>
+  </>;
+  const className = 'status-row state-' + check.state + (stale ? ' stale' : '');
+  if (check.id === 'models' && models.length) return <details className={className}>
+    <summary className="status-line">{content}<ChevronDown className="row-chevron" size={14} aria-hidden="true" /></summary>
+    <ul className="model-list" aria-label="Installed models">{models.map(model => <li key={model.name}><span>{model.name}</span><span>{modelSize(model.size)}</span></li>)}</ul>
   </details>;
+  const needsAttention = check.state === 'error' || check.state === 'warning';
+  return <div className={className}>
+    <div className="status-line">{content}<span className="row-chevron-space" /></div>
+    {needsAttention && <div className="row-detail"><p>{check.detail}</p>{check.help && <p className="row-help">{check.help}</p>}</div>}
+  </div>;
 }
 
 export default function App() {
@@ -39,7 +48,7 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [keyCopied, setKeyCopied] = useState(false);
   const [now, setNow] = useState(Date.now());
-  const [auto, setAuto] = useState(true);
+  const lastCheck = useRef(0);
   const busyRef = useRef(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mounted = useRef(false);
@@ -48,7 +57,7 @@ export default function App() {
 
   const runCheck = useCallback(async (connection: Settings) => {
     if (busyRef.current || validateSettings(connection) || (!native && !demo)) return;
-    busyRef.current = true; setBusy(true); setError('');
+    busyRef.current = true; lastCheck.current = Date.now(); setBusy(true); setError('');
     try {
       const result = await checkReadiness(connection);
       if (mounted.current) { setSnapshot(result); setNow(Date.now()); }
@@ -80,15 +89,15 @@ export default function App() {
   }, [settings, runCheck]);
 
   useEffect(() => {
-    if (!settings) return;
-    const timer = setInterval(() => {
+    if (!settings || busy) return;
+    const refreshIfDue = () => {
       setNow(Date.now());
-      if (auto && !document.hidden && !editing) void runCheck(settings);
-    }, 30000);
-    const visible = () => { setNow(Date.now()); if (!document.hidden && auto && !editing) void runCheck(settings); };
-    document.addEventListener('visibilitychange', visible);
-    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', visible); };
-  }, [settings, auto, editing, runCheck]);
+      if (!document.hidden && !editing && Date.now() - lastCheck.current >= CHECK_INTERVAL) void runCheck(settings);
+    };
+    const timer = setTimeout(refreshIfDue, Math.max(0, CHECK_INTERVAL - (Date.now() - lastCheck.current)));
+    document.addEventListener('visibilitychange', refreshIfDue);
+    return () => { clearTimeout(timer); document.removeEventListener('visibilitychange', refreshIfDue); };
+  }, [settings, busy, editing, runCheck]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 10000);
@@ -99,13 +108,14 @@ export default function App() {
   const checks = snapshot?.checks ?? initialChecks;
   const gpuCheck = snapshot?.checks.find(check => check.id === 'gpu');
   const age = snapshot ? Math.max(0, Math.floor((now - snapshot.checkedAtMs) / 1000)) : 0;
-  const stale = Boolean(snapshot && (age >= 65 || error));
+  const stale = Boolean(snapshot && (age >= 150 || error));
   const disconnected = snapshot?.checks.find(check => check.id === 'ollama')?.state === 'error';
   const warnings = checks.filter(check => check.state === 'error' || check.state === 'warning');
-  const unknown = checks.filter(check => check.state === 'unknown').length;
   const headline = !native && !demo ? 'A window into your server.' : !settings?.endpoint ? 'Meet your server.' : !snapshot ? (busy ? 'Taking a little look.' : 'Let’s check in.') : stale ? 'Time for a fresh look.' : disconnected ? 'Something is out of reach.' : warnings.length ? 'A little attention needed.' : 'Your server is within reach.';
-  const description = !native && !demo ? 'Open the desktop or Android app to see live readiness.' : !settings?.endpoint ? 'Add its address below. We’ll take it from there.' : !snapshot ? 'A few quiet checks. No models loaded.' : stale ? 'These readings are from an earlier check.' : disconnected ? 'Start with Ollama. The details below can help.' : warnings.length ? 'The checks below point to what needs a look.' : 'Ollama is responding. Your GPU can stay undisturbed.';
-  const checkedLabel = busy ? 'Checking now' : !snapshot ? 'Not checked yet' : age < 10 ? 'Checked just now' : age < 60 ? `Checked ${age}s ago` : `Checked ${Math.floor(age / 60)}m ago`;
+  const checkedLabel = busy ? 'Checking' : !snapshot ? 'Not checked' : age < 10 ? 'Just now' : age < 60 ? age + 's ago' : Math.floor(age / 60) + 'm ago';
+  const connected = Boolean(snapshot && !stale && checks.find(check => check.id === 'ollama')?.state === 'ok');
+  const externalEndpoint = settings?.mode === 'remote' ? settings.endpoint : snapshot?.externalEndpoint;
+
 
   function closeSettings() { setEditing(false); setFormError(null); settingsButton.current?.focus(); }
   function chooseMode(mode: Mode) {
@@ -132,9 +142,9 @@ export default function App() {
     finally { setSaving(false); }
   }
   async function copyEndpoint() {
-    if (!settings?.endpoint) return;
+    if (!externalEndpoint) return;
     try {
-      await copyText(settings.endpoint);
+      await copyText(externalEndpoint);
       setCopied(true);
       if (copyTimer.current) clearTimeout(copyTimer.current);
       copyTimer.current = setTimeout(() => setCopied(false), 2000);
@@ -149,8 +159,8 @@ export default function App() {
 
   return <main className="app-shell">
     <header className="app-header">
-      <span className="wordmark"><img className="brand-icon" src={BRAND.iconSrc} alt="" width="25" height="25" />{BRAND.name}</span>
-      <button ref={settingsButton} className={`quiet-button connection-button ${editing ? 'selected' : ''}`} onClick={() => { setDraft(settings ?? defaultSettings); setEditing(value => !value); setFormError(null); }} aria-expanded={editing} aria-controls="connection-settings">
+      <div className="readiness-message" role="status" aria-live="polite" aria-atomic="true"><h1 id="readiness-heading">{headline}</h1></div>
+      <button ref={settingsButton} className={`quiet-button connection-button ${editing ? 'selected' : ''}`} onClick={() => { setDraft(settings ?? defaultSettings); setEditing(value => !value); setFormError(null); }} aria-label="Connection" aria-expanded={editing} aria-controls="connection-settings">
         <Settings2 size={16} aria-hidden="true" /><span>Connection</span>
       </button>
     </header>
@@ -187,17 +197,9 @@ export default function App() {
       </form>
     </section>}
 
-    <section className="readiness" aria-labelledby="readiness-heading">
-      <Mascot checking={busy} worried={Boolean(disconnected || warnings.length)} />
-      <div className="readiness-message" role="status" aria-live="polite" aria-atomic="true">
-        <h1 id="readiness-heading">{headline}</h1>
-        <p>{description}</p>
-      </div>
-    </section>
-
     <section className="server-strip" aria-label="Selected server">
-      <div className="server-identity"><Monitor size={18} strokeWidth={1.6} aria-hidden="true" /><div><h2>{settings?.name || 'My GPU server'}</h2><p className="endpoint">{settings?.endpoint || 'No address yet'}</p></div></div>
-      <button className="icon-button" disabled={!settings?.endpoint} onClick={copyEndpoint} aria-label={copied ? 'URL copied' : 'Copy server URL'} title={copied ? 'Copied' : 'Copy server URL'}>{copied ? <CheckIcon size={17} /> : <Copy size={17} />}</button>
+      <div className="server-identity"><Monitor size={18} strokeWidth={1.6} aria-hidden="true" /><div><h2>{settings?.name || 'My GPU server'}</h2><p className="endpoint">{externalEndpoint || (settings?.mode === 'host' ? 'Tailscale URL unavailable' : 'No address yet')}</p></div></div>
+      <button className="icon-button" disabled={!externalEndpoint} onClick={copyEndpoint} aria-label={copied ? 'URL copied' : 'Copy server URL'} title={copied ? 'Copied' : 'Copy server URL'}>{copied ? <CheckIcon size={17} /> : <Copy size={17} />}</button>
       <span className="sr-only" role="status">{copied ? 'Server URL copied' : ''}</span>
     </section>
 
@@ -206,23 +208,23 @@ export default function App() {
     <div className="readings-grid">
     <div className="readings-list">
     <section className="checklist" aria-label="Server readiness checks" aria-busy={busy}>
-      <div className="list-heading"><h2>At a glance</h2><span>{snapshot ? snapshot.mode === 'host' ? 'On this computer' : 'From this device' : 'Read-only checks'}</span></div>
-      {checks.filter(check => check.id !== 'gpu').map(check => <StatusRow key={check.id} check={check} stale={stale} />)}
+      {checks.filter(check => check.id !== 'gpu').map(check => <StatusRow key={check.id} check={check} stale={stale} models={snapshot?.installedModels ?? []} />)}
     </section>
 
     {snapshot?.mode === 'remote' && snapshot.hostDetails !== 'linked' && <button className="host-link-prompt" onClick={() => { setDraft(settings ?? defaultSettings); setEditing(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
       <CircleHelp size={15} /><span>{snapshot.hostDetails === 'unauthorized' ? 'Host pairing key was not accepted' : snapshot.hostDetails === 'unreachable' ? 'Host details could not be reached' : 'Link host details for the full picture'}</span><ArrowUpRight size={14} />
     </button>}
-    {gpuCheck && <details className={`allocation-note state-${gpuCheck.state}`}><summary><span>Model allocation</span><span className="allocation-status">{gpuCheck.label}</span><ChevronDown size={13} aria-hidden="true" /></summary><p>{gpuCheck.detail}</p>{gpuCheck.help && <p>{gpuCheck.help}</p>}</details>}
+    {gpuCheck && ['warning', 'error'].includes(gpuCheck.state) && <div className={'gpu-warning state-' + gpuCheck.state}><strong>{gpuCheck.label}</strong><p>{gpuCheck.help || gpuCheck.detail}</p></div>}
     </div>
-    <GpuActivity history={snapshot?.gpuHistory} now={now} stale={stale} />
+    <GpuActivity history={snapshot?.gpuHistory} gpuName={snapshot?.gpuName} now={now} stale={stale} />
     </div>
-    <div className="evidence-note"><ShieldCheck size={15} aria-hidden="true" /><p>{snapshot && unknown > 0 ? 'Some checks are unverified. Open a row for details.' : 'Checks never load a model or interrupt your work.'}</p></div>
 
     <footer className="app-footer">
-      <div className="freshness"><span className={`freshness-dot ${busy ? 'busy' : ''} ${stale ? 'old' : ''}`} />{checkedLabel}<label className="auto-control"><input type="checkbox" checked={auto} onChange={event => setAuto(event.target.checked)} />Auto-check every 30s</label></div>
-      {!native && !demo ? (import.meta.env.DEV && <a className="primary-button" href="?demo=healthy">Explore a preview<ArrowUpRight size={15} /></a>) : <button className="primary-button refresh-button" onClick={() => settings && void runCheck(settings)} disabled={busy || !settings?.endpoint || saving} aria-label={busy ? 'Checking server' : 'Check again'}>{busy ? <LoaderCircle className="spin" size={16} /> : <RefreshCw size={16} />}{busy ? 'Checking…' : 'Check again'}</button>}
+      <div className="freshness">
+        <span className={'connection-status' + (connected ? ' is-connected' : '')}><span className="freshness-dot" />{connected ? 'Connected' : disconnected ? 'Disconnected' : stale ? 'Check needed' : 'Connecting'}</span>
+        <span aria-hidden="true">·</span><span aria-live="off">{checkedLabel}</span>
+        {(!native && !demo) ? (import.meta.env.DEV && <a href="?demo=healthy">Preview</a>) : <button className="icon-button refresh-button" onClick={() => settings && void runCheck(settings)} disabled={busy || !settings?.endpoint || saving} aria-label={busy ? 'Checking server' : 'Refresh status'} title="Refresh status"><ArrowClockwise20Regular className={busy ? 'spin' : ''} aria-hidden="true" /></button>}
+      </div>
     </footer>
-    <p className="sign-off">{BRAND.description}</p>
   </main>;
 }

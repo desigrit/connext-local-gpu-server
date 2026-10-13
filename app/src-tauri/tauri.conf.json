@@ -45,6 +45,9 @@
     "macOS": {
       "minimumSystemVersion": "11.0",
       "signingIdentity": "-"
+    },
+    "resources": {
+      "../assets/r2d2/ORIGIN.txt": "licenses/Shambu-artwork.txt"
     }
   }
 }

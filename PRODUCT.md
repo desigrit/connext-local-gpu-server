@@ -16,7 +16,7 @@ People with an Ollama GPU server at home who want to check its readiness from th
 
 ## Product Purpose
 
-One screen answers whether the server can be reached and which part of the connection needs attention. An hourly firefly chart shows recorded GPU activity bursts over the last 24 hours. Launch, inspect, close.
+One screen answers whether the server can be reached and which part of the connection needs attention. A slim strip of hourly columns shows observed Ollama GPU activity over a rolling 24-hour window. Launch, inspect, close.
 
 ## Operating Context
 
@@ -28,9 +28,11 @@ The Windows backend must use Rust. Support Windows, macOS, and Android. Use read
 
 ## Brand Commitments
 
-A quiet, light, minimal interface with clear status rows and a little whimsy. No em dashes. The name is Shambu, inspired by Shikari Shambu. Its character illustration has a broad toothy grin, green clothes, and comically oversized binoculars extending beyond a circular Indian jungle scene. Most of the smaller figure is hidden by foliage. The derivative preserves the character identity and supplied visual reference; its source and image edits are credited.
+A quiet, light, minimal interface with clear status rows and a little whimsy. No em dashes. The name is Shambu, inspired by Shikari Shambu. The current icon direction is a distinctive flat R2-D2, angled toward the right and small enough to fit within the original Shambu forest circle. Reuse the existing forest and foreground bushes rather than redrawing them. It must remain legible at taskbar sizes. Source artwork and modifications are credited. Branding belongs in the native title bar and app icon, without a duplicate wordmark or portrait in the dashboard.
 
-Desktop opens in a standard landscape window similar to Ollama. Phones retain a compact vertical layout. GPU usage is visualized as fireflies grouped by hour. One usage instance means an observed GPU activity burst, not an Ollama request. Empty and unmonitored hours display Idle.
+Desktop opens in a standard landscape window similar to Ollama. The dashboard uses one column on all devices. A long, narrow GPU activity strip stays visible below Model Library, with rolling 24-hour columns. A filled hour means observed GPU activity correlated with an Ollama model loaded in GPU memory; this is an estimate, not an inference request count. Empty and unmonitored hours display Idle. Only the GPU name sits above the strip. Custom hour tooltips show local time, time zone, and Active or Idle. There are no range controls, axes, legend, or information bubble. The main server strip shows the Tailscale URL other devices use.
+
+Use Active consistently in status rows. Refresh automatically every two minutes. The footer combines a green Connected indicator, relative check time, and an icon-only Fluent refresh control. Keep actionable failure details visible. Only the installed model library and necessary configuration need disclosures.
 
 ## Product Principles
 

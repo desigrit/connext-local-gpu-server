@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 600"><title>R2-D2 in a right-facing three-quarter view</title><metadata>Editable vector illustration based on the flat R2-D2 reference supplied by the project owner, preserved at app/assets/archive/r2d2-reference/r2d2-flat-reference.png. Star Wars and R2-D2 remain the property of their respective rights holders. No official artwork, character-rights license, or Lucasfilm endorsement is claimed. See docs/branding.md.</metadata><g id="right-facing-droid" stroke="#27363D" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">
+<!-- Far shoulder and leg. -->
+<path d="M337 248L365 241Q384 246 387 267L385 480L397 516L353 531L336 496Z" fill="#B6C0C7"/>
+<path d="M364 287L379 284L378 455L363 459Z" fill="#176799"/>
+<path d="M355 488L385 479L405 534L361 547L343 532Z" fill="#E8EDEB"/>
+<path d="M360 505L381 500L391 528L364 536Z" fill="#A6AFB5" stroke-width="2.6"/>
+<!-- Cylindrical white torso; its front face is turned right. -->
+<path d="M81 224Q210 251 347 222L347 474Q224 509 81 472Z" fill="#F5F7F3"/>
+<path d="M82 230Q119 241 163 245L160 487Q115 484 81 473Z" fill="#CAD3D8" stroke="none"/>
+<path d="M161 248L161 479" fill="none" stroke="#A0ADB5" stroke-width="2.4"/>
+<path d="M167 267L320 254L320 266L168 281Z" fill="#166B9D"/>
+<path d="M171 293L320 279L320 291L171 307Z" fill="#246F9A"/>
+<path d="M175 328L204 324L204 435L173 439Z" fill="#E8EDEC" stroke="#97A5AF" stroke-width="2.5"/>
+<path d="M181 334L197 332L197 426L180 429Z" fill="#F9FAF5" stroke="#B1BDC3" stroke-width="2"/>
+<path d="M218 322L269 318L269 441L217 447Z" fill="#ABB7BF"/>
+<path d="M229 332L258 329L258 430L228 434Z" fill="#165D84"/>
+<ellipse cx="244" cy="353" rx="11" ry="18" fill="#7D919D"/>
+<path d="M235 345L252 343M234 353L253 351M235 361L252 359" stroke="#243F51" stroke-width="2.8"/>
+<path d="M237 384L251 383L251 415L237 417Z" fill="#6C8594"/>
+<path d="M244 389L244 410" stroke="#243F51" stroke-width="2.7"/>
+<path d="M283 319L328 314L328 429L283 436Z" fill="#F7F8F3" stroke="#93A3AD" stroke-width="2.5"/>
+<path d="M291 328L319 325L319 419L291 424Z" fill="none" stroke="#C0CBCF" stroke-width="3"/>
+<path d="M104 272L147 278L147 335L104 330Z" fill="#DDE4E4" stroke-width="2.5"/>
+<path d="M110 283L141 287L141 321L110 318Z" fill="#F5F7F4" stroke="#A4B0B7" stroke-width="2"/>
+<path d="M116 351L148 354M116 365L148 368M116 379L148 382M116 393L148 396" stroke="#207EB0" stroke-width="6"/>
+<path d="M168 460L198 456L198 482L168 484Z" fill="#2B6380"/>
+<path d="M211 458L237 454L237 479L211 482Z" fill="#C1CBD0"/>
+<circle cx="224" cy="466" r="8" fill="#325B71"/>
+<path d="M250 452L289 447L289 474L250 479Z" fill="#DAE3E5"/>
+<circle cx="269" cy="462" r="10" fill="#2478A6"/>
+<path d="M302 446L326 441L326 465L302 472Z" fill="#657F90"/>
+<path d="M82 472Q214 510 347 474L339 496Q214 531 93 495Z" fill="#8F9FA8"/>
+<path d="M144 495L144 511M169 503L169 517M193 508L193 521M218 511L218 523M244 509L244 521M270 505L270 516M297 499L297 511" stroke-width="2.7"/>
+<!-- Near shoulder, foot and cables. -->
+<path d="M46 245Q58 230 86 236L109 249L106 409L90 427L90 505L57 506L51 408L36 393L36 268Q37 252 46 245Z" fill="#EDF1ED"/>
+<path d="M54 267L74 264L73 399L53 396Z" fill="#B5C2C9" stroke-width="2.7"/>
+<ellipse cx="84" cy="293" rx="20" ry="25" fill="#7F94A2"/>
+<path d="M60 331L81 334L79 391L58 388Z" fill="#176995"/>
+<path d="M62 421L81 422L81 473L65 473Z" fill="#277BA6"/>
+<path d="M47 473L95 474L97 508L55 514Z" fill="#BFCBD0"/>
+<path d="M50 499L95 502L123 554L31 570L24 551Z" fill="#F3F5F1"/>
+<path d="M48 522L78 524L91 551L41 558Z" fill="#A7B5BD" stroke-width="2.5"/>
+<path d="M66 485C42 484 36 501 39 522M76 485C52 486 47 501 50 522" fill="none" stroke="#927B53" stroke-width="4"/>
+<!-- Silver dome and segmented blue panels. -->
+<path d="M73 202C73 106 124 48 215 48C302 48 354 110 354 203Q215 236 73 202Z" fill="#D6DFE2"/>
+<path d="M74 196C78 104 128 51 215 49C190 66 165 106 161 215Q113 211 74 196Z" fill="#BCC8D0" stroke="none"/>
+<path d="M149 67Q179 53 208 53L203 88Q167 91 145 101Z" fill="#2375A6" stroke-width="2.7"/>
+<path d="M227 53Q257 57 281 73L294 105L227 88Z" fill="#176996" stroke-width="2.7"/>
+<path d="M302 86Q323 105 337 137L308 126Z" fill="#1A6E9C" stroke-width="2.7"/>
+<path d="M86 150L115 139L115 183L82 186Z" fill="#207DB0" stroke-width="2.8"/>
+<path d="M129 141L164 138L162 182L128 183Z" fill="#176C9C" stroke-width="2.8"/>
+<path d="M184 174L199 174L199 191L183 192Z" fill="#66AFC8" stroke-width="2.4"/>
+<path d="M215 115L279 115L294 171L223 177Z" fill="#1C6693"/>
+<ellipse cx="255" cy="144" rx="24" ry="25" fill="#142C3B"/>
+<ellipse cx="259" cy="138" rx="9" ry="7" fill="#648896" stroke="none"/>
+<path d="M240 188L270 186L271 198L240 199Z" fill="#223D4D" stroke-width="2.4"/>
+<circle cx="257" cy="192" r="4" fill="#D46144" stroke="none"/>
+<path d="M305 177L341 176L354 181L350 197L311 198Z" fill="#7E919E"/>
+<ellipse cx="352" cy="187" rx="8" ry="10" fill="#C2CED2"/>
+<ellipse cx="353" cy="186" rx="4" ry="6" fill="#253D4C" stroke-width="2"/>
+<path d="M74 201Q216 232 354 202L354 219Q218 251 75 219Z" fill="#226F9D"/>
+<path d="M82 218Q215 246 346 219" fill="none" stroke="#B5C9D1" stroke-width="3"/>
+<path d="M301 86L312 69L323 76L315 96Z" fill="#ADBCC5" stroke-width="3.2"/>
+<path d="M308 84L317 87" stroke-width="2"/>
+</g></svg>

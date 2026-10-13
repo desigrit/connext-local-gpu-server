@@ -1,5 +1,8 @@
 use crate::{config, SnapshotCache};
-use readiness::{GpuHistory, GPU_HISTORY_WINDOW_MS, MAX_GPU_BURSTS};
+use readiness::{
+    GpuHistory, GPU_HISTORY_HOUR_MS, GPU_HISTORY_SOURCE, GPU_HISTORY_WINDOW_MS,
+    MAX_GPU_ACTIVE_HOURS, MAX_GPU_BURSTS,
+};
 use serde::{Deserialize, Serialize};
 use std::{
     fs::{self, File, OpenOptions},
@@ -8,7 +11,8 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-const HISTORY_VERSION: u32 = 1;
+const HISTORY_VERSION: u32 = 3;
+const HISTORY_FILE_NAME: &str = "ollama-activity.json";
 const QUIET_PERIOD_MS: u64 = 60_000;
 const MAX_FILE_BYTES: u64 = 64 * 1024;
 
@@ -19,6 +23,7 @@ struct History {
     sampled_at_ms: u64,
     last_active_ms: Option<u64>,
     bursts: Vec<u64>,
+    active_hours: Vec<u64>,
 }
 
 impl Default for History {
@@ -28,6 +33,7 @@ impl Default for History {
             sampled_at_ms: 0,
             last_active_ms: None,
             bursts: Vec::new(),
+            active_hours: Vec::new(),
         }
     }
 }
@@ -36,6 +42,16 @@ impl History {
     fn is_valid(&self) -> bool {
         self.version == HISTORY_VERSION
             && self.bursts.len() <= MAX_GPU_BURSTS
+            && self.active_hours.len() <= MAX_GPU_ACTIVE_HOURS
+            && (self.sampled_at_ms > 0
+                || (self.bursts.is_empty()
+                    && self.active_hours.is_empty()
+                    && self.last_active_ms.is_none()))
+            && self.active_hours.iter().all(|hour| {
+                *hour <= self.sampled_at_ms / GPU_HISTORY_HOUR_MS * GPU_HISTORY_HOUR_MS
+                    && *hour % GPU_HISTORY_HOUR_MS == 0
+            })
+            && self.active_hours.windows(2).all(|pair| pair[0] < pair[1])
             && self
                 .bursts
                 .iter()
@@ -57,9 +73,15 @@ impl History {
         }
         let cutoff = now_ms.saturating_sub(GPU_HISTORY_WINDOW_MS);
         self.bursts.retain(|time| *time >= cutoff);
+        let first_hour = cutoff / GPU_HISTORY_HOUR_MS * GPU_HISTORY_HOUR_MS;
+        self.active_hours.retain(|hour| *hour >= first_hour);
         self.last_active_ms = self.last_active_ms.filter(|time| *time >= cutoff);
         if let Some(active) = active.filter(|_| now_ms > 0) {
             if active {
+                let hour = now_ms / GPU_HISTORY_HOUR_MS * GPU_HISTORY_HOUR_MS;
+                if self.active_hours.last() != Some(&hour) {
+                    self.active_hours.push(hour);
+                }
                 if self
                     .last_active_ms
                     .is_none_or(|last| now_ms.saturating_sub(last) >= QUIET_PERIOD_MS)
@@ -77,8 +99,10 @@ impl History {
 
     fn snapshot(&self) -> Option<GpuHistory> {
         (self.sampled_at_ms > 0).then(|| GpuHistory {
+            source: GPU_HISTORY_SOURCE.into(),
             sampled_at_ms: self.sampled_at_ms,
             bursts: self.bursts.clone(),
+            active_hours: self.active_hours.clone(),
         })
     }
 }
@@ -147,7 +171,9 @@ impl HistoryStore {
         getrandom::fill(&mut entropy)
             .map_err(|_| io::Error::other("Could not create a private history file."))?;
         let suffix: String = entropy.iter().map(|byte| format!("{byte:02x}")).collect();
-        let temporary = self.path.with_file_name(format!(".history-{suffix}.tmp"));
+        let temporary = self
+            .path
+            .with_file_name(format!(".ollama-activity-{suffix}.tmp"));
         let mut options = OpenOptions::new();
         options.write(true).create_new(true);
         #[cfg(unix)]
@@ -183,7 +209,7 @@ fn now_ms() -> u64 {
 pub(crate) async fn collect(cache: SnapshotCache) {
     let store = config::default_path()
         .ok()
-        .and_then(|path| HistoryStore::open(path.with_file_name("history.json")));
+        .and_then(|path| HistoryStore::open(path.with_file_name(HISTORY_FILE_NAME)));
     let mut history = store
         .as_ref()
         .map(|store| store.load(now_ms()))
@@ -193,7 +219,9 @@ pub(crate) async fn collect(cache: SnapshotCache) {
     interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
     loop {
         interval.tick().await;
-        let active = readiness::gpu_active().await;
+        let active = cache
+            .inference_activity(readiness::gpu_active().await)
+            .await;
         let previous = history.clone();
         history.observe(now_ms(), active);
         *cache.gpu_history.write().await = history.snapshot();
@@ -226,7 +254,7 @@ mod tests {
         }
 
         fn store(&self) -> HistoryStore {
-            HistoryStore::open(self.0.join("history.json")).unwrap()
+            HistoryStore::open(self.0.join(HISTORY_FILE_NAME)).unwrap()
         }
     }
 
@@ -250,6 +278,8 @@ mod tests {
         history.observe(3_610_000, Some(false));
         history.observe(3_660_000, Some(true));
         assert_eq!(history.bursts, vec![3_595_000]);
+        // One continuous burst fills both hours where actual qualifying samples were observed.
+        assert_eq!(history.active_hours, vec![0, 3_600_000]);
         assert_eq!(history.bursts[0] / 3_600_000, 0);
         history.observe(3_665_000, Some(false));
         history.observe(3_720_000, Some(true));
@@ -286,7 +316,7 @@ mod tests {
     }
 
     #[test]
-    fn retention_is_bounded_and_includes_the_exact_24_hour_edge() {
+    fn retention_is_bounded_and_includes_the_exact_48_hour_edge() {
         let mut history = History::default();
         history.observe(1_000, Some(true));
         history.observe(GPU_HISTORY_WINDOW_MS + 1_000, Some(false));
@@ -298,6 +328,24 @@ mod tests {
         }
         assert!(history.bursts.len() <= MAX_GPU_BURSTS);
         assert!(history.bursts[0] >= history.sampled_at_ms - GPU_HISTORY_WINDOW_MS);
+    }
+
+    #[test]
+    fn active_hours_keep_the_oldest_partial_hour_without_backfilling_gaps() {
+        let mut history = History::default();
+        history.observe(1_000, Some(true));
+        history.observe(GPU_HISTORY_HOUR_MS * 2 + 1_000, Some(true));
+        assert_eq!(history.active_hours, vec![0, GPU_HISTORY_HOUR_MS * 2]);
+        history.observe(GPU_HISTORY_WINDOW_MS + 1_001, Some(false));
+        assert_eq!(history.active_hours, vec![0, GPU_HISTORY_HOUR_MS * 2]);
+        history.observe(GPU_HISTORY_WINDOW_MS + GPU_HISTORY_HOUR_MS, Some(false));
+        assert_eq!(history.active_hours, vec![GPU_HISTORY_HOUR_MS * 2]);
+        let mut continuous = History::default();
+        for hour in 0..100 {
+            continuous.observe(hour * GPU_HISTORY_HOUR_MS + 1_000, Some(true));
+        }
+        assert_eq!(continuous.active_hours.len(), MAX_GPU_ACTIVE_HOURS);
+        assert_eq!(continuous.active_hours[0], 51 * GPU_HISTORY_HOUR_MS);
     }
 
     #[test]
@@ -331,8 +379,14 @@ mod tests {
         let json: serde_json::Value =
             serde_json::from_slice(&fs::read(&store.path).unwrap()).unwrap();
         let object = json.as_object().unwrap();
-        assert_eq!(object.len(), 4);
-        for key in ["version", "sampledAtMs", "lastActiveMs", "bursts"] {
+        assert_eq!(object.len(), 5);
+        for key in [
+            "version",
+            "sampledAtMs",
+            "lastActiveMs",
+            "bursts",
+            "activeHours",
+        ] {
             assert!(object.contains_key(key));
         }
         assert_eq!(fs::read_dir(&directory.0).unwrap().count(), 1);
@@ -357,10 +411,14 @@ mod tests {
         for corrupt in [
             "not json".to_string(),
             " ".repeat(MAX_FILE_BYTES as usize + 1),
-            r#"{"version":2,"sampledAtMs":10,"lastActiveMs":10,"bursts":[10]}"#.into(),
-            r#"{"version":1,"sampledAtMs":10,"lastActiveMs":10,"bursts":[9,8]}"#.into(),
-            r#"{"version":1,"sampledAtMs":10,"lastActiveMs":10,"bursts":[11]}"#.into(),
-            r#"{"version":1,"sampledAtMs":10,"lastActiveMs":null,"bursts":[10]}"#.into(),
+            r#"{"version":2,"sampledAtMs":10,"lastActiveMs":10,"bursts":[10],"activeHours":[0]}"#
+                .into(),
+            r#"{"version":3,"sampledAtMs":10,"lastActiveMs":10,"bursts":[9,8],"activeHours":[0]}"#
+                .into(),
+            r#"{"version":3,"sampledAtMs":10,"lastActiveMs":10,"bursts":[11],"activeHours":[0]}"#
+                .into(),
+            r#"{"version":3,"sampledAtMs":10,"lastActiveMs":null,"bursts":[10],"activeHours":[0]}"#
+                .into(),
         ] {
             fs::write(&store.path, corrupt).unwrap();
             assert_eq!(store.load(100_000), History::default());
@@ -373,6 +431,23 @@ mod tests {
     }
 
     #[test]
+    fn legacy_all_gpu_history_is_preserved_and_never_imported_as_inference() {
+        let directory = TempDirectory::new();
+        let legacy_path = directory.0.join("history.json");
+        let legacy = br#"{"version":1,"sampledAtMs":1000,"lastActiveMs":1000,"bursts":[1000]}"#;
+        fs::write(&legacy_path, legacy).unwrap();
+        let store = directory.store();
+        let mut history = store.load(5_000);
+        assert!(history.bursts.is_empty());
+        history.observe(5_000, Some(false));
+        store.save(&history).unwrap();
+        assert_eq!(history.snapshot().unwrap().source, GPU_HISTORY_SOURCE);
+        assert_eq!(fs::read(&legacy_path).unwrap(), legacy);
+        assert_eq!(store.path.file_name().unwrap(), HISTORY_FILE_NAME);
+        assert!(store.load(5_000).bursts.is_empty());
+    }
+
+    #[test]
     fn excessive_entries_and_non_regular_files_are_not_accepted() {
         let directory = TempDirectory::new();
         let store = directory.store();
@@ -381,6 +456,7 @@ mod tests {
             sampled_at_ms: 10_000,
             last_active_ms: Some(10_000),
             bursts: (1..=MAX_GPU_BURSTS as u64 + 1).collect(),
+            active_hours: vec![0],
         };
         fs::write(&store.path, serde_json::to_vec(&oversized).unwrap()).unwrap();
         assert_eq!(store.load(10_000), History::default());

@@ -1,0 +1,6 @@
+Use case: precise-object-edit.
+Edit target: the attached existing circular jungle illustration.
+Remove only the illustrated safari man, his yellow hat, clothing, hands, and the enormous binoculars. Fill only the regions those removed objects occupied inside the circle with the natural continuation of the same existing teal jungle canopy and undergrowth.
+Preserve all already visible forest: the exact circular perimeter and composition, the pale cream upper sky, distant layered teal treetops, hanging leaves in the upper left, dense foreground jade and teal leaves, dark ink outlines and painted texture. Do not redesign, simplify, recolor, recenter, zoom, or replace the forest.
+Outside the original circle is transparent. The removed binoculars projected outside the right circle edge; those outside areas must become transparent. The result contains only the original empty circular forest, with the formerly occluded region repaired.
+Keep the same square canvas, original circle position and margins. No person, robot, character, binoculars, prop, text, watermark, new frame, or plain-color backdrop.
