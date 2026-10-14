@@ -168,13 +168,18 @@ test('click feedback works inside and outside Settings and respects reduced moti
   await page.getByRole('button', { name: /Model library/ }).click();
   await expect.poll(() => page.evaluate(() => window.clickAnimations)).toBe(1);
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  await expect.poll(() => page.evaluate(() => window.clickAnimations)).toBe(2);
+  const sliderPositions = () => page.locator('.settings-icon > .settings-slider').evaluateAll(sliders =>
+    sliders.map(slider => Math.round(new DOMMatrix(getComputedStyle(slider).transform).m41)));
+  await expect.poll(sliderPositions).toEqual([10, -10]);
+  expect(await page.evaluate(() => window.clickAnimations)).toBe(1);
   await page.getByRole('button', { name: 'Remote server', exact: true }).click();
-  await expect.poll(() => page.evaluate(() => window.clickAnimations)).toBe(3);
+  await expect.poll(() => page.evaluate(() => window.clickAnimations)).toBe(2);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.getByRole('button', { name: 'This computer', exact: true }).click();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
-  expect(await page.evaluate(() => window.clickAnimations)).toBe(3);
+  await expect.poll(sliderPositions).toEqual([0, 0]);
+  await expect(page.locator('.settings-icon > .settings-slider-top')).toHaveCSS('transition-duration', '0s');
+  expect(await page.evaluate(() => window.clickAnimations)).toBe(2);
 });
 
 test('Settings stays accessible and fits desktop and narrow phones', async ({ page }) => {
