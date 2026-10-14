@@ -9,7 +9,7 @@ export function useClickFeedback() {
     const flutter = (event: MouseEvent) => {
       if (motion.matches || !(event.target instanceof Element)) return;
       const control = event.target.closest('button, a, summary');
-      if (!control || control.matches(':disabled, .hour-column')) return;
+      if (!control || control.matches(':disabled, .hour-column, .connection-button')) return;
       requestAnimationFrame(() => {
         if (disposed || !control.isConnected || motion.matches) return;
         const icon = control.querySelector('svg:not(.spin):not(.row-chevron), .brand-icon');

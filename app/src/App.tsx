@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Check as CheckIcon, CircleHelp, Copy, Monitor, Settings2, TriangleAlert } from 'lucide-react';
+import { ArrowUpRight, Check as CheckIcon, CircleHelp, Copy, Monitor, TriangleAlert } from 'lucide-react';
 import { ArrowClockwise20Regular } from '@fluentui/react-icons';
 import { android, checkReadiness, copyText, defaultSettings, demo, loadSettings, native, saveSettings, validateSettings } from './bridge';
 import GpuActivity from './GpuActivity';
@@ -15,6 +15,7 @@ import { useGpuMetrics } from './useGpuMetrics';
 import { useAnchoredLayout } from './useAnchoredLayout';
 import { useClickFeedback } from './useClickFeedback';
 import { UpdateFooter } from './UpdateFooter';
+import SettingsIcon from './SettingsIcon';
 import type { Check, Settings, Snapshot } from './types';
 
 const initialChecks: Check[] = [
@@ -140,7 +141,7 @@ export default function App() {
         </div>
       </div>
       <button ref={settingsButton} className={`icon-button connection-button ${editing ? 'selected' : ''}`} onClick={() => editing ? closeSettings() : openSettings()} disabled={saving} aria-label="Settings" aria-expanded={editing} aria-controls="connection-settings">
-        <Settings2 size={18} aria-hidden="true" />
+        <SettingsIcon open={editing} />
       </button>
     </header>
 
