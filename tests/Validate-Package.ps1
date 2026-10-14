@@ -18,11 +18,11 @@ foreach ($file in $files | Where-Object { $_.Extension -eq '.ps1' }) {
     if ($errors) { throw "PowerShell syntax error in $($file.Name): $($errors[0].Message)" }
 }
 foreach ($file in $files | Where-Object { $_.Extension -in @('.md','.ps1','.json') }) {
-    $text = Get-Content -LiteralPath $file.FullName -Raw
+    $text = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8
     if ($text.Contains([string][char]0x2014)) { throw "Disallowed punctuation in $($file.Name)." }
 }
 foreach ($file in $files | Where-Object { $_.Extension -eq '.md' }) {
-    $text = Get-Content -LiteralPath $file.FullName -Raw
+    $text = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8
     foreach ($match in [regex]::Matches($text,'\[[^\]]+\]\(([^)\s]+)\)')) {
         $target = $match.Groups[1].Value
         if ($target -match '^(https?://|#)') { continue }
