@@ -11,7 +11,7 @@ export function demoSnapshot(settings: Settings, scenario: string): Snapshot {
     externalEndpoint: remote ? settings.endpoint : 'http://192.0.2.10:11434',
     gpuName: remote && !settings.diagnosticsKey ? null : 'NVIDIA Quadro RTX 8000',
     gpuMetrics: remote && !settings.diagnosticsKey ? null : { sampleAgeMs: 500, devices: [{ index: 0, loadPercent: 7, memoryUsedMib: 1741, memoryTotalMib: 49152 }] },
-    installedModels: [{ name: 'qwen3:8b', size: 4_900_000_000 }, { name: 'qwen2.5-coder:14b', size: 9_000_000_000 }, { name: 'example-embed:latest', size: 274_000_000 }],
+    installedModels: [{ name: 'qwen3:8b', size: 4_900_000_000, quantizationLevel: 'Q4_K_M' }, { name: 'qwen2.5-coder:14b', size: 9_000_000_000, quantizationLevel: 'Q4_K_M' }, { name: 'example-embed:latest', size: 274_000_000 }],
     latencyMs: 12, modelCount: 3, loadedModels: [],
     checks: [
       { id: 'ollama', title: remote ? 'Ollama server' : 'Ollama local URL', state: 'ok', label: 'Active', detail: 'Ollama replied in 12 ms.', help: null },

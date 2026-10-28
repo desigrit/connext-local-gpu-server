@@ -7,6 +7,7 @@ import ollamaIcon from './assets/brands/ollama.svg';
 import tailscaleIcon from './assets/brands/tailscale.png';
 import qwenIcon from './assets/brands/qwen.png';
 import type { Check, InstalledModel, Mode } from './types';
+import { ollamaModelLabel } from './model-label';
 
 const icons = { forwarding: ArrowDownUp, models: HardDrive };
 const appIcons = { ollama: ollamaIcon, tailscale: tailscaleIcon };
@@ -76,7 +77,7 @@ export default function StatusRow({ check, stale, models, mode, busy, onRetry, o
     <Collapsible id={modelListId} open={modelsOpen}>
     <ul className="model-list" aria-label="Installed models">{models.map(model => <li key={model.name}>
       {/^(?:[^/]+\/)?qwen/i.test(model.name) ? <img src={qwenIcon} className="model-icon" alt="Qwen" /> : <HardDrive className="model-icon" size={17} aria-hidden="true" />}
-      <span className="model-name">{model.name}</span><span className="model-size">{modelSize(model.size)}</span>
+      <span className="model-name" title={model.name}>{ollamaModelLabel(model)}</span><span className="model-size">{modelSize(model.size)}</span>
     </li>)}</ul>
     </Collapsible>
   </div>;

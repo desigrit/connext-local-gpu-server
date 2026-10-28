@@ -14,7 +14,7 @@ test('healthy screen exposes the external URL, GPU name, and installed models', 
   await expect(page.locator('.model-toggle')).toHaveCount(1);
   await page.getByRole('button', { name: /Model library/ }).click();
   await expect(page.getByRole('list', { name: 'Installed models' }).getByRole('listitem')).toHaveCount(3);
-  await expect(page.getByText('qwen3:8b', { exact: true })).toBeVisible();
+  await expect(page.getByText('Qwen 3 8B (4-bit quant)', { exact: true })).toBeVisible();
   await expect(page.getByText('4.9 GB', { exact: true })).toBeVisible();
   await expect(page.locator('.status-label').filter({ hasText: /^Active$/ })).toHaveCount(3);
   await expect(page.getByRole('checkbox')).toHaveCount(0);

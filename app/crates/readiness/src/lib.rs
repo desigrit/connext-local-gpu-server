@@ -126,6 +126,10 @@ pub struct LoadedModel {
 pub struct InstalledModel {
     pub name: String,
     pub size: u64,
+    #[serde(default)]
+    pub parameter_size: Option<String>,
+    #[serde(default)]
+    pub quantization_level: Option<String>,
 }
 
 pub const GPU_HISTORY_SOURCE: &str = "ollama-gpu-estimate";
@@ -338,6 +342,14 @@ fn parse_installed_models(result: Result<Value, String>) -> Result<Vec<Installed
             Ok(InstalledModel {
                 name: name.into(),
                 size: item.get("size").and_then(Value::as_u64).unwrap_or(0),
+                parameter_size: item
+                    .pointer("/details/parameter_size")
+                    .and_then(Value::as_str)
+                    .map(str::to_owned),
+                quantization_level: item
+                    .pointer("/details/quantization_level")
+                    .and_then(Value::as_str)
+                    .map(str::to_owned),
             })
         })
         .collect()
@@ -614,7 +626,7 @@ mod tests {
     #[test]
     fn installed_models_come_from_the_direct_tags_response() {
         let models = parse_installed_models(Ok(serde_json::json!({"models":[
-            {"name":"fixture-small:latest","size":123},
+            {"name":"fixture-small:latest","size":123,"details":{"parameter_size":"9.0B","quantization_level":"Q4_K_M"}},
             {"name":"fixture-large:latest","size":456}
         ]})))
         .unwrap();
@@ -623,11 +635,15 @@ mod tests {
             vec![
                 InstalledModel {
                     name: "fixture-small:latest".into(),
-                    size: 123
+                    size: 123,
+                    parameter_size: Some("9.0B".into()),
+                    quantization_level: Some("Q4_K_M".into()),
                 },
                 InstalledModel {
                     name: "fixture-large:latest".into(),
-                    size: 456
+                    size: 456,
+                    parameter_size: None,
+                    quantization_level: None,
                 },
             ]
         );
